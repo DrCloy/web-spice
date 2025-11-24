@@ -1,0 +1,371 @@
+@import 'tailwindcss';
+
+@theme {
+  /* WebSpice 브랜드 컬러 */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  /* 회로 컴포넌트 컬러 */
+  --color-component-resistor: #d97706;
+  --color-component-capacitor: #059669;
+  --color-component-inductor: #7c3aed;
+  --color-component-voltage: #dc2626;
+  --color-component-current: #0ea5e9;
+  --color-component-ground: #374151;
+
+  /* 신호 표시 컬러 (그래프용) */
+  --color-signal-1: #ef4444;
+  --color-signal-2: #3b82f6;
+  --color-signal-3: #10b981;
+  --color-signal-4: #f59e0b;
+  --color-signal-5: #8b5cf6;
+  --color-signal-6: #06b6d4;
+  --color-signal-7: #f97316;
+  --color-signal-8: #84cc16;
+
+  /* 상태 컬러 */
+  --color-status-success: #10b981;
+  --color-status-warning: #f59e0b;
+  --color-status-error: #ef4444;
+  --color-status-info: #3b82f6;
+
+  /* 커스텀 스페이싱 */
+  --spacing-18: 4.5rem;
+  --spacing-88: 22rem;
+  --spacing-panel: 280px;
+  --spacing-sidebar: 320px;
+
+  /* 폰트 패밀리 */
+  --font-mono:
+    'JetBrains Mono', 'Fira Code', Monaco, 'Cascadia Code', monospace;
+
+  /* 커스텀 애니메이션 */
+  --animate-pulse-slow: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-bounce-x: bounce-x 1s infinite;
+  --animate-fade-in: fade-in 0.3s ease-in-out;
+  --animate-slide-up: slide-up 0.2s ease-out;
+
+  /* 커스텀 그리드 레이아웃 */
+  --grid-cols-sidebar: 280px 1fr;
+  --grid-cols-layout-3: 280px 1fr 320px;
+  --grid-cols-layout-2: 320px 1fr;
+
+  /* 커스텀 박스 섀도우 */
+  --shadow-component: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  --shadow-panel:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-graph:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* 커스텀 보더 레디우스 */
+  --radius-component: 6px;
+  --radius-panel: 8px;
+
+  /* 커스텀 Z-인덱스 */
+  --z-canvas: 1;
+  --z-toolbar: 10;
+  --z-modal: 50;
+  --z-tooltip: 60;
+
+  /* 키프레임 정의 */
+  @keyframes pulse-slow {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  @keyframes bounce-x {
+    0%,
+    100% {
+      transform: translateX(-25%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+    50% {
+      transform: translateX(0);
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-up {
+    0% {
+      transform: translateY(10px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+@layer base {
+  /* 기본 폰트 및 색상 설정 */
+  html {
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-variant-ligatures: contextual;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: white;
+    color: rgb(17 24 39);
+  }
+
+  body.dark {
+    background-color: rgb(17 24 39);
+    color: rgb(243 244 246);
+  }
+
+  /* 스크롤바 스타일링 */
+  ::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 0.5rem;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: rgb(243 244 246);
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background-color: rgb(31 41 55);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(209 213 219);
+    border-radius: 0.25rem;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background-color: rgb(75 85 99);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(156 163 175);
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(107 114 128);
+  }
+}
+
+@layer components {
+  /* 회로 에디터 전용 스타일 (Headless UI 외부 요소) */
+  .circuit-canvas {
+    background-color: rgb(249 250 251);
+    border-width: 1px;
+    border-color: rgb(229 231 235);
+    border-radius: var(--radius-component);
+  }
+
+  .dark .circuit-canvas {
+    background-color: rgb(17 24 39);
+    border-color: rgb(75 85 99);
+  }
+
+  .component-palette {
+    background-color: white;
+    border-right-width: 1px;
+    border-color: rgb(229 231 235);
+    width: var(--spacing-panel);
+  }
+
+  .dark .component-palette {
+    background-color: rgb(31 41 55);
+    border-color: rgb(75 85 99);
+  }
+
+  .properties-panel {
+    background-color: white;
+    border-left-width: 1px;
+    border-color: rgb(229 231 235);
+    width: var(--spacing-sidebar);
+  }
+
+  .dark .properties-panel {
+    background-color: rgb(31 41 55);
+    border-color: rgb(75 85 99);
+  }
+
+  /* 그래프 컨테이너 (차트 라이브러리용) */
+  .graph-container {
+    background-color: white;
+    border-width: 1px;
+    border-color: rgb(229 231 235);
+    border-radius: var(--radius-panel);
+    padding: 1rem;
+    box-shadow: var(--shadow-graph);
+  }
+
+  .dark .graph-container {
+    background-color: rgb(31 41 55);
+    border-color: rgb(75 85 99);
+  }
+}
+
+@layer utilities {
+  /* 커스텀 유틸리티 */
+  .text-gradient {
+    background: linear-gradient(
+      to right,
+      var(--color-primary-600),
+      var(--color-primary-800)
+    );
+    background-clip: text;
+    color: transparent;
+  }
+
+  .glass {
+    background-color: rgb(255 255 255 / 0.8);
+    backdrop-filter: blur(8px);
+  }
+
+  .dark .glass {
+    background-color: rgb(31 41 55 / 0.8);
+  }
+
+  .center-absolute {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* 그리드 레이아웃 유틸리티 */
+  .grid-sidebar {
+    grid-template-columns: var(--grid-cols-sidebar);
+  }
+
+  .grid-layout-3 {
+    grid-template-columns: var(--grid-cols-layout-3);
+  }
+
+  .grid-layout-2 {
+    grid-template-columns: var(--grid-cols-layout-2);
+  }
+
+  /* Z-인덱스 유틸리티 */
+  .z-canvas {
+    z-index: var(--z-canvas);
+  }
+  .z-toolbar {
+    z-index: var(--z-toolbar);
+  }
+  .z-modal {
+    z-index: var(--z-modal);
+  }
+  .z-tooltip {
+    z-index: var(--z-tooltip);
+  }
+
+  /* 컴포넌트 컬러 유틸리티 */
+  .text-resistor {
+    color: var(--color-component-resistor);
+  }
+  .text-capacitor {
+    color: var(--color-component-capacitor);
+  }
+  .text-inductor {
+    color: var(--color-component-inductor);
+  }
+  .text-voltage {
+    color: var(--color-component-voltage);
+  }
+  .text-current {
+    color: var(--color-component-current);
+  }
+  .text-ground {
+    color: var(--color-component-ground);
+  }
+
+  .bg-resistor {
+    background-color: var(--color-component-resistor);
+  }
+  .bg-capacitor {
+    background-color: var(--color-component-capacitor);
+  }
+  .bg-inductor {
+    background-color: var(--color-component-inductor);
+  }
+  .bg-voltage {
+    background-color: var(--color-component-voltage);
+  }
+  .bg-current {
+    background-color: var(--color-component-current);
+  }
+  .bg-ground {
+    background-color: var(--color-component-ground);
+  }
+
+  /* 신호 컬러 유틸리티 */
+  .text-signal-1 {
+    color: var(--color-signal-1);
+  }
+  .text-signal-2 {
+    color: var(--color-signal-2);
+  }
+  .text-signal-3 {
+    color: var(--color-signal-3);
+  }
+  .text-signal-4 {
+    color: var(--color-signal-4);
+  }
+  .text-signal-5 {
+    color: var(--color-signal-5);
+  }
+  .text-signal-6 {
+    color: var(--color-signal-6);
+  }
+  .text-signal-7 {
+    color: var(--color-signal-7);
+  }
+  .text-signal-8 {
+    color: var(--color-signal-8);
+  }
+
+  .border-signal-1 {
+    border-color: var(--color-signal-1);
+  }
+  .border-signal-2 {
+    border-color: var(--color-signal-2);
+  }
+  .border-signal-3 {
+    border-color: var(--color-signal-3);
+  }
+  .border-signal-4 {
+    border-color: var(--color-signal-4);
+  }
+  .border-signal-5 {
+    border-color: var(--color-signal-5);
+  }
+  .border-signal-6 {
+    border-color: var(--color-signal-6);
+  }
+  .border-signal-7 {
+    border-color: var(--color-signal-7);
+  }
+  .border-signal-8 {
+    border-color: var(--color-signal-8);
+  }
+}
