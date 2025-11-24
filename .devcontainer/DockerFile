@@ -1,0 +1,39 @@
+FROM mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye
+
+# Install additional system packages
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -y install --no-install-recommends \
+    git \
+    curl \
+    wget \
+    unzip \
+    build-essential \
+    && apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
+# Set up Node.js environment
+USER node
+ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+ENV PATH=$PATH:/home/node/.npm-global/bin
+ENV NODE_ENV=development
+
+# Install global npm packages for development
+RUN npm install -g \
+    npm@latest \
+    @vitejs/create-app \
+    typescript \
+    ts-node \
+    nodemon
+
+# Configure git (will be overridden by user config)
+RUN git config --global init.defaultBranch main
+RUN git config --global core.autocrlf input
+
+WORKDIR /workspace
+
+# Copy package files for dependency caching
+COPY package*.json ./
+RUN npm ci --only=development
+
+EXPOSE 5173 4173
+
+CMD ["sleep", "infinity"]

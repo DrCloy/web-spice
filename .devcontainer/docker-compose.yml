@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  webspice-dev:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    environment:
+      - NODE_ENV=development
+    ports:
+      - '5173:5173' # Vite dev server
+      - '4173:4173' # Vite preview
+      - '3000:3000' # 추가 서비스용
+    networks:
+      - webspice-network
+
+networks:
+  webspice-network:
+    driver: bridge
