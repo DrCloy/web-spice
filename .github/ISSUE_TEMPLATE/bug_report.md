@@ -1,9 +1,9 @@
 ---
 name: 버그 신고
 about: 예상과 다르게 동작하는 문제를 신고할 때 사용
-title: "[BUG] "
-labels: ["bug", "priority-medium"]
-assignees: ""
+title: '[BUG] '
+labels: ['bug', 'priority-medium']
+assignees: ''
 ---
 
 ## 🐛 버그 설명

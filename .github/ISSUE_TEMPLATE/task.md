@@ -1,9 +1,9 @@
 ---
 name: 일반 작업
 about: 개발 태스크, 리팩토링, 문서 작업 등에 사용
-title: "[TASK] "
-labels: ["enhancement"]
-assignees: ""
+title: '[TASK] '
+labels: ['enhancement']
+assignees: ''
 ---
 
 ## 📋 작업 설명
