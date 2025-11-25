@@ -1,6 +1,5 @@
 /**
  * WebSpice Component Type Definitions
- * Phase 1: Foundation Engine - Issue #1
  */
 
 // =============================================================================

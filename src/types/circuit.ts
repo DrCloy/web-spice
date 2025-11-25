@@ -1,6 +1,5 @@
 /**
  * WebSpice Circuit Type Definitions
- * Phase 1: Foundation Engine - Issue #1
  */
 
 import type { Component, ComponentId, NodeId } from './component';

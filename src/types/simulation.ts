@@ -1,6 +1,5 @@
 /**
  * WebSpice Simulation Type Definitions
- * Phase 1: Foundation Engine - Issue #1
  */
 
 import type { Complex, ComponentId, NodeId } from './component';
