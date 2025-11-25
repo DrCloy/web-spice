@@ -87,7 +87,7 @@ export interface Inductor extends TwoTerminalComponent {
 }
 
 /** Voltage source waveform types */
-export type VoltageSourceType = 'dc' | 'ac' | 'pulse' | 'sin';
+export type VoltageSourceType = 'dc' | 'ac';
 
 /** DC voltage source */
 export interface DCVoltageSource extends TwoTerminalComponent {
