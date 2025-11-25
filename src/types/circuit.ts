@@ -85,23 +85,28 @@ export type ErrorCode =
 export interface ErrorContext {
   componentId?: ComponentId;
   nodeId?: NodeId;
-  [key: string]: unknown;
 }
 
 /** Custom error for WebSpice with debugging context */
 export class WebSpiceError extends Error {
   public code: ErrorCode;
-  public componentId?: ComponentId;
-  public nodeId?: NodeId;
   public context?: ErrorContext;
 
   constructor(code: ErrorCode, message: string, context?: ErrorContext) {
     super(message);
     this.code = code;
     this.name = 'WebSpiceError';
-    this.componentId = context?.componentId;
-    this.nodeId = context?.nodeId;
     this.context = context;
+  }
+
+  /** Helper to get component ID from context */
+  get componentId(): ComponentId | undefined {
+    return this.context?.componentId;
+  }
+
+  /** Helper to get node ID from context */
+  get nodeId(): NodeId | undefined {
+    return this.context?.nodeId;
   }
 }
 

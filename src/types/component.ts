@@ -132,9 +132,12 @@ export interface ACCurrentSource extends TwoTerminalComponent {
 /** Current source union type */
 export type CurrentSource = DCCurrentSource | ACCurrentSource;
 
-/** Ground reference node */
-export interface Ground extends BaseComponent {
+/** Ground reference node - special type without terminals */
+export interface Ground {
+  id: ComponentId;
   type: 'ground';
+  name: string;
+  nodeId: NodeId; // The node ID this ground references
 }
 
 /** Union type for all components */

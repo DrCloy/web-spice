@@ -22,8 +22,21 @@ export interface DCAnalysisConfig extends BaseAnalysisConfig {
   // DC sweep parameters (optional)
   sweep?: {
     sourceId: ComponentId;
+    /**
+     * Starting value for the sweep.
+     */
     startValue: number;
+    /**
+     * Ending value for the sweep.
+     */
     endValue: number;
+    /**
+     * Step size for the sweep.
+     * Must be a positive number.
+     * If startValue < endValue, the sweep increments by stepValue; if startValue > endValue, the sweep decrements by stepValue.
+     * The sweep includes both startValue and endValue if possible.
+     * If the range is not evenly divisible by stepValue, the last step may not land exactly on endValue.
+     */
     stepValue: number;
   };
 }
@@ -33,7 +46,7 @@ export interface ACAnalysisConfig extends BaseAnalysisConfig {
   type: 'ac';
   startFrequency: number; // Hz
   endFrequency: number; // Hz
-  pointsPerDecade: number;
+  pointsPerDecade: number; // Must be positive integer, typically 10-100
   sweepType: 'linear' | 'decade' | 'octave';
 }
 
