@@ -107,6 +107,10 @@ export interface ACAnalysisResult {
 export interface TransientAnalysisResult {
   type: 'transient';
   timePoints: number[];
+  /**
+   * For each node/component, the array of values corresponds by index to the timePoints array.
+   * That is, nodeVoltages[node][i] and branchCurrents[component][i] are the values at timePoints[i].
+   */
   nodeVoltages: Record<NodeId, number[]>; // JSON-serializable
   branchCurrents: Record<ComponentId, number[]>;
 }
@@ -138,13 +142,13 @@ export interface SolverOptions {
   pivotTolerance: number;
 }
 
-/** Default solver options */
-export const DEFAULT_SOLVER_OPTIONS: SolverOptions = {
+/** Default solver options (immutable) */
+export const DEFAULT_SOLVER_OPTIONS = {
   maxIterations: 100,
   absoluteTolerance: 1e-12,
   relativeTolerance: 1e-3,
   pivotTolerance: 1e-13,
-};
+} as const satisfies SolverOptions;
 
 // =============================================================================
 // JSON Schema Types (for analysis)
@@ -152,6 +156,6 @@ export const DEFAULT_SOLVER_OPTIONS: SolverOptions = {
 
 /** JSON representation of analysis configuration */
 export interface AnalysisJSON {
-  type: string;
+  type: AnalysisType;
   parameters: Record<string, number | string>;
 }

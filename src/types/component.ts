@@ -69,21 +69,21 @@ export interface TwoTerminalComponent extends BaseComponent {
 /** Resistor component */
 export interface Resistor extends TwoTerminalComponent {
   type: 'resistor';
-  resistance: number; // Ohms
+  resistance: number; // Ohms (must be > 0)
 }
 
 /** Capacitor component */
 export interface Capacitor extends TwoTerminalComponent {
   type: 'capacitor';
-  capacitance: number; // Farads
-  initialVoltage?: number; // Initial voltage for transient analysis
+  capacitance: number; // Farads (must be > 0)
+  initialVoltage?: number; // Initial voltage for transient analysis (Volts)
 }
 
 /** Inductor component */
 export interface Inductor extends TwoTerminalComponent {
   type: 'inductor';
-  inductance: number; // Henrys
-  initialCurrent?: number; // Initial current for transient analysis
+  inductance: number; // Henrys (must be > 0)
+  initialCurrent?: number; // Initial current for transient analysis (Amperes)
 }
 
 /** Voltage source waveform types */
@@ -93,17 +93,17 @@ export type VoltageSourceType = 'dc' | 'ac' | 'pulse' | 'sin';
 export interface DCVoltageSource extends TwoTerminalComponent {
   type: 'voltage_source';
   sourceType: 'dc';
-  voltage: number; // Volts
+  voltage: number; // Volts (can be negative for reversed polarity)
 }
 
 /** AC voltage source */
 export interface ACVoltageSource extends TwoTerminalComponent {
   type: 'voltage_source';
   sourceType: 'ac';
-  amplitude: number; // Peak voltage
-  frequency: number; // Hz
-  phase?: number; // Degrees
-  dcOffset?: number; // DC offset
+  amplitude: number; // Peak voltage in Volts (must be >= 0)
+  frequency: number; // Hz (must be > 0)
+  phase?: number; // Degrees (typically 0-360)
+  dcOffset?: number; // DC offset in Volts
 }
 
 /** Voltage source union type */
@@ -116,17 +116,17 @@ export type CurrentSourceType = 'dc' | 'ac';
 export interface DCCurrentSource extends TwoTerminalComponent {
   type: 'current_source';
   sourceType: 'dc';
-  current: number; // Amperes
+  current: number; // Amperes (can be negative for reversed direction)
 }
 
 /** AC current source */
 export interface ACCurrentSource extends TwoTerminalComponent {
   type: 'current_source';
   sourceType: 'ac';
-  amplitude: number; // Peak current
-  frequency: number; // Hz
-  phase?: number; // Degrees
-  dcOffset?: number; // DC offset
+  amplitude: number; // Peak current in Amperes (must be >= 0)
+  frequency: number; // Hz (must be > 0)
+  phase?: number; // Degrees (typically 0-360)
+  dcOffset?: number; // DC offset in Amperes
 }
 
 /** Current source union type */

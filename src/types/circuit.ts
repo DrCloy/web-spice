@@ -2,7 +2,12 @@
  * WebSpice Circuit Type Definitions
  */
 
-import type { Component, ComponentId, NodeId } from './component';
+import type {
+  Component,
+  ComponentId,
+  ComponentType,
+  NodeId,
+} from './component';
 
 // =============================================================================
 // Circuit Types
@@ -117,7 +122,7 @@ export class WebSpiceError extends Error {
 /** JSON representation of a component for parsing */
 export interface ComponentJSON {
   id: string;
-  type: string;
+  type: ComponentType;
   name: string;
   nodes: string[];
   parameters: Record<string, number | string>;
