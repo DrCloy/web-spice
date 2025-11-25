@@ -154,7 +154,12 @@ export const DEFAULT_SOLVER_OPTIONS = {
 // JSON Schema Types (for analysis)
 // =============================================================================
 
-/** JSON representation of analysis configuration */
+/**
+ * JSON representation of analysis configuration for parsing.
+ * Used to deserialize analysis configurations from external sources (files, API, etc.).
+ * The parameters object contains analysis-specific settings that will be validated
+ * and converted to the appropriate typed AnalysisConfig.
+ */
 export interface AnalysisJSON {
   type: AnalysisType;
   parameters: Record<string, number | string>;
