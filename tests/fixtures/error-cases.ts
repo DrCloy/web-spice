@@ -3,7 +3,7 @@
  * These fixtures represent invalid circuits that should trigger errors
  */
 
-import type { Circuit } from '../../src/types/circuit';
+import type { Circuit } from '@/types/circuit';
 import {
   createTestGround,
   createTestResistor,

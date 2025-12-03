@@ -3,8 +3,8 @@
  * Provides common functions for numerical comparison and validation
  */
 
-import type { Circuit, Matrix, Vector } from '../../src/types/circuit';
-import type { Component } from '../../src/types/component';
+import type { Circuit, Matrix, Vector } from '@/types/circuit';
+import type { Component } from '@/types/component';
 import { DEFAULT_TOLERANCE } from '../setup';
 
 // =============================================================================

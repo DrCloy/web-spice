@@ -15,7 +15,7 @@ import type {
   NodeId,
   Resistor,
   Terminal,
-} from '../../src/types/component';
+} from '@/types/component';
 
 /**
  * Creates a terminal object

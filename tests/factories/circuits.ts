@@ -3,8 +3,8 @@
  * These functions create complete test circuits with known configurations
  */
 
-import type { Circuit, Node } from '../../src/types/circuit';
-import type { Component, ComponentId, NodeId } from '../../src/types/component';
+import type { Circuit, Node } from '@/types/circuit';
+import type { Component, ComponentId, NodeId } from '@/types/component';
 import {
   createTestGround,
   createTestResistor,

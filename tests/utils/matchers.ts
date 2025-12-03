@@ -2,8 +2,8 @@
  * Custom Vitest matchers for WebSpice numerical and circuit testing
  */
 
-import type { Matrix } from '../../src/types/circuit';
-import type { Resistor } from '../../src/types/component';
+import type { Matrix } from '@/types/circuit';
+import type { Resistor } from '@/types/component';
 import { DEFAULT_TOLERANCE } from '../setup';
 
 /**
