@@ -1,11 +1,5 @@
 {
   "extends": ["@commitlint/config-conventional"],
-  "parserPreset": {
-    "parserOpts": {
-      "headerPattern": "^(?<type>.+):\\s(?<subject>.+)$",
-      "headerCorrespondence": ["type", "subject"]
-    }
-  },
   "rules": {
     "type-enum": [
       2,
