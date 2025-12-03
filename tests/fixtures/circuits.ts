@@ -3,8 +3,8 @@
  * These fixtures provide test cases with analytically verified results
  */
 
-import type { Circuit } from '../../src/types/circuit';
-import type { DCOperatingPoint } from '../../src/types/simulation';
+import type { Circuit } from '@/types/circuit';
+import type { DCOperatingPoint } from '@/types/simulation';
 import {
   createParallelResistors,
   createSeriesResistors,

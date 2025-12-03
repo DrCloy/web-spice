@@ -3,7 +3,7 @@
  * These fixtures provide circuits of varying complexity for benchmarking
  */
 
-import type { Circuit } from '../../src/types/circuit';
+import type { Circuit } from '@/types/circuit';
 import {
   createParallelResistors,
   createSeriesResistors,

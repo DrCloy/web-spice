@@ -3,7 +3,7 @@
  * These functions create test matrices for numerical algorithm testing
  */
 
-import type { Matrix, Vector } from '../../src/types/circuit';
+import type { Matrix, Vector } from '@/types/circuit';
 
 /**
  * Creates a test matrix with specified dimensions and optional data
