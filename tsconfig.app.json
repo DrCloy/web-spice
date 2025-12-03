@@ -26,13 +26,7 @@
 
     /* Path Aliases */
     "paths": {
-      "@/*": ["./src/*"],
-      "@/types/*": ["./src/types/*"],
-      "@/engine/*": ["./src/engine/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/utils/*": ["./src/utils/*"],
-      "@/hooks/*": ["./src/hooks/*"],
-      "@/store/*": ["./src/store/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"]
