@@ -509,7 +509,8 @@ describe('회로 검증', () => {
 
 **사용 가능한 에러 케이스:**
 
-- `FLOATING_NODE_ERROR` - 연결되지 않은 컴포넌트
+- `FLOATING_NODE_ERROR` - 아무 컴포넌트에도 연결되지 않은 노드
+- `DISCONNECTED_SUBGRAPH_ERROR` - 메인 회로와 분리된 서브 그래프
 - `NO_GROUND_ERROR` - 그라운드 참조 누락
 - `ZERO_RESISTANCE_ERROR` - 저항값이 0인 컴포넌트
 - `NEGATIVE_RESISTANCE_ERROR` - 음수 저항

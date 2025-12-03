@@ -22,23 +22,24 @@ export interface ErrorCaseFixture {
 }
 
 /**
- * Circuit with a floating node (disconnected component)
+ * Circuit with a disconnected subgraph (isolated from main circuit)
  *
  * Circuit:
  *   V1(12V) -- R1 -- GND
- *   R2 (not connected to anything)
+ *   R2 (forms isolated subgraph, not connected to main circuit)
+ *     Node 99 -- R2 -- Node 98
  *
- * Expected error: FLOATING_NODE
+ * Expected error: DISCONNECTED_SUBGRAPH or FLOATING_COMPONENT
  */
-export const FLOATING_NODE_ERROR: ErrorCaseFixture = {
+export const DISCONNECTED_SUBGRAPH_ERROR: ErrorCaseFixture = {
   circuit: {
-    id: 'error-floating-node',
-    name: 'Floating Node Error',
-    description: 'Circuit with disconnected component',
+    id: 'error-disconnected-subgraph',
+    name: 'Disconnected Subgraph Error',
+    description: 'Circuit with disconnected component forming isolated subgraph',
     components: [
       createTestVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
       createTestResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
-      // R2 has nodes that don't connect to the main circuit
+      // R2 forms an isolated subgraph not connected to main circuit
       createTestResistor({ id: 'R2', resistance: 1000, nodes: ['99', '98'] }),
       createTestGround({ id: 'GND', nodeId: '0' }),
     ],
@@ -57,13 +58,13 @@ export const FLOATING_NODE_ERROR: ErrorCaseFixture = {
       },
       {
         id: '99',
-        name: 'Floating Node A',
+        name: 'Isolated Node A',
         isGround: false,
         connectedComponents: ['R2'],
       },
       {
         id: '98',
-        name: 'Floating Node B',
+        name: 'Isolated Node B',
         isGround: false,
         connectedComponents: ['R2'],
       },
@@ -71,7 +72,53 @@ export const FLOATING_NODE_ERROR: ErrorCaseFixture = {
     groundNodeId: '0',
   },
   description:
-    'Circuit with floating nodes that are not connected to the main circuit',
+    'Circuit with disconnected subgraph that is isolated from the main circuit',
+  expectedErrorCode: 'DISCONNECTED_SUBGRAPH',
+  expectedErrorMessage: 'Circuit contains disconnected components',
+};
+
+/**
+ * Circuit with a truly floating node (no connections at all)
+ *
+ * Circuit:
+ *   V1(12V) -- R1 -- GND
+ *   Node 99 (not connected to any component)
+ *
+ * Expected error: FLOATING_NODE
+ */
+export const FLOATING_NODE_ERROR: ErrorCaseFixture = {
+  circuit: {
+    id: 'error-floating-node',
+    name: 'Floating Node Error',
+    description: 'Circuit with a node that has no component connections',
+    components: [
+      createTestVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
+      createTestResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+      createTestGround({ id: 'GND', nodeId: '0' }),
+    ],
+    nodes: [
+      {
+        id: '0',
+        name: 'Ground',
+        isGround: true,
+        connectedComponents: ['V1', 'R1', 'GND'],
+      },
+      {
+        id: '1',
+        name: 'Node 1',
+        isGround: false,
+        connectedComponents: ['V1', 'R1'],
+      },
+      {
+        id: '99',
+        name: 'Floating Node',
+        isGround: false,
+        connectedComponents: [], // No connections - truly floating
+      },
+    ],
+    groundNodeId: '0',
+  },
+  description: 'Circuit with a floating node that has no component connections',
   expectedErrorCode: 'FLOATING_NODE',
   expectedErrorMessage: 'Circuit contains floating nodes',
 };
@@ -236,6 +283,7 @@ export const DUPLICATE_COMPONENT_ID_ERROR: ErrorCaseFixture = {
  */
 export const ALL_ERROR_FIXTURES: ErrorCaseFixture[] = [
   FLOATING_NODE_ERROR,
+  DISCONNECTED_SUBGRAPH_ERROR,
   NO_GROUND_ERROR,
   ZERO_RESISTANCE_ERROR,
   NEGATIVE_RESISTANCE_ERROR,
