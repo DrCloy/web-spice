@@ -292,7 +292,7 @@ const resistor = createTestResistor({
 ```typescript
 const voltageSource = createTestVoltageSource({
   id: 'V1', // 기본값: 'V1'
-  voltage: 12, // 기본값: 5
+  voltage: 12, // 기본값: 12
   nodes: ['1', '0'], // 기본값: ['1', '0']
 });
 ```
@@ -346,7 +346,7 @@ const ground = createTestGround({
 
 ```typescript
 const circuit = createVoltageDivider({
-  inputVoltage: 12, // 기본값: 5
+  inputVoltage: 12, // 기본값: 12
   r1: 1000, // 기본값: 1000
   r2: 2000, // 기본값: 2000
 });
