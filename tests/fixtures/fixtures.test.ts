@@ -87,11 +87,12 @@ describe('Circuit Fixtures', () => {
     it('should detect floating node error', () => {
       const circuit = FLOATING_NODE_ERROR.circuit as any;
       const floatingNodes = circuit.nodes
-        .filter((n: any) => !n.isGround && n.connectedComponents.length === 1)
+        .filter((n: any) => !n.isGround && n.connectedComponents.length === 0)
         .map((n: any) => n.id);
 
-      // Should have floating nodes 98 and 99
+      // Should have at least one floating node (node 99)
       expect(floatingNodes.length).toBeGreaterThan(0);
+      expect(floatingNodes).toContain('99');
     });
 
     it('should have expected error codes defined', () => {

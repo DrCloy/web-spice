@@ -35,7 +35,8 @@ export const DISCONNECTED_SUBGRAPH_ERROR: ErrorCaseFixture = {
   circuit: {
     id: 'error-disconnected-subgraph',
     name: 'Disconnected Subgraph Error',
-    description: 'Circuit with disconnected component forming isolated subgraph',
+    description:
+      'Circuit with disconnected component forming isolated subgraph',
     components: [
       createTestVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
       createTestResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
