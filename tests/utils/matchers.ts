@@ -215,8 +215,26 @@ export function toBeValidMatrix(
  * Custom matcher: toSatisfyOhmsLaw
  * Verifies that a component satisfies Ohm's Law: V = I * R
  *
+ * Uses a hybrid tolerance approach:
+ * - For large values (|expected| > 1): relative tolerance (scales with value)
+ * - For small values (|expected| < 1): absolute tolerance (fixed at tolerance parameter)
+ *
+ * This hybrid approach prevents false positives when testing circuits with
+ * very small voltages/currents near zero, where relative tolerances become
+ * problematic (e.g., 0.0001V with 1% tolerance = 0.000001V threshold).
+ *
+ * @param received - Resistor component to test
+ * @param voltage - Measured voltage across resistor (V)
+ * @param current - Measured current through resistor (A)
+ * @param tolerance - Tolerance factor (default: 1e-10)
+ *
  * @example
- * expect(resistor).toSatisfyOhmsLaw(10, 0.01, 1e-10);
+ * // Large voltage: uses relative tolerance (1% of 10V = 0.1V)
+ * expect(resistor).toSatisfyOhmsLaw(10, 0.01, 0.01);
+ *
+ * @example
+ * // Small voltage: uses absolute tolerance (0.001V regardless of expected)
+ * expect(resistor).toSatisfyOhmsLaw(0.0001, 0.0001, 0.001);
  */
 export function toSatisfyOhmsLaw(
   this: { isNot: boolean },
@@ -258,6 +276,10 @@ export function toSatisfyOhmsLaw(
   const expectedCurrent = voltage / resistance;
   const currentDiff = Math.abs(current - expectedCurrent);
 
+  // Hybrid tolerance: relative for large values, absolute for small values
+  // Math.max(1, |expected|) ensures:
+  // - When |expected| > 1: tolerance scales with value (relative)
+  // - When |expected| < 1: tolerance is fixed at tolerance parameter (absolute)
   const voltagePass =
     voltageDiff <= tolerance * Math.max(1, Math.abs(expectedVoltage));
   const currentPass =
