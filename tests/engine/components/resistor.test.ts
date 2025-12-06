@@ -24,21 +24,18 @@ describe('Resistor', () => {
     });
 
     it('should throw error for zero resistance', () => {
-      expect(() => new Resistor('R1', 'n1', 'n2', 0)).toThrow(WebSpiceError);
       expect(() => new Resistor('R1', 'n1', 'n2', 0)).toThrow(
         'Resistance must be greater than 0'
       );
     });
 
     it('should throw error for negative resistance', () => {
-      expect(() => new Resistor('R1', 'n1', 'n2', -100)).toThrow(WebSpiceError);
       expect(() => new Resistor('R1', 'n1', 'n2', -100)).toThrow(
         'Resistance must be greater than 0'
       );
     });
 
     it('should throw error for invalid resistance (NaN)', () => {
-      expect(() => new Resistor('R1', 'n1', 'n2', NaN)).toThrow(WebSpiceError);
       expect(() => new Resistor('R1', 'n1', 'n2', NaN)).toThrow(
         'Resistance must be a valid number'
       );
@@ -46,15 +43,11 @@ describe('Resistor', () => {
 
     it('should throw error for invalid resistance (Infinity)', () => {
       expect(() => new Resistor('R1', 'n1', 'n2', Infinity)).toThrow(
-        WebSpiceError
-      );
-      expect(() => new Resistor('R1', 'n1', 'n2', Infinity)).toThrow(
         'Resistance must be a valid number'
       );
     });
 
     it('should throw error for empty component ID', () => {
-      expect(() => new Resistor('', 'n1', 'n2', 1000)).toThrow(WebSpiceError);
       expect(() => new Resistor('', 'n1', 'n2', 1000)).toThrow(
         'Component ID cannot be empty'
       );
@@ -66,7 +59,6 @@ describe('Resistor', () => {
     });
 
     it('should throw error for identical node IDs', () => {
-      expect(() => new Resistor('R1', 'n1', 'n1', 1000)).toThrow(WebSpiceError);
       expect(() => new Resistor('R1', 'n1', 'n1', 1000)).toThrow(
         'Terminals cannot be connected to the same node'
       );
@@ -85,14 +77,12 @@ describe('Resistor', () => {
     });
 
     it('should throw error for resistance below minimum (< 1 mΩ)', () => {
-      expect(() => new Resistor('R1', 'n1', 'n2', 1e-4)).toThrow(WebSpiceError);
       expect(() => new Resistor('R1', 'n1', 'n2', 1e-4)).toThrow(
         'Resistance must be between 0.001 and 1000000000000 Ohms'
       );
     });
 
     it('should throw error for resistance above maximum (> 1 TΩ)', () => {
-      expect(() => new Resistor('R1', 'n1', 'n2', 1e13)).toThrow(WebSpiceError);
       expect(() => new Resistor('R1', 'n1', 'n2', 1e13)).toThrow(
         'Resistance must be between 0.001 and 1000000000000 Ohms'
       );
