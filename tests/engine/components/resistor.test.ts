@@ -123,7 +123,7 @@ describe('Resistor', () => {
       const json = JSON.stringify(resistor);
       const parsed = JSON.parse(json);
 
-      // Plain object로 직렬화 확인 (디버깅/로깅용)
+      // Verify serialization to plain object (for debugging/logging purposes)
       expect(parsed).toEqual({
         id: 'R1',
         type: 'resistor',
