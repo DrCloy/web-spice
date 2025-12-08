@@ -61,7 +61,7 @@ export class Resistor implements ResistorType {
       });
     }
 
-    if (node1 === node2) {
+    if (node1.trim() === node2.trim()) {
       throw new WebSpiceError(
         'INVALID_COMPONENT',
         'Terminals cannot be connected to the same node',

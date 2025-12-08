@@ -63,6 +63,12 @@ describe('Resistor', () => {
         'Terminals cannot be connected to the same node'
       );
     });
+
+    it('should throw error for node IDs that are identical after trimming', () => {
+      expect(() => new Resistor('R1', ' n1 ', 'n1', 1000)).toThrow(
+        'Terminals cannot be connected to the same node'
+      );
+    });
   });
 
   describe('boundary values', () => {
