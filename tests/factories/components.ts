@@ -49,8 +49,8 @@ export function createTestResistor(params?: {
     name,
     resistance,
     terminals: [
-      createTerminal('pos', nodes[0]),
-      createTerminal('neg', nodes[1]),
+      createTerminal('terminal1', nodes[0]),
+      createTerminal('terminal2', nodes[1]),
     ],
   };
 }
@@ -117,8 +117,8 @@ export function createTestInductor(params?: {
     inductance,
     initialCurrent,
     terminals: [
-      createTerminal('pos', nodes[0]),
-      createTerminal('neg', nodes[1]),
+      createTerminal('terminal1', nodes[0]),
+      createTerminal('terminal2', nodes[1]),
     ],
   };
 }

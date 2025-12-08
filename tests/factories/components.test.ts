@@ -45,8 +45,8 @@ describe('Component Factories', () => {
     it('should have correct terminal names', () => {
       const resistor = createTestResistor();
 
-      expect(resistor.terminals[0].name).toBe('pos');
-      expect(resistor.terminals[1].name).toBe('neg');
+      expect(resistor.terminals[0].name).toBe('terminal1');
+      expect(resistor.terminals[1].name).toBe('terminal2');
     });
   });
 
