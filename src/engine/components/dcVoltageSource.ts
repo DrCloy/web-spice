@@ -41,7 +41,8 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
     if (!id || id.trim().length === 0) {
       throw new WebSpiceError(
         'INVALID_COMPONENT',
-        'Component ID cannot be empty'
+        'Component ID cannot be empty',
+        { componentId: id }
       );
     }
 
