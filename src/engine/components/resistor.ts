@@ -35,7 +35,7 @@ export class Resistor implements ResistorType {
    * @param id - Unique component identifier
    * @param node1 - First terminal node ID
    * @param node2 - Second terminal node ID
-   * @param resistance - Resistance value in Ohms (must be > 0)
+   * @param resistance - Resistance value in Ohms (must be between 1mΩ and 1TΩ)
    * @throws {WebSpiceError} If parameters are invalid
    */
   constructor(id: string, node1: NodeId, node2: NodeId, resistance: number) {
@@ -92,17 +92,17 @@ export class Resistor implements ResistorType {
     ) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
-        `Resistance must be between ${Resistor.MIN_RESISTANCE} and ${Resistor.MAX_RESISTANCE} Ohms`,
+        `Resistance must be between 1e-3 and 1e12 Ohms`,
         { componentId: id }
       );
     }
 
-    this._id = id;
-    this._name = id;
+    this._id = id.trim();
+    this._name = id.trim();
     this._resistance = resistance;
     this._terminals = [
-      { name: 'terminal1', nodeId: node1 },
-      { name: 'terminal2', nodeId: node2 },
+      { name: 'terminal1', nodeId: node1.trim() },
+      { name: 'terminal2', nodeId: node2.trim() },
     ];
   }
 

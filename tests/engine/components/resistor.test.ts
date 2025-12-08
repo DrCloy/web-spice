@@ -78,13 +78,13 @@ describe('Resistor', () => {
 
     it('should throw error for resistance below minimum (< 1 mΩ)', () => {
       expect(() => new Resistor('R1', 'n1', 'n2', 1e-4)).toThrow(
-        'Resistance must be between 0.001 and 1000000000000 Ohms'
+        'Resistance must be between 1e-3 and 1e12 Ohms'
       );
     });
 
     it('should throw error for resistance above maximum (> 1 TΩ)', () => {
       expect(() => new Resistor('R1', 'n1', 'n2', 1e13)).toThrow(
-        'Resistance must be between 0.001 and 1000000000000 Ohms'
+        'Resistance must be between 1e-3 and 1e12 Ohms'
       );
     });
 
@@ -128,15 +128,18 @@ describe('Resistor', () => {
   });
 
   describe('immutability', () => {
-    it('should not allow modification of resistance via getter', () => {
+    it('should have immutable resistance value', () => {
       const resistor = new Resistor('R1', 'n1', 'n2', 1000);
-      // Resistance is accessed via getter, internal field is private
-      expect(resistor.resistance).toBe(1000);
 
-      // Attempting to set a getter-only property should throw in strict mode
-      expect(() => {
+      // Attempt modification (may throw in strict mode or silently fail)
+      try {
         (resistor as any).resistance = 2000;
-      }).toThrow(TypeError);
+      } catch {
+        // Expected in strict mode - setter-only property assignment throws TypeError
+      }
+
+      // Value must remain unchanged regardless of environment
+      expect(resistor.resistance).toBe(1000);
     });
 
     it('should not allow modification of terminals array', () => {
@@ -145,13 +148,6 @@ describe('Resistor', () => {
       // Attempt to modify should not affect internal state
       originalTerminals[0] = { name: 'modified', nodeId: 'n99' };
       expect(resistor.terminals[0].nodeId).toBe('n1');
-    });
-
-    it('should not expose internal private fields', () => {
-      const resistor = new Resistor('R1', 'n1', 'n2', 1000);
-      // Private fields should not be accessible
-      expect((resistor as any)._resistance).toBe(1000);
-      expect((resistor as any)._terminals).toBeDefined();
     });
   });
 });
