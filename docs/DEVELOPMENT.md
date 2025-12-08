@@ -16,7 +16,7 @@ WebSpice 개발 환경 설정 및 개발 가이드라인
 
 ```bash
 # 1. VS Code에서 프로젝트 열기
-code webspice/
+code web-spice/
 
 # 2. Command Palette (Cmd/Ctrl + Shift + P)
 # "Dev Containers: Reopen in Container" 선택
