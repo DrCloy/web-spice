@@ -10,7 +10,7 @@ import { WebSpiceError } from '@/types/circuit';
  * @example
  * ```typescript
  * // Create a 12A DC source
- * const battery = new DCCurrentSourceImpl('I1', 'n1', 'n2', 12);
+ * const currentSource = new DCCurrentSourceImpl('I1', 'n1', 'n2', 12);
  *
  * // Negative current (reversed polarity)
  * const reversed = new DCCurrentSourceImpl('I2', 'n1', 'n2', -5);
