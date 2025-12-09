@@ -11,7 +11,7 @@ import { WebSpiceError } from '@/types/circuit';
  *
  * @example
  * ```typescript
- * const r1 = new Resistor('R1', 'node1', 'node2', 1000); // 1kΩ resistor
+ * const r1 = new ResistorImpl('R1', 'node1', 'node2', 1000); // 1kΩ resistor
  * ```
  */
 export class ResistorImpl implements Resistor {
