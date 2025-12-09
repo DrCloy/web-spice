@@ -44,3 +44,6 @@ Thumbs.db
 .simulation-cache/
 *.tmp.json
 .webspice-config
+
+# Wiki (separate git repository)
+docs/wiki/
