@@ -68,6 +68,9 @@ export class DCCurrentSourceImpl implements DCCurrentSource {
     }
 
     // Validate current
+    // NOTE: Current can be negative (reversed direction) or zero (inactive source).
+    // This is intentionally different from resistors which must have positive resistance.
+    // Only validates that the value is a finite number.
     if (!Number.isFinite(current)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',

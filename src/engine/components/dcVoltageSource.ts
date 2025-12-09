@@ -68,6 +68,9 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
     }
 
     // Validate voltage
+    // NOTE: Voltage can be negative (reversed polarity) or zero (inactive source).
+    // This is intentionally different from resistors which must have positive resistance.
+    // Only validates that the value is a finite number.
     if (!Number.isFinite(voltage)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',

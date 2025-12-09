@@ -45,13 +45,13 @@ export class ResistorImpl implements Resistor {
     }
 
     // Validate node IDs
-    if (!node1 || node1.trim() === '') {
+    if (!node1 || node1.trim().length === 0) {
       throw new WebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty', {
         componentId: id,
       });
     }
 
-    if (!node2 || node2.trim() === '') {
+    if (!node2 || node2.trim().length === 0) {
       throw new WebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty', {
         componentId: id,
       });
@@ -66,6 +66,9 @@ export class ResistorImpl implements Resistor {
     }
 
     // Validate resistance
+    // NOTE: Resistance must be positive due to physical constraints.
+    // Unlike voltage/current sources which can have negative values (reversed polarity),
+    // resistance is a physical property that cannot be negative or zero.
     if (!Number.isFinite(resistance)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
