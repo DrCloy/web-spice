@@ -1,8 +1,4 @@
-import type {
-  NodeId,
-  Resistor as ResistorType,
-  Terminal,
-} from '@/types/component';
+import type { NodeId, Resistor, Terminal } from '@/types/component';
 import { WebSpiceError } from '@/types/circuit';
 
 /**
@@ -18,7 +14,7 @@ import { WebSpiceError } from '@/types/circuit';
  * const r1 = new Resistor('R1', 'node1', 'node2', 1000); // 1kΩ resistor
  * ```
  */
-export class Resistor implements ResistorType {
+export class ResistorImpl implements Resistor {
   /** Minimum allowed resistance: 1 mΩ (milli-ohm) */
   private static readonly MIN_RESISTANCE = 1e-3;
   /** Maximum allowed resistance: 1 TΩ (tera-ohm) */
@@ -87,8 +83,8 @@ export class Resistor implements ResistorType {
     }
 
     if (
-      resistance < Resistor.MIN_RESISTANCE ||
-      resistance > Resistor.MAX_RESISTANCE
+      resistance < ResistorImpl.MIN_RESISTANCE ||
+      resistance > ResistorImpl.MAX_RESISTANCE
     ) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
@@ -149,7 +145,7 @@ export class Resistor implements ResistorType {
    * Serialize to JSON
    * Required for JSON.stringify() since getters are not enumerable
    */
-  toJSON(): ResistorType {
+  toJSON(): Resistor {
     return {
       id: this._id,
       type: this._type,
