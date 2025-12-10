@@ -3,20 +3,27 @@ import { ResistorImpl } from '@/engine/components/resistor';
 import type { Resistor } from '@/types/component';
 import { WebSpiceError } from '@/types/circuit';
 
+/**
+ * Helper function to create resistor test data with optional overrides
+ */
+function makeResistorData(overrides?: Partial<Resistor>): Resistor {
+  return {
+    id: 'R1',
+    type: 'resistor',
+    name: 'R1',
+    resistance: 1000,
+    terminals: [
+      { name: 'terminal1', nodeId: 'n1' },
+      { name: 'terminal2', nodeId: 'n2' },
+    ],
+    ...overrides,
+  };
+}
+
 describe('Resistor', () => {
   describe('constructor (new API: data object)', () => {
     it('should create a resistor with valid data object', () => {
-      const data: Resistor = {
-        id: 'R1',
-        type: 'resistor',
-        name: 'R1',
-        resistance: 1000,
-        terminals: [
-          { name: 'terminal1', nodeId: 'n1' },
-          { name: 'terminal2', nodeId: 'n2' },
-        ],
-      };
-      const resistor = new ResistorImpl(data);
+      const resistor = new ResistorImpl(makeResistorData());
 
       expect(resistor.id).toBe('R1');
       expect(resistor.type).toBe('resistor');
@@ -34,170 +41,104 @@ describe('Resistor', () => {
     });
 
     it('should use id as name when name is not provided', () => {
-      const data: Resistor = {
-        id: 'R1',
-        type: 'resistor',
-        name: '',
-        resistance: 1000,
-        terminals: [
-          { name: 'terminal1', nodeId: 'n1' },
-          { name: 'terminal2', nodeId: 'n2' },
-        ],
-      };
-      const resistor = new ResistorImpl(data);
+      const resistor = new ResistorImpl(makeResistorData({ name: '' }));
 
       expect(resistor.name).toBe('R1');
     });
 
     it('should throw error for zero resistance', () => {
-      const data: Resistor = {
-        id: 'R1',
-        type: 'resistor',
-        name: 'R1',
-        resistance: 0,
-        terminals: [
-          { name: 'terminal1', nodeId: 'n1' },
-          { name: 'terminal2', nodeId: 'n2' },
-        ],
-      };
-      expect(() => new ResistorImpl(data)).toThrow(
-        'Resistance must be greater than 0'
-      );
+      expect(
+        () => new ResistorImpl(makeResistorData({ resistance: 0 }))
+      ).toThrow('Resistance must be greater than 0');
     });
 
     it('should throw error for negative resistance', () => {
-      const data: Resistor = {
-        id: 'R1',
-        type: 'resistor',
-        name: 'R1',
-        resistance: -100,
-        terminals: [
-          { name: 'terminal1', nodeId: 'n1' },
-          { name: 'terminal2', nodeId: 'n2' },
-        ],
-      };
-      expect(() => new ResistorImpl(data)).toThrow(
-        'Resistance must be greater than 0'
-      );
+      expect(
+        () => new ResistorImpl(makeResistorData({ resistance: -100 }))
+      ).toThrow('Resistance must be greater than 0');
     });
 
     it('should throw error for invalid resistance (NaN)', () => {
-      const data: Resistor = {
-        id: 'R1',
-        type: 'resistor',
-        name: 'R1',
-        resistance: NaN,
-        terminals: [
-          { name: 'terminal1', nodeId: 'n1' },
-          { name: 'terminal2', nodeId: 'n2' },
-        ],
-      };
-      expect(() => new ResistorImpl(data)).toThrow(
-        'Resistance must be a valid number'
-      );
+      expect(
+        () => new ResistorImpl(makeResistorData({ resistance: NaN }))
+      ).toThrow('Resistance must be a valid number');
     });
 
     it('should throw error for invalid resistance (Infinity)', () => {
-      const data: Resistor = {
-        id: 'R1',
-        type: 'resistor',
-        name: 'R1',
-        resistance: Infinity,
-        terminals: [
-          { name: 'terminal1', nodeId: 'n1' },
-          { name: 'terminal2', nodeId: 'n2' },
-        ],
-      };
-      expect(() => new ResistorImpl(data)).toThrow(
-        'Resistance must be a valid number'
-      );
+      expect(
+        () => new ResistorImpl(makeResistorData({ resistance: Infinity }))
+      ).toThrow('Resistance must be a valid number');
     });
 
     it('should throw error for empty component ID', () => {
-      const data: Resistor = {
-        id: '',
-        type: 'resistor',
-        name: 'R1',
-        resistance: 1000,
-        terminals: [
-          { name: 'terminal1', nodeId: 'n1' },
-          { name: 'terminal2', nodeId: 'n2' },
-        ],
-      };
-      expect(() => new ResistorImpl(data)).toThrow(
+      expect(() => new ResistorImpl(makeResistorData({ id: '' }))).toThrow(
         'Component ID cannot be empty'
       );
     });
 
     it('should throw error for empty node IDs', () => {
-      const data1: Resistor = {
-        id: 'R1',
-        type: 'resistor',
-        name: 'R1',
-        resistance: 1000,
-        terminals: [
-          { name: 'terminal1', nodeId: '' },
-          { name: 'terminal2', nodeId: 'n2' },
-        ],
-      };
-      expect(() => new ResistorImpl(data1)).toThrow(WebSpiceError);
+      expect(
+        () =>
+          new ResistorImpl(
+            makeResistorData({
+              terminals: [
+                { name: 'terminal1', nodeId: '' },
+                { name: 'terminal2', nodeId: 'n2' },
+              ],
+            })
+          )
+      ).toThrow(WebSpiceError);
 
-      const data2: Resistor = {
-        id: 'R1',
-        type: 'resistor',
-        name: 'R1',
-        resistance: 1000,
-        terminals: [
-          { name: 'terminal1', nodeId: 'n1' },
-          { name: 'terminal2', nodeId: '' },
-        ],
-      };
-      expect(() => new ResistorImpl(data2)).toThrow(WebSpiceError);
+      expect(
+        () =>
+          new ResistorImpl(
+            makeResistorData({
+              terminals: [
+                { name: 'terminal1', nodeId: 'n1' },
+                { name: 'terminal2', nodeId: '' },
+              ],
+            })
+          )
+      ).toThrow(WebSpiceError);
     });
 
     it('should throw error for identical node IDs', () => {
-      const data: Resistor = {
-        id: 'R1',
-        type: 'resistor',
-        name: 'R1',
-        resistance: 1000,
-        terminals: [
-          { name: 'terminal1', nodeId: 'n1' },
-          { name: 'terminal2', nodeId: 'n1' },
-        ],
-      };
-      expect(() => new ResistorImpl(data)).toThrow(
-        'Terminals cannot be connected to the same node'
-      );
+      expect(
+        () =>
+          new ResistorImpl(
+            makeResistorData({
+              terminals: [
+                { name: 'terminal1', nodeId: 'n1' },
+                { name: 'terminal2', nodeId: 'n1' },
+              ],
+            })
+          )
+      ).toThrow('Terminals cannot be connected to the same node');
     });
 
     it('should throw error for node IDs that are identical after trimming', () => {
-      const data: Resistor = {
-        id: 'R1',
-        type: 'resistor',
-        name: 'R1',
-        resistance: 1000,
-        terminals: [
-          { name: 'terminal1', nodeId: ' n1 ' },
-          { name: 'terminal2', nodeId: 'n1' },
-        ],
-      };
-      expect(() => new ResistorImpl(data)).toThrow(
-        'Terminals cannot be connected to the same node'
-      );
+      expect(
+        () =>
+          new ResistorImpl(
+            makeResistorData({
+              terminals: [
+                { name: 'terminal1', nodeId: ' n1 ' },
+                { name: 'terminal2', nodeId: 'n1' },
+              ],
+            })
+          )
+      ).toThrow('Terminals cannot be connected to the same node');
     });
 
     it('should throw error for invalid terminals (not exactly 2)', () => {
-      const data: any = {
-        id: 'R1',
-        type: 'resistor',
-        name: 'R1',
-        resistance: 1000,
-        terminals: [{ name: 'terminal1', nodeId: 'n1' }], // only 1 terminal
-      };
-      expect(() => new ResistorImpl(data)).toThrow(
-        'Resistor must have exactly 2 terminals'
-      );
+      expect(
+        () =>
+          new ResistorImpl(
+            makeResistorData({
+              terminals: [{ name: 'terminal1', nodeId: 'n1' }] as any,
+            })
+          )
+      ).toThrow('Resistor must have exactly 2 terminals');
     });
   });
 
@@ -274,31 +215,37 @@ describe('Resistor', () => {
 
   describe('boundary values', () => {
     it('should accept minimum resistance (1 mΩ)', () => {
-      const resistor = new ResistorImpl('R1', 'n1', 'n2', 1e-3);
+      const resistor = new ResistorImpl(makeResistorData({ resistance: 1e-3 }));
       expect(resistor.resistance).toBe(1e-3);
     });
 
     it('should accept maximum resistance (1 TΩ)', () => {
-      const resistor = new ResistorImpl('R1', 'n1', 'n2', 1e12);
+      const resistor = new ResistorImpl(makeResistorData({ resistance: 1e12 }));
       expect(resistor.resistance).toBe(1e12);
     });
 
     it('should throw error for resistance below minimum (< 1 mΩ)', () => {
-      expect(() => new ResistorImpl('R1', 'n1', 'n2', 1e-4)).toThrow(
-        'Resistance must be between 1e-3 and 1e12 Ohms'
-      );
+      expect(
+        () => new ResistorImpl(makeResistorData({ resistance: 1e-4 }))
+      ).toThrow('Resistance must be between 1e-3 and 1e12 Ohms');
     });
 
     it('should throw error for resistance above maximum (> 1 TΩ)', () => {
-      expect(() => new ResistorImpl('R1', 'n1', 'n2', 1e13)).toThrow(
-        'Resistance must be between 1e-3 and 1e12 Ohms'
-      );
+      expect(
+        () => new ResistorImpl(makeResistorData({ resistance: 1e13 }))
+      ).toThrow('Resistance must be between 1e-3 and 1e12 Ohms');
     });
 
     it('should accept typical resistor values', () => {
       const values = [1, 10, 100, 1000, 10000, 100000, 1000000];
       values.forEach(value => {
-        const resistor = new ResistorImpl(`R${value}`, 'n1', 'n2', value);
+        const resistor = new ResistorImpl(
+          makeResistorData({
+            id: `R${value}`,
+            name: `R${value}`,
+            resistance: value,
+          })
+        );
         expect(resistor.resistance).toBe(value);
       });
     });
@@ -306,7 +253,7 @@ describe('Resistor', () => {
 
   describe('type compliance', () => {
     it('should match ResistorType interface', () => {
-      const resistor = new ResistorImpl('R1', 'n1', 'n2', 1000);
+      const resistor = new ResistorImpl(makeResistorData());
       const typed: Resistor = resistor;
 
       expect(typed.id).toBe('R1');
@@ -316,7 +263,7 @@ describe('Resistor', () => {
     });
 
     it('should be serializable to plain object', () => {
-      const resistor = new ResistorImpl('R1', 'n1', 'n2', 1000);
+      const resistor = new ResistorImpl(makeResistorData());
       const json = JSON.stringify(resistor);
       const parsed = JSON.parse(json);
 
@@ -336,7 +283,7 @@ describe('Resistor', () => {
 
   describe('immutability', () => {
     it('should have immutable resistance value', () => {
-      const resistor = new ResistorImpl('R1', 'n1', 'n2', 1000);
+      const resistor = new ResistorImpl(makeResistorData());
 
       // Attempt modification (may throw in strict mode or silently fail)
       try {
@@ -350,7 +297,7 @@ describe('Resistor', () => {
     });
 
     it('should not allow modification of terminals array', () => {
-      const resistor = new ResistorImpl('R1', 'n1', 'n2', 1000);
+      const resistor = new ResistorImpl(makeResistorData());
       const originalTerminals = resistor.terminals;
       // Attempt to modify should not affect internal state
       originalTerminals[0] = { name: 'modified', nodeId: 'n99' };
