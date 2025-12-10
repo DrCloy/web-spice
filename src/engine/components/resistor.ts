@@ -19,49 +19,105 @@ export class ResistorImpl implements Resistor {
   private static readonly MIN_RESISTANCE = 1e-3;
   /** Maximum allowed resistance: 1 TΩ (tera-ohm) */
   private static readonly MAX_RESISTANCE = 1e12;
-  private readonly _id: string;
-  private readonly _type = 'resistor' as const;
-  private readonly _name: string;
-  private readonly _resistance: number;
-  private readonly _terminals: readonly [Terminal, Terminal];
+  private _id!: string;
+  private _type = 'resistor' as const;
+  private _name!: string;
+  private _resistance!: number;
+  private _terminals!: readonly [Terminal, Terminal];
 
   /**
    * Creates a new Resistor instance
    *
+   * @param data - Resistor data object
+   * @throws {WebSpiceError} If parameters are invalid
+   *
+   * @example
+   * ```typescript
+   * // New API: data object
+   * const resistor = new ResistorImpl({
+   *   id: 'R1',
+   *   type: 'resistor',
+   *   name: 'R1',
+   *   resistance: 1000,
+   *   terminals: [
+   *     { name: 'terminal1', nodeId: 'n1' },
+   *     { name: 'terminal2', nodeId: 'n2' }
+   *   ]
+   * });
+   * ```
+   */
+  constructor(data: Resistor);
+  /**
+   * Creates a new Resistor instance (deprecated)
+   *
+   * @deprecated Use constructor with data object instead
    * @param id - Unique component identifier
    * @param node1 - First terminal node ID
    * @param node2 - Second terminal node ID
    * @param resistance - Resistance value in Ohms (must be between 1mΩ and 1TΩ)
    * @throws {WebSpiceError} If parameters are invalid
    */
-  constructor(id: string, node1: NodeId, node2: NodeId, resistance: number) {
+  constructor(id: string, node1: NodeId, node2: NodeId, resistance: number);
+  constructor(
+    dataOrId: Resistor | string,
+    node1?: NodeId,
+    node2?: NodeId,
+    resistance?: number
+  ) {
+    if (typeof dataOrId === 'object') {
+      // New API: data object
+      this.initFromData(dataOrId);
+    } else {
+      // Old API: individual parameters (deprecated)
+      // eslint-disable-next-line no-console
+      console.warn(
+        'ResistorImpl: Constructor with individual parameters is deprecated. Use data object instead.'
+      );
+      this.initFromParams(dataOrId, node1!, node2!, resistance!);
+    }
+  }
+
+  /**
+   * Initialize from data object (new API)
+   */
+  private initFromData(data: Resistor): void {
     // Validate component ID
-    if (!id || id.trim() === '') {
+    if (!data.id || data.id.trim().length === 0) {
       throw new WebSpiceError(
         'INVALID_COMPONENT',
         'Component ID cannot be empty',
-        { componentId: id }
+        { componentId: data.id }
       );
     }
 
-    // Validate node IDs
-    if (!node1 || node1.trim().length === 0) {
+    // Validate terminals
+    if (!data.terminals || data.terminals.length !== 2) {
+      throw new WebSpiceError(
+        'INVALID_COMPONENT',
+        'Resistor must have exactly 2 terminals',
+        { componentId: data.id }
+      );
+    }
+
+    const [term1, term2] = data.terminals;
+
+    if (!term1.nodeId || term1.nodeId.trim().length === 0) {
       throw new WebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty', {
-        componentId: id,
+        componentId: data.id,
       });
     }
 
-    if (!node2 || node2.trim().length === 0) {
+    if (!term2.nodeId || term2.nodeId.trim().length === 0) {
       throw new WebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty', {
-        componentId: id,
+        componentId: data.id,
       });
     }
 
-    if (node1.trim() === node2.trim()) {
+    if (term1.nodeId.trim() === term2.nodeId.trim()) {
       throw new WebSpiceError(
         'INVALID_COMPONENT',
         'Terminals cannot be connected to the same node',
-        { componentId: id }
+        { componentId: data.id }
       );
     }
 
@@ -69,40 +125,63 @@ export class ResistorImpl implements Resistor {
     // NOTE: Resistance must be positive due to physical constraints.
     // Unlike voltage/current sources which can have negative values (reversed polarity),
     // resistance is a physical property that cannot be negative or zero.
-    if (!Number.isFinite(resistance)) {
+    if (!Number.isFinite(data.resistance)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
         'Resistance must be a valid number',
-        { componentId: id }
+        { componentId: data.id }
       );
     }
 
-    if (resistance <= 0) {
+    if (data.resistance <= 0) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
         'Resistance must be greater than 0',
-        { componentId: id }
+        { componentId: data.id }
       );
     }
 
     if (
-      resistance < ResistorImpl.MIN_RESISTANCE ||
-      resistance > ResistorImpl.MAX_RESISTANCE
+      data.resistance < ResistorImpl.MIN_RESISTANCE ||
+      data.resistance > ResistorImpl.MAX_RESISTANCE
     ) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
         `Resistance must be between 1e-3 and 1e12 Ohms`,
-        { componentId: id }
+        { componentId: data.id }
       );
     }
 
-    this._id = id.trim();
-    this._name = id.trim();
-    this._resistance = resistance;
+    // Initialize
+    this._id = data.id.trim();
+    this._name = data.name || data.id.trim();
+    this._resistance = data.resistance;
     this._terminals = [
-      { name: 'terminal1', nodeId: node1.trim() },
-      { name: 'terminal2', nodeId: node2.trim() },
+      { ...term1, nodeId: term1.nodeId.trim() },
+      { ...term2, nodeId: term2.nodeId.trim() },
     ];
+  }
+
+  /**
+   * Initialize from individual parameters (deprecated, old API)
+   */
+  private initFromParams(
+    id: string,
+    node1: NodeId,
+    node2: NodeId,
+    resistance: number
+  ): void {
+    // Convert to data object and use initFromData
+    this.initFromData({
+      id,
+      type: 'resistor',
+      name: id,
+      resistance,
+      terminals: [
+        { name: 'terminal1', nodeId: node1 },
+        { name: 'terminal2', nodeId: node2 },
+      ],
+    });
   }
 
   /**

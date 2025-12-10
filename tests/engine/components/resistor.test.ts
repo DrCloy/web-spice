@@ -4,7 +4,204 @@ import type { Resistor } from '@/types/component';
 import { WebSpiceError } from '@/types/circuit';
 
 describe('Resistor', () => {
-  describe('constructor', () => {
+  describe('constructor (new API: data object)', () => {
+    it('should create a resistor with valid data object', () => {
+      const data: Resistor = {
+        id: 'R1',
+        type: 'resistor',
+        name: 'R1',
+        resistance: 1000,
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
+      const resistor = new ResistorImpl(data);
+
+      expect(resistor.id).toBe('R1');
+      expect(resistor.type).toBe('resistor');
+      expect(resistor.name).toBe('R1');
+      expect(resistor.resistance).toBe(1000);
+      expect(resistor.terminals).toHaveLength(2);
+      expect(resistor.terminals[0]).toEqual({
+        name: 'terminal1',
+        nodeId: 'n1',
+      });
+      expect(resistor.terminals[1]).toEqual({
+        name: 'terminal2',
+        nodeId: 'n2',
+      });
+    });
+
+    it('should use id as name when name is not provided', () => {
+      const data: Resistor = {
+        id: 'R1',
+        type: 'resistor',
+        name: '',
+        resistance: 1000,
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
+      const resistor = new ResistorImpl(data);
+
+      expect(resistor.name).toBe('R1');
+    });
+
+    it('should throw error for zero resistance', () => {
+      const data: Resistor = {
+        id: 'R1',
+        type: 'resistor',
+        name: 'R1',
+        resistance: 0,
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
+      expect(() => new ResistorImpl(data)).toThrow(
+        'Resistance must be greater than 0'
+      );
+    });
+
+    it('should throw error for negative resistance', () => {
+      const data: Resistor = {
+        id: 'R1',
+        type: 'resistor',
+        name: 'R1',
+        resistance: -100,
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
+      expect(() => new ResistorImpl(data)).toThrow(
+        'Resistance must be greater than 0'
+      );
+    });
+
+    it('should throw error for invalid resistance (NaN)', () => {
+      const data: Resistor = {
+        id: 'R1',
+        type: 'resistor',
+        name: 'R1',
+        resistance: NaN,
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
+      expect(() => new ResistorImpl(data)).toThrow(
+        'Resistance must be a valid number'
+      );
+    });
+
+    it('should throw error for invalid resistance (Infinity)', () => {
+      const data: Resistor = {
+        id: 'R1',
+        type: 'resistor',
+        name: 'R1',
+        resistance: Infinity,
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
+      expect(() => new ResistorImpl(data)).toThrow(
+        'Resistance must be a valid number'
+      );
+    });
+
+    it('should throw error for empty component ID', () => {
+      const data: Resistor = {
+        id: '',
+        type: 'resistor',
+        name: 'R1',
+        resistance: 1000,
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
+      expect(() => new ResistorImpl(data)).toThrow(
+        'Component ID cannot be empty'
+      );
+    });
+
+    it('should throw error for empty node IDs', () => {
+      const data1: Resistor = {
+        id: 'R1',
+        type: 'resistor',
+        name: 'R1',
+        resistance: 1000,
+        terminals: [
+          { name: 'terminal1', nodeId: '' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
+      expect(() => new ResistorImpl(data1)).toThrow(WebSpiceError);
+
+      const data2: Resistor = {
+        id: 'R1',
+        type: 'resistor',
+        name: 'R1',
+        resistance: 1000,
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: '' },
+        ],
+      };
+      expect(() => new ResistorImpl(data2)).toThrow(WebSpiceError);
+    });
+
+    it('should throw error for identical node IDs', () => {
+      const data: Resistor = {
+        id: 'R1',
+        type: 'resistor',
+        name: 'R1',
+        resistance: 1000,
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n1' },
+        ],
+      };
+      expect(() => new ResistorImpl(data)).toThrow(
+        'Terminals cannot be connected to the same node'
+      );
+    });
+
+    it('should throw error for node IDs that are identical after trimming', () => {
+      const data: Resistor = {
+        id: 'R1',
+        type: 'resistor',
+        name: 'R1',
+        resistance: 1000,
+        terminals: [
+          { name: 'terminal1', nodeId: ' n1 ' },
+          { name: 'terminal2', nodeId: 'n1' },
+        ],
+      };
+      expect(() => new ResistorImpl(data)).toThrow(
+        'Terminals cannot be connected to the same node'
+      );
+    });
+
+    it('should throw error for invalid terminals (not exactly 2)', () => {
+      const data: any = {
+        id: 'R1',
+        type: 'resistor',
+        name: 'R1',
+        resistance: 1000,
+        terminals: [{ name: 'terminal1', nodeId: 'n1' }], // only 1 terminal
+      };
+      expect(() => new ResistorImpl(data)).toThrow(
+        'Resistor must have exactly 2 terminals'
+      );
+    });
+  });
+
+  describe('constructor (old API: individual parameters - deprecated)', () => {
     it('should create a resistor with valid parameters', () => {
       const resistor = new ResistorImpl('R1', 'n1', 'n2', 1000);
 

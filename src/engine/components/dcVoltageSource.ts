@@ -20,50 +20,107 @@ import { WebSpiceError } from '@/types/circuit';
  * ```
  */
 export class DCVoltageSourceImpl implements DCVoltageSource {
-  private readonly _id: string;
-  private readonly _type = 'voltage_source' as const;
-  private readonly _sourceType = 'dc' as const;
-  private readonly _name: string;
-  private readonly _voltage: number;
-  private readonly _terminals: readonly [Terminal, Terminal];
+  private _id!: string;
+  private _type = 'voltage_source' as const;
+  private _sourceType = 'dc' as const;
+  private _name!: string;
+  private _voltage!: number;
+  private _terminals!: readonly [Terminal, Terminal];
 
   /**
    * Creates a new DC voltage source
    *
+   * @param data - DC voltage source data object
+   * @throws {WebSpiceError} If parameters are invalid
+   *
+   * @example
+   * ```typescript
+   * // New API: data object
+   * const battery = new DCVoltageSourceImpl({
+   *   id: 'V1',
+   *   type: 'voltage_source',
+   *   sourceType: 'dc',
+   *   name: 'V1',
+   *   voltage: 12,
+   *   terminals: [
+   *     { name: 'pos', nodeId: 'vcc' },
+   *     { name: 'neg', nodeId: 'gnd' }
+   *   ]
+   * });
+   * ```
+   */
+  constructor(data: DCVoltageSource);
+  /**
+   * Creates a new DC voltage source (deprecated)
+   *
+   * @deprecated Use constructor with data object instead
    * @param id - Unique component identifier
    * @param nodePos - Positive terminal node ID
    * @param nodeNeg - Negative terminal node ID
    * @param voltage - Voltage in Volts (can be negative for reversed polarity)
    * @throws {WebSpiceError} If parameters are invalid
    */
-  constructor(id: string, nodePos: NodeId, nodeNeg: NodeId, voltage: number) {
+  constructor(id: string, nodePos: NodeId, nodeNeg: NodeId, voltage: number);
+  constructor(
+    dataOrId: DCVoltageSource | string,
+    nodePos?: NodeId,
+    nodeNeg?: NodeId,
+    voltage?: number
+  ) {
+    if (typeof dataOrId === 'object') {
+      // New API: data object
+      this.initFromData(dataOrId);
+    } else {
+      // Old API: individual parameters (deprecated)
+      // eslint-disable-next-line no-console
+      console.warn(
+        'DCVoltageSourceImpl: Constructor with individual parameters is deprecated. Use data object instead.'
+      );
+      this.initFromParams(dataOrId, nodePos!, nodeNeg!, voltage!);
+    }
+  }
+
+  /**
+   * Initialize from data object (new API)
+   */
+  private initFromData(data: DCVoltageSource): void {
     // Validate component ID
-    if (!id || id.trim().length === 0) {
+    if (!data.id || data.id.trim().length === 0) {
       throw new WebSpiceError(
         'INVALID_COMPONENT',
         'Component ID cannot be empty',
-        { componentId: id }
+        { componentId: data.id }
       );
     }
 
-    // Validate node IDs
-    if (!nodePos || nodePos.trim().length === 0) {
+    // Validate terminals
+    if (!data.terminals || data.terminals.length !== 2) {
+      throw new WebSpiceError(
+        'INVALID_COMPONENT',
+        'DC voltage source must have exactly 2 terminals',
+        { componentId: data.id }
+      );
+    }
+
+    const [termPos, termNeg] = data.terminals;
+
+    if (!termPos.nodeId || termPos.nodeId.trim().length === 0) {
       throw new WebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty', {
-        componentId: id,
+        componentId: data.id,
       });
     }
 
-    if (!nodeNeg || nodeNeg.trim().length === 0) {
+    if (!termNeg.nodeId || termNeg.nodeId.trim().length === 0) {
       throw new WebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty', {
-        componentId: id,
+        componentId: data.id,
       });
     }
 
-    if (nodePos.trim() === nodeNeg.trim()) {
+    if (termPos.nodeId.trim() === termNeg.nodeId.trim()) {
       throw new WebSpiceError(
         'INVALID_COMPONENT',
         'Terminals cannot be connected to the same node',
-        { componentId: id }
+        { componentId: data.id }
       );
     }
 
@@ -71,21 +128,45 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
     // NOTE: Voltage can be negative (reversed polarity) or zero (inactive source).
     // This is intentionally different from resistors which must have positive resistance.
     // Only validates that the value is a finite number.
-    if (!Number.isFinite(voltage)) {
+    if (!Number.isFinite(data.voltage)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
         'Voltage must be a valid number',
-        { componentId: id }
+        { componentId: data.id }
       );
     }
 
-    this._id = id.trim();
-    this._name = id.trim();
-    this._voltage = voltage;
+    // Initialize
+    this._id = data.id.trim();
+    this._name = data.name || data.id.trim();
+    this._voltage = data.voltage;
     this._terminals = [
-      { name: 'pos', nodeId: nodePos.trim() },
-      { name: 'neg', nodeId: nodeNeg.trim() },
+      { ...termPos, nodeId: termPos.nodeId.trim() },
+      { ...termNeg, nodeId: termNeg.nodeId.trim() },
     ];
+  }
+
+  /**
+   * Initialize from individual parameters (deprecated, old API)
+   */
+  private initFromParams(
+    id: string,
+    nodePos: NodeId,
+    nodeNeg: NodeId,
+    voltage: number
+  ): void {
+    // Convert to data object and use initFromData
+    this.initFromData({
+      id,
+      type: 'voltage_source',
+      sourceType: 'dc',
+      name: id,
+      voltage,
+      terminals: [
+        { name: 'pos', nodeId: nodePos },
+        { name: 'neg', nodeId: nodeNeg },
+      ],
+    });
   }
 
   get id(): string {
