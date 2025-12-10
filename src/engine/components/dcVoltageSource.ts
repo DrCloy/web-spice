@@ -1,4 +1,4 @@
-import type { DCVoltageSource, NodeId, Terminal } from '@/types/component';
+import type { DCVoltageSource, Terminal } from '@/types/component';
 import { WebSpiceError } from '@/types/circuit';
 
 /**
@@ -35,7 +35,6 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
    *
    * @example
    * ```typescript
-   * // New API: data object
    * const battery = new DCVoltageSourceImpl({
    *   id: 'V1',
    *   type: 'voltage_source',
@@ -49,39 +48,12 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
    * });
    * ```
    */
-  constructor(data: DCVoltageSource);
-  /**
-   * Creates a new DC voltage source (deprecated)
-   *
-   * @deprecated Use constructor with data object instead
-   * @param id - Unique component identifier
-   * @param nodePos - Positive terminal node ID
-   * @param nodeNeg - Negative terminal node ID
-   * @param voltage - Voltage in Volts (can be negative for reversed polarity)
-   * @throws {WebSpiceError} If parameters are invalid
-   */
-  constructor(id: string, nodePos: NodeId, nodeNeg: NodeId, voltage: number);
-  constructor(
-    dataOrId: DCVoltageSource | string,
-    nodePos?: NodeId,
-    nodeNeg?: NodeId,
-    voltage?: number
-  ) {
-    if (typeof dataOrId === 'object') {
-      // New API: data object
-      this.initFromData(dataOrId);
-    } else {
-      // Old API: individual parameters (deprecated)
-      // eslint-disable-next-line no-console
-      console.warn(
-        'DCVoltageSourceImpl: Constructor with individual parameters is deprecated. Use data object instead.'
-      );
-      this.initFromParams(dataOrId, nodePos!, nodeNeg!, voltage!);
-    }
+  constructor(data: DCVoltageSource) {
+    this.initFromData(data);
   }
 
   /**
-   * Initialize from data object (new API)
+   * Initialize from data object
    */
   private initFromData(data: DCVoltageSource): void {
     // Validate component ID
@@ -144,29 +116,6 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
       { ...termPos, nodeId: termPos.nodeId.trim() },
       { ...termNeg, nodeId: termNeg.nodeId.trim() },
     ];
-  }
-
-  /**
-   * Initialize from individual parameters (deprecated, old API)
-   */
-  private initFromParams(
-    id: string,
-    nodePos: NodeId,
-    nodeNeg: NodeId,
-    voltage: number
-  ): void {
-    // Convert to data object and use initFromData
-    this.initFromData({
-      id,
-      type: 'voltage_source',
-      sourceType: 'dc',
-      name: id,
-      voltage,
-      terminals: [
-        { name: 'pos', nodeId: nodePos },
-        { name: 'neg', nodeId: nodeNeg },
-      ],
-    });
   }
 
   get id(): string {

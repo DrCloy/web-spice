@@ -1,4 +1,4 @@
-import type { DCCurrentSource, NodeId, Terminal } from '@/types/component';
+import type { DCCurrentSource, Terminal } from '@/types/component';
 import { WebSpiceError } from '@/types/circuit';
 
 /**
@@ -35,7 +35,6 @@ export class DCCurrentSourceImpl implements DCCurrentSource {
    *
    * @example
    * ```typescript
-   * // New API: data object
    * const currentSource = new DCCurrentSourceImpl({
    *   id: 'I1',
    *   type: 'current_source',
@@ -49,39 +48,12 @@ export class DCCurrentSourceImpl implements DCCurrentSource {
    * });
    * ```
    */
-  constructor(data: DCCurrentSource);
-  /**
-   * Creates a new DC current source (deprecated)
-   *
-   * @deprecated Use constructor with data object instead
-   * @param id - Unique component identifier
-   * @param nodePos - Positive terminal node ID
-   * @param nodeNeg - Negative terminal node ID
-   * @param current - Current in Amperes (can be negative for reversed polarity)
-   * @throws {WebSpiceError} If parameters are invalid
-   */
-  constructor(id: string, nodePos: NodeId, nodeNeg: NodeId, current: number);
-  constructor(
-    dataOrId: DCCurrentSource | string,
-    nodePos?: NodeId,
-    nodeNeg?: NodeId,
-    current?: number
-  ) {
-    if (typeof dataOrId === 'object') {
-      // New API: data object
-      this.initFromData(dataOrId);
-    } else {
-      // Old API: individual parameters (deprecated)
-      // eslint-disable-next-line no-console
-      console.warn(
-        'DCCurrentSourceImpl: Constructor with individual parameters is deprecated. Use data object instead.'
-      );
-      this.initFromParams(dataOrId, nodePos!, nodeNeg!, current!);
-    }
+  constructor(data: DCCurrentSource) {
+    this.initFromData(data);
   }
 
   /**
-   * Initialize from data object (new API)
+   * Initialize from data object
    */
   private initFromData(data: DCCurrentSource): void {
     // Validate component ID
@@ -144,29 +116,6 @@ export class DCCurrentSourceImpl implements DCCurrentSource {
       { ...termPos, nodeId: termPos.nodeId.trim() },
       { ...termNeg, nodeId: termNeg.nodeId.trim() },
     ];
-  }
-
-  /**
-   * Initialize from individual parameters (deprecated, old API)
-   */
-  private initFromParams(
-    id: string,
-    nodePos: NodeId,
-    nodeNeg: NodeId,
-    current: number
-  ): void {
-    // Convert to data object and use initFromData
-    this.initFromData({
-      id,
-      type: 'current_source',
-      sourceType: 'dc',
-      name: id,
-      current,
-      terminals: [
-        { name: 'pos', nodeId: nodePos },
-        { name: 'neg', nodeId: nodeNeg },
-      ],
-    });
   }
 
   get id(): string {

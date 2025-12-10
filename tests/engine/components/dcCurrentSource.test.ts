@@ -141,69 +141,6 @@ describe('DCCurrentSourceImpl', () => {
     });
   });
 
-  describe('constructor (old API: individual parameters - deprecated)', () => {
-    it('should create a DC current source with valid parameters', () => {
-      const source = new DCCurrentSourceImpl('I1', 'n1', 'n2', 12);
-
-      expect(source.id).toBe('I1');
-      expect(source.type).toBe('current_source');
-      expect(source.sourceType).toBe('dc');
-      expect(source.name).toBe('I1');
-      expect(source.current).toBe(12);
-      expect(source.terminals).toHaveLength(2);
-      expect(source.terminals[0]).toEqual({
-        name: 'pos',
-        nodeId: 'n1',
-      });
-      expect(source.terminals[1]).toEqual({
-        name: 'neg',
-        nodeId: 'n2',
-      });
-    });
-
-    it('should throw error for empty component ID', () => {
-      expect(() => new DCCurrentSourceImpl('', 'n1', 'n2', 12)).toThrow(
-        'Component ID cannot be empty'
-      );
-    });
-
-    it('should throw error for empty positive node ID', () => {
-      expect(() => new DCCurrentSourceImpl('I1', '', 'n2', 12)).toThrow(
-        WebSpiceError
-      );
-    });
-
-    it('should throw error for empty negative node ID', () => {
-      expect(() => new DCCurrentSourceImpl('I1', 'n1', '', 12)).toThrow(
-        WebSpiceError
-      );
-    });
-
-    it('should throw error for identical node IDs', () => {
-      expect(() => new DCCurrentSourceImpl('I1', 'n1', 'n1', 12)).toThrow(
-        'Terminals cannot be connected to the same node'
-      );
-    });
-
-    it('should throw error for node IDs that are identical after trimming', () => {
-      expect(() => new DCCurrentSourceImpl('I1', ' n1 ', 'n1', 12)).toThrow(
-        'Terminals cannot be connected to the same node'
-      );
-    });
-
-    it('should throw error for invalid current (NaN)', () => {
-      expect(() => new DCCurrentSourceImpl('I1', 'n1', 'n2', NaN)).toThrow(
-        'Current must be a valid number'
-      );
-    });
-
-    it('should throw error for invalid current (Infinity)', () => {
-      expect(() => new DCCurrentSourceImpl('I1', 'n1', 'n2', Infinity)).toThrow(
-        'Current must be a valid number'
-      );
-    });
-  });
-
   describe('current values', () => {
     it('should accept positive current', () => {
       const source = new DCCurrentSourceImpl(makeDCCurrentSourceData());

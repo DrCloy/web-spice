@@ -1,4 +1,4 @@
-import type { NodeId, Resistor, Terminal } from '@/types/component';
+import type { Resistor, Terminal } from '@/types/component';
 import { WebSpiceError } from '@/types/circuit';
 
 /**
@@ -33,7 +33,6 @@ export class ResistorImpl implements Resistor {
    *
    * @example
    * ```typescript
-   * // New API: data object
    * const resistor = new ResistorImpl({
    *   id: 'R1',
    *   type: 'resistor',
@@ -46,39 +45,12 @@ export class ResistorImpl implements Resistor {
    * });
    * ```
    */
-  constructor(data: Resistor);
-  /**
-   * Creates a new Resistor instance (deprecated)
-   *
-   * @deprecated Use constructor with data object instead
-   * @param id - Unique component identifier
-   * @param node1 - First terminal node ID
-   * @param node2 - Second terminal node ID
-   * @param resistance - Resistance value in Ohms (must be between 1mΩ and 1TΩ)
-   * @throws {WebSpiceError} If parameters are invalid
-   */
-  constructor(id: string, node1: NodeId, node2: NodeId, resistance: number);
-  constructor(
-    dataOrId: Resistor | string,
-    node1?: NodeId,
-    node2?: NodeId,
-    resistance?: number
-  ) {
-    if (typeof dataOrId === 'object') {
-      // New API: data object
-      this.initFromData(dataOrId);
-    } else {
-      // Old API: individual parameters (deprecated)
-      // eslint-disable-next-line no-console
-      console.warn(
-        'ResistorImpl: Constructor with individual parameters is deprecated. Use data object instead.'
-      );
-      this.initFromParams(dataOrId, node1!, node2!, resistance!);
-    }
+  constructor(data: Resistor) {
+    this.initFromData(data);
   }
 
   /**
-   * Initialize from data object (new API)
+   * Initialize from data object
    */
   private initFromData(data: Resistor): void {
     // Validate component ID
@@ -160,28 +132,6 @@ export class ResistorImpl implements Resistor {
       { ...term1, nodeId: term1.nodeId.trim() },
       { ...term2, nodeId: term2.nodeId.trim() },
     ];
-  }
-
-  /**
-   * Initialize from individual parameters (deprecated, old API)
-   */
-  private initFromParams(
-    id: string,
-    node1: NodeId,
-    node2: NodeId,
-    resistance: number
-  ): void {
-    // Convert to data object and use initFromData
-    this.initFromData({
-      id,
-      type: 'resistor',
-      name: id,
-      resistance,
-      terminals: [
-        { name: 'terminal1', nodeId: node1 },
-        { name: 'terminal2', nodeId: node2 },
-      ],
-    });
   }
 
   /**

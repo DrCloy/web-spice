@@ -141,69 +141,6 @@ describe('DCVoltageSourceImpl', () => {
     });
   });
 
-  describe('constructor (old API: individual parameters - deprecated)', () => {
-    it('should create a DC voltage source with valid parameters', () => {
-      const source = new DCVoltageSourceImpl('V1', 'n1', 'n2', 12);
-
-      expect(source.id).toBe('V1');
-      expect(source.type).toBe('voltage_source');
-      expect(source.sourceType).toBe('dc');
-      expect(source.name).toBe('V1');
-      expect(source.voltage).toBe(12);
-      expect(source.terminals).toHaveLength(2);
-      expect(source.terminals[0]).toEqual({
-        name: 'pos',
-        nodeId: 'n1',
-      });
-      expect(source.terminals[1]).toEqual({
-        name: 'neg',
-        nodeId: 'n2',
-      });
-    });
-
-    it('should throw error for empty component ID', () => {
-      expect(() => new DCVoltageSourceImpl('', 'n1', 'n2', 12)).toThrow(
-        'Component ID cannot be empty'
-      );
-    });
-
-    it('should throw error for empty positive node ID', () => {
-      expect(() => new DCVoltageSourceImpl('V1', '', 'n2', 12)).toThrow(
-        WebSpiceError
-      );
-    });
-
-    it('should throw error for empty negative node ID', () => {
-      expect(() => new DCVoltageSourceImpl('V1', 'n1', '', 12)).toThrow(
-        WebSpiceError
-      );
-    });
-
-    it('should throw error for identical node IDs', () => {
-      expect(() => new DCVoltageSourceImpl('V1', 'n1', 'n1', 12)).toThrow(
-        'Terminals cannot be connected to the same node'
-      );
-    });
-
-    it('should throw error for node IDs that are identical after trimming', () => {
-      expect(() => new DCVoltageSourceImpl('V1', ' n1 ', 'n1', 12)).toThrow(
-        'Terminals cannot be connected to the same node'
-      );
-    });
-
-    it('should throw error for invalid voltage (NaN)', () => {
-      expect(() => new DCVoltageSourceImpl('V1', 'n1', 'n2', NaN)).toThrow(
-        'Voltage must be a valid number'
-      );
-    });
-
-    it('should throw error for invalid voltage (Infinity)', () => {
-      expect(() => new DCVoltageSourceImpl('V1', 'n1', 'n2', Infinity)).toThrow(
-        'Voltage must be a valid number'
-      );
-    });
-  });
-
   describe('voltage values', () => {
     it('should accept positive voltage', () => {
       const source = new DCVoltageSourceImpl(makeDCVoltageSourceData());
