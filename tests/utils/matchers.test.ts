@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { createTestResistor } from '../factories/components';
+import type { Resistor } from '@/types/component';
 import { createIdentityMatrix, createTestMatrix } from '../factories/matrix';
 import { NUMERICAL_TOLERANCE } from '../setup';
 
@@ -139,20 +139,32 @@ describe('Custom Matchers', () => {
 
   describe('toSatisfyOhmsLaw', () => {
     it('should pass when Ohms Law is satisfied', () => {
-      const resistor = createTestResistor({
+      const resistor: Resistor = {
         id: 'R1',
+        type: 'resistor',
+        name: 'R1',
         resistance: 1000,
-      });
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
 
       // V = I * R: 10V = 0.01A * 1000Ω
       expect(resistor).toSatisfyOhmsLaw(10, 0.01);
     });
 
     it('should fail when Ohms Law is violated', () => {
-      const resistor = createTestResistor({
+      const resistor: Resistor = {
         id: 'R1',
+        type: 'resistor',
+        name: 'R1',
         resistance: 1000,
-      });
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
 
       // Wrong: 10V ≠ 0.02A * 1000Ω = 20V
       expect(() => {
@@ -161,30 +173,48 @@ describe('Custom Matchers', () => {
     });
 
     it('should work with custom tolerance', () => {
-      const resistor = createTestResistor({
+      const resistor: Resistor = {
         id: 'R1',
+        type: 'resistor',
+        name: 'R1',
         resistance: 1000,
-      });
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
 
       // Slightly off but within tolerance
       expect(resistor).toSatisfyOhmsLaw(10, 0.0101, 0.01);
     });
 
     it('should handle small currents', () => {
-      const resistor = createTestResistor({
+      const resistor: Resistor = {
         id: 'R1',
+        type: 'resistor',
+        name: 'R1',
         resistance: 1000000, // 1MΩ
-      });
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
 
       // V = I * R: 1V = 0.000001A * 1000000Ω
       expect(resistor).toSatisfyOhmsLaw(1, 0.000001);
     });
 
     it('should handle large resistances', () => {
-      const resistor = createTestResistor({
+      const resistor: Resistor = {
         id: 'R1',
+        type: 'resistor',
+        name: 'R1',
         resistance: 10000000, // 10MΩ
-      });
+        terminals: [
+          { name: 'terminal1', nodeId: 'n1' },
+          { name: 'terminal2', nodeId: 'n2' },
+        ],
+      };
 
       // V = I * R: 100V = 0.00001A * 10000000Ω
       expect(resistor).toSatisfyOhmsLaw(100, 0.00001);

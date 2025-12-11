@@ -1,15 +1,18 @@
 /**
  * Circuit fixtures with known solutions for testing
  * These fixtures provide test cases with analytically verified results
+ * Also includes circuit pattern functions (voltage divider, series, parallel, etc.)
  */
 
 import type { Circuit } from '@/types/circuit';
+import type { Component, NodeId } from '@/types/component';
 import type { DCOperatingPoint } from '@/types/simulation';
+import { createTestCircuit } from '../factories/circuits';
 import {
-  createParallelResistors,
-  createSeriesResistors,
-  createVoltageDivider,
-} from '../factories/circuits';
+  createDCVoltageSource,
+  createGround,
+  createResistor,
+} from '../factories/components';
 
 /**
  * Circuit fixture with expected results
@@ -18,6 +21,183 @@ export interface CircuitFixture {
   circuit: Circuit;
   expectedResults: DCOperatingPoint;
   description: string;
+}
+
+/**
+ * Creates a simple voltage divider circuit
+ *
+ * Circuit:
+ *   V1(+) -- R1 -- Node1 -- R2 -- GND
+ *
+ * @example
+ * const circuit = createVoltageDivider({
+ *   inputVoltage: 12,
+ *   r1: 1000,
+ *   r2: 2000
+ * });
+ */
+export function createVoltageDivider(params?: {
+  inputVoltage?: number;
+  r1?: number;
+  r2?: number;
+}): Circuit {
+  const { inputVoltage = 12, r1 = 1000, r2 = 2000 } = params || {};
+
+  const v1 = createDCVoltageSource({
+    id: 'V1',
+    name: 'Input Voltage',
+    voltage: inputVoltage,
+    nodes: ['1', '0'],
+  });
+
+  const resistor1 = createResistor({
+    id: 'R1',
+    name: 'R1',
+    resistance: r1,
+    nodes: ['1', '2'],
+  });
+
+  const resistor2 = createResistor({
+    id: 'R2',
+    name: 'R2',
+    resistance: r2,
+    nodes: ['2', '0'],
+  });
+
+  const ground = createGround({
+    id: 'GND',
+    nodeId: '0',
+  });
+
+  return createTestCircuit({
+    id: 'voltage-divider',
+    name: 'Voltage Divider',
+    description: `Voltage divider with V=${inputVoltage}V, R1=${r1}Ω, R2=${r2}Ω`,
+    components: [v1, resistor1, resistor2, ground],
+    groundNodeId: '0',
+  });
+}
+
+/**
+ * Creates a simple series resistor circuit
+ *
+ * Circuit:
+ *   V1(+) -- R1 -- R2 -- R3 -- GND
+ *
+ * @example
+ * const circuit = createSeriesResistors({
+ *   voltage: 12,
+ *   resistances: [100, 200, 300]
+ * });
+ */
+export function createSeriesResistors(params?: {
+  voltage?: number;
+  resistances?: number[];
+}): Circuit {
+  const { voltage = 12, resistances = [100, 200, 300] } = params || {};
+
+  const components: Component[] = [];
+
+  // Create voltage source
+  components.push(
+    createDCVoltageSource({
+      id: 'V1',
+      name: 'Input Voltage',
+      voltage,
+      nodes: ['1', '0'],
+    })
+  );
+
+  // Create series resistors
+  resistances.forEach((resistance, index) => {
+    const nodeA = (index + 1).toString();
+    const nodeB = (index + 2).toString();
+    components.push(
+      createResistor({
+        id: `R${index + 1}`,
+        name: `R${index + 1}`,
+        resistance,
+        nodes: [nodeA, nodeB] as [NodeId, NodeId],
+      })
+    );
+  });
+
+  // Create ground
+  components.push(
+    createGround({
+      id: 'GND',
+      nodeId: '0',
+    })
+  );
+
+  return createTestCircuit({
+    id: 'series-resistors',
+    name: 'Series Resistors',
+    description: `Series resistors with V=${voltage}V, R=[${resistances.join(', ')}]Ω`,
+    components,
+    groundNodeId: '0',
+  });
+}
+
+/**
+ * Creates a parallel resistor circuit
+ *
+ * Circuit:
+ *        +-- R1 --+
+ *   V1 -+-- R2 --+-- GND
+ *        +-- R3 --+
+ *
+ * @example
+ * const circuit = createParallelResistors({
+ *   voltage: 12,
+ *   resistances: [100, 200, 300]
+ * });
+ */
+export function createParallelResistors(params?: {
+  voltage?: number;
+  resistances?: number[];
+}): Circuit {
+  const { voltage = 12, resistances = [100, 200, 300] } = params || {};
+
+  const components: Component[] = [];
+
+  // Create voltage source
+  components.push(
+    createDCVoltageSource({
+      id: 'V1',
+      name: 'Input Voltage',
+      voltage,
+      nodes: ['1', '0'],
+    })
+  );
+
+  // Create parallel resistors (all connected between node 1 and ground)
+  resistances.forEach((resistance, index) => {
+    components.push(
+      createResistor({
+        id: `R${index + 1}`,
+        name: `R${index + 1}`,
+        resistance,
+        nodes: ['1', '0'],
+      })
+    );
+  });
+
+  // Create ground
+  components.push(
+    createGround({
+      id: 'GND',
+      nodeId: '0',
+    })
+  );
+
+  return createTestCircuit({
+    id: 'parallel-resistors',
+    name: 'Parallel Resistors',
+    description: `Parallel resistors with V=${voltage}V, R=[${resistances.join(', ')}]Ω`,
+    components,
+    groundNodeId: '0',
+  });
 }
 
 /**
