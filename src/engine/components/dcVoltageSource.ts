@@ -20,12 +20,12 @@ import { WebSpiceError } from '@/types/circuit';
  * ```
  */
 export class DCVoltageSourceImpl implements DCVoltageSource {
-  private _id!: string;
-  private _type = 'voltage_source' as const;
-  private _sourceType = 'dc' as const;
-  private _name!: string;
-  private _voltage!: number;
-  private _terminals!: readonly [Terminal, Terminal];
+  private readonly _id!: string;
+  private readonly _type = 'voltage_source' as const;
+  private readonly _sourceType = 'dc' as const;
+  private readonly _name!: string;
+  private readonly _voltage!: number;
+  private readonly _terminals!: readonly [Terminal, Terminal];
 
   /**
    * Creates a new DC voltage source
@@ -49,13 +49,6 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
    * ```
    */
   constructor(data: DCVoltageSource) {
-    this.initFromData(data);
-  }
-
-  /**
-   * Initialize from data object
-   */
-  private initFromData(data: DCVoltageSource): void {
     // Validate component ID
     if (!data.id || data.id.trim().length === 0) {
       throw new WebSpiceError(
@@ -108,7 +101,7 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
       );
     }
 
-    // Initialize
+    // Initialize readonly fields
     this._id = data.id.trim();
     this._name = data.name || data.id.trim();
     this._voltage = data.voltage;

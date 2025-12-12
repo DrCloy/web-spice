@@ -19,11 +19,11 @@ export class ResistorImpl implements Resistor {
   private static readonly MIN_RESISTANCE = 1e-3;
   /** Maximum allowed resistance: 1 TΩ (tera-ohm) */
   private static readonly MAX_RESISTANCE = 1e12;
-  private _id!: string;
-  private _type = 'resistor' as const;
-  private _name!: string;
-  private _resistance!: number;
-  private _terminals!: readonly [Terminal, Terminal];
+  private readonly _id!: string;
+  private readonly _type = 'resistor' as const;
+  private readonly _name!: string;
+  private readonly _resistance!: number;
+  private readonly _terminals!: readonly [Terminal, Terminal];
 
   /**
    * Creates a new Resistor instance
@@ -46,13 +46,6 @@ export class ResistorImpl implements Resistor {
    * ```
    */
   constructor(data: Resistor) {
-    this.initFromData(data);
-  }
-
-  /**
-   * Initialize from data object
-   */
-  private initFromData(data: Resistor): void {
     // Validate component ID
     if (!data.id || data.id.trim().length === 0) {
       throw new WebSpiceError(
@@ -124,7 +117,7 @@ export class ResistorImpl implements Resistor {
       );
     }
 
-    // Initialize
+    // Initialize readonly fields
     this._id = data.id.trim();
     this._name = data.name || data.id.trim();
     this._resistance = data.resistance;

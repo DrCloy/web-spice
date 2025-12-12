@@ -20,12 +20,12 @@ import { WebSpiceError } from '@/types/circuit';
  * ```
  */
 export class DCCurrentSourceImpl implements DCCurrentSource {
-  private _id!: string;
-  private _type = 'current_source' as const;
-  private _sourceType = 'dc' as const;
-  private _name!: string;
-  private _current!: number;
-  private _terminals!: readonly [Terminal, Terminal];
+  private readonly _id!: string;
+  private readonly _type = 'current_source' as const;
+  private readonly _sourceType = 'dc' as const;
+  private readonly _name!: string;
+  private readonly _current!: number;
+  private readonly _terminals!: readonly [Terminal, Terminal];
 
   /**
    * Creates a new DC current source
@@ -49,13 +49,6 @@ export class DCCurrentSourceImpl implements DCCurrentSource {
    * ```
    */
   constructor(data: DCCurrentSource) {
-    this.initFromData(data);
-  }
-
-  /**
-   * Initialize from data object
-   */
-  private initFromData(data: DCCurrentSource): void {
     // Validate component ID
     if (!data.id || data.id.trim().length === 0) {
       throw new WebSpiceError(
@@ -108,7 +101,7 @@ export class DCCurrentSourceImpl implements DCCurrentSource {
       );
     }
 
-    // Initialize
+    // Initialize readonly fields
     this._id = data.id.trim();
     this._name = data.name || data.id.trim();
     this._current = data.current;
