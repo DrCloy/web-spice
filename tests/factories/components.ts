@@ -1,13 +1,12 @@
 /**
  * Component factory functions for testing
- * These functions create test instances of circuit components with sensible defaults
+ * These functions create test instances of circuit components
  */
 
 import type {
   ACCurrentSource,
   ACVoltageSource,
   Capacitor,
-  ComponentId,
   DCCurrentSource,
   DCVoltageSource,
   Ground,
@@ -25,267 +24,208 @@ function createTerminal(name: string, nodeId: NodeId): Terminal {
 }
 
 /**
- * Creates a test resistor with specified or default parameters
+ * Creates ground component data
  *
  * @example
- * const r1 = createTestResistor({ id: 'R1', resistance: 1000, nodes: ['1', '2'] });
+ * const gnd = createGround({ id: 'GND', nodeId: '0' });
  */
-export function createTestResistor(params?: {
-  id?: ComponentId;
+export function createGround(params: {
+  id: string;
+  nodeId: string;
   name?: string;
-  resistance?: number;
-  nodes?: [NodeId, NodeId];
-}): Resistor {
-  const {
-    id = 'R1',
-    name = 'Test Resistor',
-    resistance = 1000,
-    nodes = ['1', '0'],
-  } = params || {};
-
-  return {
-    id,
-    type: 'resistor',
-    name,
-    resistance,
-    terminals: [
-      createTerminal('terminal1', nodes[0]),
-      createTerminal('terminal2', nodes[1]),
-    ],
-  };
-}
-
-/**
- * Creates a test capacitor with specified or default parameters
- *
- * @example
- * const c1 = createTestCapacitor({ id: 'C1', capacitance: 1e-6, nodes: ['1', '0'] });
- */
-export function createTestCapacitor(params?: {
-  id?: ComponentId;
-  name?: string;
-  capacitance?: number;
-  initialVoltage?: number;
-  nodes?: [NodeId, NodeId];
-}): Capacitor {
-  const {
-    id = 'C1',
-    name = 'Test Capacitor',
-    capacitance = 1e-6,
-    initialVoltage,
-    nodes = ['1', '0'],
-  } = params || {};
-
-  return {
-    id,
-    type: 'capacitor',
-    name,
-    capacitance,
-    initialVoltage,
-    terminals: [
-      createTerminal('pos', nodes[0]),
-      createTerminal('neg', nodes[1]),
-    ],
-  };
-}
-
-/**
- * Creates a test inductor with specified or default parameters
- *
- * @example
- * const l1 = createTestInductor({ id: 'L1', inductance: 1e-3, nodes: ['1', '0'] });
- */
-export function createTestInductor(params?: {
-  id?: ComponentId;
-  name?: string;
-  inductance?: number;
-  initialCurrent?: number;
-  nodes?: [NodeId, NodeId];
-}): Inductor {
-  const {
-    id = 'L1',
-    name = 'Test Inductor',
-    inductance = 1e-3,
-    initialCurrent,
-    nodes = ['1', '0'],
-  } = params || {};
-
-  return {
-    id,
-    type: 'inductor',
-    name,
-    inductance,
-    initialCurrent,
-    terminals: [
-      createTerminal('terminal1', nodes[0]),
-      createTerminal('terminal2', nodes[1]),
-    ],
-  };
-}
-
-/**
- * Creates a test DC voltage source with specified or default parameters
- *
- * @example
- * const v1 = createTestVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] });
- */
-export function createTestVoltageSource(params?: {
-  id?: ComponentId;
-  name?: string;
-  voltage?: number;
-  nodes?: [NodeId, NodeId];
-}): DCVoltageSource {
-  const {
-    id = 'V1',
-    name = 'Test Voltage Source',
-    voltage = 12,
-    nodes = ['1', '0'],
-  } = params || {};
-
-  return {
-    id,
-    type: 'voltage_source',
-    sourceType: 'dc',
-    name,
-    voltage,
-    terminals: [
-      createTerminal('pos', nodes[0]),
-      createTerminal('neg', nodes[1]),
-    ],
-  };
-}
-
-/**
- * Creates a test AC voltage source with specified or default parameters
- *
- * @example
- * const v1 = createTestACVoltageSource({ id: 'V1', amplitude: 10, frequency: 60 });
- */
-export function createTestACVoltageSource(params?: {
-  id?: ComponentId;
-  name?: string;
-  amplitude?: number;
-  frequency?: number;
-  phase?: number;
-  dcOffset?: number;
-  nodes?: [NodeId, NodeId];
-}): ACVoltageSource {
-  const {
-    id = 'V1',
-    name = 'Test AC Voltage Source',
-    amplitude = 10,
-    frequency = 60,
-    phase = 0,
-    dcOffset,
-    nodes = ['1', '0'],
-  } = params || {};
-
-  return {
-    id,
-    type: 'voltage_source',
-    sourceType: 'ac',
-    name,
-    amplitude,
-    frequency,
-    phase,
-    dcOffset,
-    terminals: [
-      createTerminal('pos', nodes[0]),
-      createTerminal('neg', nodes[1]),
-    ],
-  };
-}
-
-/**
- * Creates a test DC current source with specified or default parameters
- *
- * @example
- * const i1 = createTestCurrentSource({ id: 'I1', current: 0.001, nodes: ['1', '0'] });
- */
-export function createTestCurrentSource(params?: {
-  id?: ComponentId;
-  name?: string;
-  current?: number;
-  nodes?: [NodeId, NodeId];
-}): DCCurrentSource {
-  const {
-    id = 'I1',
-    name = 'Test Current Source',
-    current = 0.001,
-    nodes = ['1', '0'],
-  } = params || {};
-
-  return {
-    id,
-    type: 'current_source',
-    sourceType: 'dc',
-    name,
-    current,
-    terminals: [
-      createTerminal('pos', nodes[0]),
-      createTerminal('neg', nodes[1]),
-    ],
-  };
-}
-
-/**
- * Creates a test AC current source with specified or default parameters
- *
- * @example
- * const i1 = createTestACCurrentSource({ id: 'I1', amplitude: 0.001, frequency: 60 });
- */
-export function createTestACCurrentSource(params?: {
-  id?: ComponentId;
-  name?: string;
-  amplitude?: number;
-  frequency?: number;
-  phase?: number;
-  dcOffset?: number;
-  nodes?: [NodeId, NodeId];
-}): ACCurrentSource {
-  const {
-    id = 'I1',
-    name = 'Test AC Current Source',
-    amplitude = 0.001,
-    frequency = 60,
-    phase = 0,
-    dcOffset,
-    nodes = ['1', '0'],
-  } = params || {};
-
-  return {
-    id,
-    type: 'current_source',
-    sourceType: 'ac',
-    name,
-    amplitude,
-    frequency,
-    phase,
-    dcOffset,
-    terminals: [
-      createTerminal('pos', nodes[0]),
-      createTerminal('neg', nodes[1]),
-    ],
-  };
-}
-
-/**
- * Creates a test ground reference node
- *
- * @example
- * const gnd = createTestGround({ id: 'GND', nodeId: '0' });
- */
-export function createTestGround(params?: {
-  id?: ComponentId;
-  name?: string;
-  nodeId?: NodeId;
 }): Ground {
-  const { id = 'GND', name = 'Ground', nodeId = '0' } = params || {};
-
   return {
-    id,
+    id: params.id,
     type: 'ground',
-    name,
-    nodeId,
+    name: params.name || params.id,
+    nodeId: params.nodeId,
+  };
+}
+
+/**
+ * Creates resistor component data
+ *
+ * @example
+ * const r1 = createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] });
+ */
+export function createResistor(params: {
+  id: string;
+  resistance: number;
+  nodes: [string, string];
+  name?: string;
+}): Resistor {
+  return {
+    id: params.id,
+    type: 'resistor',
+    name: params.name || params.id,
+    resistance: params.resistance,
+    terminals: [
+      createTerminal('terminal1', params.nodes[0]),
+      createTerminal('terminal2', params.nodes[1]),
+    ],
+  };
+}
+
+/**
+ * Creates DC voltage source component data
+ *
+ * @example
+ * const v1 = createDCVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] });
+ */
+export function createDCVoltageSource(params: {
+  id: string;
+  voltage: number;
+  nodes: [string, string];
+  name?: string;
+}): DCVoltageSource {
+  return {
+    id: params.id,
+    type: 'voltage_source',
+    sourceType: 'dc',
+    name: params.name || params.id,
+    voltage: params.voltage,
+    terminals: [
+      createTerminal('pos', params.nodes[0]),
+      createTerminal('neg', params.nodes[1]),
+    ],
+  };
+}
+
+/**
+ * Creates DC current source component data
+ *
+ * @example
+ * const i1 = createDCCurrentSource({ id: 'I1', current: 0.001, nodes: ['1', '0'] });
+ */
+export function createDCCurrentSource(params: {
+  id: string;
+  current: number;
+  nodes: [string, string];
+  name?: string;
+}): DCCurrentSource {
+  return {
+    id: params.id,
+    type: 'current_source',
+    sourceType: 'dc',
+    name: params.name || params.id,
+    current: params.current,
+    terminals: [
+      createTerminal('pos', params.nodes[0]),
+      createTerminal('neg', params.nodes[1]),
+    ],
+  };
+}
+
+/**
+ * Creates capacitor component data
+ *
+ * @example
+ * const c1 = createCapacitor({ id: 'C1', capacitance: 1e-6, nodes: ['1', '0'] });
+ */
+export function createCapacitor(params: {
+  id: string;
+  capacitance: number;
+  nodes: [string, string];
+  name?: string;
+  initialVoltage?: number;
+}): Capacitor {
+  return {
+    id: params.id,
+    type: 'capacitor',
+    name: params.name || params.id,
+    capacitance: params.capacitance,
+    initialVoltage: params.initialVoltage,
+    terminals: [
+      createTerminal('pos', params.nodes[0]),
+      createTerminal('neg', params.nodes[1]),
+    ],
+  };
+}
+
+/**
+ * Creates inductor component data
+ *
+ * @example
+ * const l1 = createInductor({ id: 'L1', inductance: 1e-3, nodes: ['1', '0'] });
+ */
+export function createInductor(params: {
+  id: string;
+  inductance: number;
+  nodes: [string, string];
+  name?: string;
+  initialCurrent?: number;
+}): Inductor {
+  return {
+    id: params.id,
+    type: 'inductor',
+    name: params.name || params.id,
+    inductance: params.inductance,
+    initialCurrent: params.initialCurrent,
+    terminals: [
+      createTerminal('terminal1', params.nodes[0]),
+      createTerminal('terminal2', params.nodes[1]),
+    ],
+  };
+}
+
+/**
+ * Creates AC voltage source component data
+ *
+ * @example
+ * const v1 = createACVoltageSource({ id: 'V1', amplitude: 10, frequency: 60, nodes: ['1', '0'] });
+ */
+export function createACVoltageSource(params: {
+  id: string;
+  amplitude: number;
+  frequency: number;
+  nodes: [string, string];
+  name?: string;
+  phase?: number;
+  dcOffset?: number;
+}): ACVoltageSource {
+  return {
+    id: params.id,
+    type: 'voltage_source',
+    sourceType: 'ac',
+    name: params.name || params.id,
+    amplitude: params.amplitude,
+    frequency: params.frequency,
+    phase: params.phase ?? 0,
+    dcOffset: params.dcOffset,
+    terminals: [
+      createTerminal('pos', params.nodes[0]),
+      createTerminal('neg', params.nodes[1]),
+    ],
+  };
+}
+
+/**
+ * Creates AC current source component data
+ *
+ * @example
+ * const i1 = createACCurrentSource({ id: 'I1', amplitude: 0.001, frequency: 60, nodes: ['1', '0'] });
+ */
+export function createACCurrentSource(params: {
+  id: string;
+  amplitude: number;
+  frequency: number;
+  nodes: [string, string];
+  name?: string;
+  phase?: number;
+  dcOffset?: number;
+}): ACCurrentSource {
+  return {
+    id: params.id,
+    type: 'current_source',
+    sourceType: 'ac',
+    name: params.name || params.id,
+    amplitude: params.amplitude,
+    frequency: params.frequency,
+    phase: params.phase ?? 0,
+    dcOffset: params.dcOffset,
+    terminals: [
+      createTerminal('pos', params.nodes[0]),
+      createTerminal('neg', params.nodes[1]),
+    ],
   };
 }
