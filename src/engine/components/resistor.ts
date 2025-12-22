@@ -119,7 +119,7 @@ export class ResistorImpl implements Resistor {
 
     // Initialize readonly fields
     this._id = data.id.trim();
-    this._name = data.name || data.id.trim();
+    this._name = (data.name && data.name.trim()) || this._id;
     this._resistance = data.resistance;
     this._terminals = [
       { ...term1, nodeId: term1.nodeId.trim() },

@@ -103,7 +103,7 @@ export class DCCurrentSourceImpl implements DCCurrentSource {
 
     // Initialize readonly fields
     this._id = data.id.trim();
-    this._name = data.name || data.id.trim();
+    this._name = (data.name && data.name.trim()) || this._id;
     this._current = data.current;
     this._terminals = [
       { ...termPos, nodeId: termPos.nodeId.trim() },
