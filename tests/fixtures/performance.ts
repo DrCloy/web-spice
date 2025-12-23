@@ -4,16 +4,13 @@
  */
 
 import type { Circuit } from '@/types/circuit';
-import {
-  createParallelResistors,
-  createSeriesResistors,
-} from '../factories/circuits';
-import {
-  createTestGround,
-  createTestResistor,
-  createTestVoltageSource,
-} from '../factories/components';
 import { createTestCircuit } from '../factories/circuits';
+import {
+  createDCVoltageSource,
+  createGround,
+  createResistor,
+} from '../factories/components';
+import { createParallelResistors, createSeriesResistors } from './circuits';
 
 /**
  * Performance benchmark fixture
@@ -129,7 +126,7 @@ export function createSparseCircuit(size: number): Circuit {
 
   // Add voltage source
   components.push(
-    createTestVoltageSource({
+    createDCVoltageSource({
       id: 'V1',
       voltage: 12,
       nodes: ['1', '0'],
@@ -143,7 +140,7 @@ export function createSparseCircuit(size: number): Circuit {
 
     // Series resistor
     components.push(
-      createTestResistor({
+      createResistor({
         id: `R_series_${i + 1}`,
         resistance: 1000,
         nodes: [node1, node2] as [string, string],
@@ -152,7 +149,7 @@ export function createSparseCircuit(size: number): Circuit {
 
     // Shunt resistor to ground
     components.push(
-      createTestResistor({
+      createResistor({
         id: `R_shunt_${i + 1}`,
         resistance: 10000,
         nodes: [node1, '0'],
@@ -161,7 +158,7 @@ export function createSparseCircuit(size: number): Circuit {
   }
 
   // Add ground
-  components.push(createTestGround({ id: 'GND', nodeId: '0' }));
+  components.push(createGround({ id: 'GND', nodeId: '0' }));
 
   return createTestCircuit({
     id: 'sparse-ladder-network',
@@ -261,7 +258,7 @@ export function createMeshNetwork(rows: number, cols: number): Circuit {
 
   // Add voltage source at top-left corner
   components.push(
-    createTestVoltageSource({
+    createDCVoltageSource({
       id: 'V1',
       voltage: 12,
       nodes: ['0_0', '0'],
@@ -274,7 +271,7 @@ export function createMeshNetwork(rows: number, cols: number): Circuit {
       const node1 = `${r}_${c}`;
       const node2 = `${r}_${c + 1}`;
       components.push(
-        createTestResistor({
+        createResistor({
           id: `R_h_${r}_${c}`,
           resistance: 1000,
           nodes: [node1, node2] as [string, string],
@@ -289,7 +286,7 @@ export function createMeshNetwork(rows: number, cols: number): Circuit {
       const node1 = `${r}_${c}`;
       const node2 = `${r + 1}_${c}`;
       components.push(
-        createTestResistor({
+        createResistor({
           id: `R_v_${r}_${c}`,
           resistance: 1000,
           nodes: [node1, node2] as [string, string],
@@ -302,7 +299,7 @@ export function createMeshNetwork(rows: number, cols: number): Circuit {
   for (let c = 0; c < cols; c++) {
     const node = `${rows - 1}_${c}`;
     components.push(
-      createTestResistor({
+      createResistor({
         id: `R_gnd_${c}`,
         resistance: 1000,
         nodes: [node, '0'],
@@ -311,7 +308,7 @@ export function createMeshNetwork(rows: number, cols: number): Circuit {
   }
 
   // Add ground
-  components.push(createTestGround({ id: 'GND', nodeId: '0' }));
+  components.push(createGround({ id: 'GND', nodeId: '0' }));
 
   return createTestCircuit({
     id: `mesh-network-${rows}x${cols}`,

@@ -28,7 +28,7 @@ import {
   createTestMatrix,
   createTestVector,
 } from '../factories/matrix';
-import { createVoltageDivider } from '../factories/circuits';
+import { createVoltageDivider } from '../fixtures/circuits';
 
 describe('Helper Utilities', () => {
   describe('Numerical Comparison', () => {

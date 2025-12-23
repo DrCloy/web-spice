@@ -4,12 +4,12 @@
  */
 
 import type { Circuit } from '@/types/circuit';
-import {
-  createTestGround,
-  createTestResistor,
-  createTestVoltageSource,
-} from '../factories/components';
 import { createTestCircuit } from '../factories/circuits';
+import {
+  createDCVoltageSource,
+  createGround,
+  createResistor,
+} from '../factories/components';
 
 /**
  * Error case fixture with expected error information
@@ -38,11 +38,11 @@ export const DISCONNECTED_SUBGRAPH_ERROR: ErrorCaseFixture = {
     description:
       'Circuit with disconnected component forming isolated subgraph',
     components: [
-      createTestVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
-      createTestResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+      createDCVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
+      createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
       // R2 forms an isolated subgraph not connected to main circuit
-      createTestResistor({ id: 'R2', resistance: 1000, nodes: ['99', '98'] }),
-      createTestGround({ id: 'GND', nodeId: '0' }),
+      createResistor({ id: 'R2', resistance: 1000, nodes: ['99', '98'] }),
+      createGround({ id: 'GND', nodeId: '0' }),
     ],
     nodes: [
       {
@@ -93,9 +93,9 @@ export const FLOATING_NODE_ERROR: ErrorCaseFixture = {
     name: 'Floating Node Error',
     description: 'Circuit with a node that has no component connections',
     components: [
-      createTestVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
-      createTestResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
-      createTestGround({ id: 'GND', nodeId: '0' }),
+      createDCVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
+      createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+      createGround({ id: 'GND', nodeId: '0' }),
     ],
     nodes: [
       {
@@ -138,8 +138,8 @@ export const NO_GROUND_ERROR: ErrorCaseFixture = {
     name: 'No Ground Error',
     description: 'Circuit without ground reference',
     components: [
-      createTestVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '2'] }),
-      createTestResistor({ id: 'R1', resistance: 1000, nodes: ['1', '2'] }),
+      createDCVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '2'] }),
+      createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '2'] }),
     ],
     nodes: [
       {
@@ -176,9 +176,9 @@ export const ZERO_RESISTANCE_ERROR: ErrorCaseFixture = {
     id: 'error-zero-resistance',
     name: 'Zero Resistance Error',
     components: [
-      createTestVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
-      createTestResistor({ id: 'R1', resistance: 0, nodes: ['1', '0'] }), // Invalid!
-      createTestGround({ id: 'GND', nodeId: '0' }),
+      createDCVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
+      createResistor({ id: 'R1', resistance: 0, nodes: ['1', '0'] }), // Invalid!
+      createGround({ id: 'GND', nodeId: '0' }),
     ],
     groundNodeId: '0',
   }),
@@ -200,9 +200,9 @@ export const NEGATIVE_RESISTANCE_ERROR: ErrorCaseFixture = {
     id: 'error-negative-resistance',
     name: 'Negative Resistance Error',
     components: [
-      createTestVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
-      createTestResistor({ id: 'R1', resistance: -1000, nodes: ['1', '0'] }), // Invalid!
-      createTestGround({ id: 'GND', nodeId: '0' }),
+      createDCVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
+      createResistor({ id: 'R1', resistance: -1000, nodes: ['1', '0'] }), // Invalid!
+      createGround({ id: 'GND', nodeId: '0' }),
     ],
     groundNodeId: '0',
   }),
@@ -227,9 +227,9 @@ export const SINGULAR_MATRIX_ERROR: ErrorCaseFixture = {
     id: 'error-singular-matrix',
     name: 'Singular Matrix Error',
     components: [
-      createTestVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
-      createTestVoltageSource({ id: 'V2', voltage: 10, nodes: ['1', '0'] }),
-      createTestGround({ id: 'GND', nodeId: '0' }),
+      createDCVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
+      createDCVoltageSource({ id: 'V2', voltage: 10, nodes: ['1', '0'] }),
+      createGround({ id: 'GND', nodeId: '0' }),
     ],
     groundNodeId: '0',
   }),
@@ -267,10 +267,10 @@ export const DUPLICATE_COMPONENT_ID_ERROR: ErrorCaseFixture = {
     id: 'error-duplicate-id',
     name: 'Duplicate ID Error',
     components: [
-      createTestVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
-      createTestResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
-      createTestResistor({ id: 'R1', resistance: 2000, nodes: ['1', '0'] }), // Duplicate ID!
-      createTestGround({ id: 'GND', nodeId: '0' }),
+      createDCVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
+      createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+      createResistor({ id: 'R1', resistance: 2000, nodes: ['1', '0'] }), // Duplicate ID!
+      createGround({ id: 'GND', nodeId: '0' }),
     ],
     groundNodeId: '0',
   }),

@@ -3,10 +3,30 @@ import { DCVoltageSourceImpl } from '@/engine/components/dcVoltageSource';
 import type { DCVoltageSource } from '@/types/component';
 import { WebSpiceError } from '@/types/circuit';
 
+/**
+ * Helper function to create DC voltage source test data with optional overrides
+ */
+function makeDCVoltageSourceData(
+  overrides?: Partial<DCVoltageSource>
+): DCVoltageSource {
+  return {
+    id: 'V1',
+    type: 'voltage_source',
+    sourceType: 'dc',
+    name: 'V1',
+    voltage: 12,
+    terminals: [
+      { name: 'pos', nodeId: 'n1' },
+      { name: 'neg', nodeId: 'n2' },
+    ],
+    ...overrides,
+  };
+}
+
 describe('DCVoltageSourceImpl', () => {
-  describe('constructor', () => {
-    it('should create a DC voltage source with valid parameters', () => {
-      const source = new DCVoltageSourceImpl('V1', 'n1', 'n2', 12);
+  describe('constructor (new API: data object)', () => {
+    it('should create a DC voltage source with valid data object', () => {
+      const source = new DCVoltageSourceImpl(makeDCVoltageSourceData());
 
       expect(source.id).toBe('V1');
       expect(source.type).toBe('voltage_source');
@@ -24,67 +44,127 @@ describe('DCVoltageSourceImpl', () => {
       });
     });
 
-    it('should throw error for empty component ID', () => {
-      expect(() => new DCVoltageSourceImpl('', 'n1', 'n2', 12)).toThrow(
-        'Component ID cannot be empty'
+    it('should use id as name when name is not provided', () => {
+      const source = new DCVoltageSourceImpl(
+        makeDCVoltageSourceData({ name: '' })
       );
+
+      expect(source.name).toBe('V1');
+    });
+
+    it('should throw error for empty component ID', () => {
+      expect(
+        () => new DCVoltageSourceImpl(makeDCVoltageSourceData({ id: '' }))
+      ).toThrow('Component ID cannot be empty');
     });
 
     it('should throw error for empty positive node ID', () => {
-      expect(() => new DCVoltageSourceImpl('V1', '', 'n2', 12)).toThrow(
-        WebSpiceError
-      );
+      expect(
+        () =>
+          new DCVoltageSourceImpl(
+            makeDCVoltageSourceData({
+              terminals: [
+                { name: 'pos', nodeId: '' },
+                { name: 'neg', nodeId: 'n2' },
+              ],
+            })
+          )
+      ).toThrow(WebSpiceError);
     });
 
     it('should throw error for empty negative node ID', () => {
-      expect(() => new DCVoltageSourceImpl('V1', 'n1', '', 12)).toThrow(
-        WebSpiceError
-      );
+      expect(
+        () =>
+          new DCVoltageSourceImpl(
+            makeDCVoltageSourceData({
+              terminals: [
+                { name: 'pos', nodeId: 'n1' },
+                { name: 'neg', nodeId: '' },
+              ],
+            })
+          )
+      ).toThrow(WebSpiceError);
     });
 
     it('should throw error for identical node IDs', () => {
-      expect(() => new DCVoltageSourceImpl('V1', 'n1', 'n1', 12)).toThrow(
-        'Terminals cannot be connected to the same node'
-      );
+      expect(
+        () =>
+          new DCVoltageSourceImpl(
+            makeDCVoltageSourceData({
+              terminals: [
+                { name: 'pos', nodeId: 'n1' },
+                { name: 'neg', nodeId: 'n1' },
+              ],
+            })
+          )
+      ).toThrow('Terminals cannot be connected to the same node');
     });
 
     it('should throw error for node IDs that are identical after trimming', () => {
-      expect(() => new DCVoltageSourceImpl('V1', ' n1 ', 'n1', 12)).toThrow(
-        'Terminals cannot be connected to the same node'
-      );
+      expect(
+        () =>
+          new DCVoltageSourceImpl(
+            makeDCVoltageSourceData({
+              terminals: [
+                { name: 'pos', nodeId: ' n1 ' },
+                { name: 'neg', nodeId: 'n1' },
+              ],
+            })
+          )
+      ).toThrow('Terminals cannot be connected to the same node');
     });
 
     it('should throw error for invalid voltage (NaN)', () => {
-      expect(() => new DCVoltageSourceImpl('V1', 'n1', 'n2', NaN)).toThrow(
-        'Voltage must be a valid number'
-      );
+      expect(
+        () => new DCVoltageSourceImpl(makeDCVoltageSourceData({ voltage: NaN }))
+      ).toThrow('Voltage must be a valid number');
     });
 
     it('should throw error for invalid voltage (Infinity)', () => {
-      expect(() => new DCVoltageSourceImpl('V1', 'n1', 'n2', Infinity)).toThrow(
-        'Voltage must be a valid number'
-      );
+      expect(
+        () =>
+          new DCVoltageSourceImpl(
+            makeDCVoltageSourceData({ voltage: Infinity })
+          )
+      ).toThrow('Voltage must be a valid number');
+    });
+
+    it('should throw error for invalid terminals (not exactly 2)', () => {
+      expect(
+        () =>
+          new DCVoltageSourceImpl(
+            makeDCVoltageSourceData({
+              terminals: [{ name: 'pos', nodeId: 'n1' }] as any,
+            })
+          )
+      ).toThrow('DC voltage source must have exactly 2 terminals');
     });
   });
 
   describe('voltage values', () => {
     it('should accept positive voltage', () => {
-      const source = new DCVoltageSourceImpl('V1', 'n1', 'n2', 12);
+      const source = new DCVoltageSourceImpl(makeDCVoltageSourceData());
       expect(source.voltage).toBe(12);
     });
 
     it('should accept negative voltage (reversed polarity)', () => {
-      const source = new DCVoltageSourceImpl('V1', 'n1', 'n2', -5);
+      const source = new DCVoltageSourceImpl(
+        makeDCVoltageSourceData({ voltage: -5 })
+      );
       expect(source.voltage).toBe(-5);
     });
 
     it('should accept zero voltage (short circuit)', () => {
-      const source = new DCVoltageSourceImpl('V1', 'n1', 'n2', 0);
+      const source = new DCVoltageSourceImpl(
+        makeDCVoltageSourceData({ voltage: 0 })
+      );
       expect(source.voltage).toBe(0);
     });
 
     it('should accept very small voltage values', () => {
-      const source = new DCVoltageSourceImpl('V1', 'n1', 'n2', 0.001);
+      const source = new DCVoltageSourceImpl(
+        makeDCVoltageSourceData({ voltage: 0.001 })
+      );
       expect(source.voltage).toBe(0.001);
     });
 
@@ -92,10 +172,11 @@ describe('DCVoltageSourceImpl', () => {
       const voltages = [1.5, 3.3, 5, 9, 12, 24];
       voltages.forEach(voltage => {
         const source = new DCVoltageSourceImpl(
-          `V${voltage}`,
-          'n1',
-          'n2',
-          voltage
+          makeDCVoltageSourceData({
+            id: `V${voltage}`,
+            name: `V${voltage}`,
+            voltage,
+          })
         );
         expect(source.voltage).toBe(voltage);
       });
@@ -104,7 +185,7 @@ describe('DCVoltageSourceImpl', () => {
 
   describe('type compliance', () => {
     it('should match DCVoltageSource interface', () => {
-      const source = new DCVoltageSourceImpl('V1', 'n1', 'n2', 12);
+      const source = new DCVoltageSourceImpl(makeDCVoltageSourceData());
       const typed: DCVoltageSource = source;
 
       expect(typed.id).toBe('V1');
@@ -115,7 +196,7 @@ describe('DCVoltageSourceImpl', () => {
     });
 
     it('should be serializable to plain object', () => {
-      const source = new DCVoltageSourceImpl('V1', 'n1', 'n2', 12);
+      const source = new DCVoltageSourceImpl(makeDCVoltageSourceData());
       const json = JSON.stringify(source);
       const parsed = JSON.parse(json);
 
@@ -136,7 +217,7 @@ describe('DCVoltageSourceImpl', () => {
 
   describe('immutability', () => {
     it('should have immutable voltage value', () => {
-      const source = new DCVoltageSourceImpl('V1', 'n1', 'n2', 12);
+      const source = new DCVoltageSourceImpl(makeDCVoltageSourceData());
 
       // Attempt modification (may throw in strict mode or silently fail)
       try {
@@ -150,7 +231,7 @@ describe('DCVoltageSourceImpl', () => {
     });
 
     it('should not allow modification of terminals array', () => {
-      const source = new DCVoltageSourceImpl('V1', 'n1', 'n2', 12);
+      const source = new DCVoltageSourceImpl(makeDCVoltageSourceData());
       const originalTerminals = source.terminals;
       // Attempt to modify should not affect internal state
       originalTerminals[0] = { name: 'modified', nodeId: 'n99' };

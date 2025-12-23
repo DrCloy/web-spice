@@ -1,4 +1,4 @@
-import type { DCCurrentSource, NodeId, Terminal } from '@/types/component';
+import type { DCCurrentSource, Terminal } from '@/types/component';
 import { WebSpiceError } from '@/types/circuit';
 
 /**
@@ -20,68 +20,94 @@ import { WebSpiceError } from '@/types/circuit';
  * ```
  */
 export class DCCurrentSourceImpl implements DCCurrentSource {
-  private readonly _id: string;
+  private readonly _id!: string;
   private readonly _type = 'current_source' as const;
   private readonly _sourceType = 'dc' as const;
-  private readonly _name: string;
-  private readonly _current: number;
-  private readonly _terminals: readonly [Terminal, Terminal];
+  private readonly _name!: string;
+  private readonly _current!: number;
+  private readonly _terminals!: readonly [Terminal, Terminal];
 
   /**
    * Creates a new DC current source
    *
-   * @param id - Unique component identifier
-   * @param nodePos - Positive terminal node ID
-   * @param nodeNeg - Negative terminal node ID
-   * @param current - Current in Amperes (can be negative for reversed polarity)
+   * @param data - DC current source data object
    * @throws {WebSpiceError} If parameters are invalid
+   *
+   * @example
+   * ```typescript
+   * const currentSource = new DCCurrentSourceImpl({
+   *   id: 'I1',
+   *   type: 'current_source',
+   *   sourceType: 'dc',
+   *   name: 'I1',
+   *   current: 12,
+   *   terminals: [
+   *     { name: 'pos', nodeId: 'n1' },
+   *     { name: 'neg', nodeId: 'n2' }
+   *   ]
+   * });
+   * ```
    */
-  constructor(id: string, nodePos: NodeId, nodeNeg: NodeId, current: number) {
+  constructor(data: DCCurrentSource) {
     // Validate component ID
-    if (!id || id.trim().length === 0) {
+    if (!data.id || data.id.trim().length === 0) {
       throw new WebSpiceError(
         'INVALID_COMPONENT',
         'Component ID cannot be empty',
-        { componentId: id }
+        { componentId: data.id }
       );
     }
 
-    // Validate node IDs
-    if (!nodePos || nodePos.trim().length === 0) {
+    // Validate terminals
+    if (!data.terminals || data.terminals.length !== 2) {
+      throw new WebSpiceError(
+        'INVALID_COMPONENT',
+        'DC current source must have exactly 2 terminals',
+        { componentId: data.id }
+      );
+    }
+
+    const [termPos, termNeg] = data.terminals;
+
+    if (!termPos.nodeId || termPos.nodeId.trim().length === 0) {
       throw new WebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty', {
-        componentId: id,
+        componentId: data.id,
       });
     }
 
-    if (!nodeNeg || nodeNeg.trim().length === 0) {
+    if (!termNeg.nodeId || termNeg.nodeId.trim().length === 0) {
       throw new WebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty', {
-        componentId: id,
+        componentId: data.id,
       });
     }
 
-    if (nodePos.trim() === nodeNeg.trim()) {
+    if (termPos.nodeId.trim() === termNeg.nodeId.trim()) {
       throw new WebSpiceError(
         'INVALID_COMPONENT',
         'Terminals cannot be connected to the same node',
-        { componentId: id }
+        { componentId: data.id }
       );
     }
 
     // Validate current
-    if (!Number.isFinite(current)) {
+    // NOTE: Current can be negative (reversed direction) or zero (inactive source).
+    // This is intentionally different from resistors which must have positive resistance.
+    // Only validates that the value is a finite number.
+    if (!Number.isFinite(data.current)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
         'Current must be a valid number',
-        { componentId: id }
+        { componentId: data.id }
       );
     }
 
-    this._id = id.trim();
-    this._name = id.trim();
-    this._current = current;
+    // Initialize readonly fields
+    this._id = data.id.trim();
+    this._name = (data.name && data.name.trim()) || this._id;
+    this._current = data.current;
     this._terminals = [
-      { name: 'pos', nodeId: nodePos.trim() },
-      { name: 'neg', nodeId: nodeNeg.trim() },
+      { ...termPos, nodeId: termPos.nodeId.trim() },
+      { ...termNeg, nodeId: termNeg.nodeId.trim() },
     ];
   }
 
