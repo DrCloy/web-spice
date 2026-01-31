@@ -68,7 +68,7 @@ export class CircuitImpl implements Circuit {
     // Initialize readonly fields
     this._id = data.id.trim();
     this._name = data.name.trim();
-    this._description = data.description?.trim();
+    this._description = data.description?.trim() || undefined;
     this._groundNodeId = data.groundNodeId || '0';
     this._components = new Map<ComponentId, Component>();
 
@@ -125,8 +125,7 @@ export class CircuitImpl implements Circuit {
   }
 
   /**
-   * Get all nodes in the circuit (placeholder)
-   * Implements Circuit interface requirement
+   * Get all nodes in the circuit
    */
   get nodes(): Node[] {
     return this.getNodes();
@@ -292,7 +291,6 @@ export class CircuitImpl implements Circuit {
    * Required for JSON.stringify() since getters are not enumerable
    */
   toJSON(): Circuit {
-    // TODO: Implement in Phase 5
     return {
       id: this._id,
       name: this._name,
@@ -310,7 +308,6 @@ export class CircuitImpl implements Circuit {
    * @returns New CircuitImpl instance
    */
   static fromJSON(data: Circuit): CircuitImpl {
-    // TODO: Implement in Phase 5
     return new CircuitImpl({
       id: data.id,
       name: data.name,

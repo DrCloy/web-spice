@@ -70,6 +70,26 @@ describe('CircuitImpl', () => {
       expect(circuit.getComponents()[0].id).toBe('R1');
     });
 
+    it('should throw error for duplicate component IDs in constructor', () => {
+      const r1 = createResistor({
+        id: 'R1',
+        resistance: 1000,
+        nodes: ['1', '0'],
+      });
+      const r2 = createResistor({
+        id: 'R1',
+        resistance: 2000,
+        nodes: ['2', '0'],
+      });
+
+      expect(
+        () => new CircuitImpl(makeCircuitData({ components: [r1, r2] }))
+      ).toThrow(WebSpiceError);
+      expect(
+        () => new CircuitImpl(makeCircuitData({ components: [r1, r2] }))
+      ).toThrow("Component with ID 'R1' already exists in circuit");
+    });
+
     it('should throw error for empty circuit ID', () => {
       expect(() => new CircuitImpl(makeCircuitData({ id: '' }))).toThrow(
         WebSpiceError
@@ -116,6 +136,22 @@ describe('CircuitImpl', () => {
       );
 
       expect(circuit.description).toBe('Test description');
+    });
+
+    it('should convert empty description to undefined', () => {
+      const circuit1 = new CircuitImpl(
+        makeCircuitData({
+          description: '',
+        })
+      );
+      const circuit2 = new CircuitImpl(
+        makeCircuitData({
+          description: '   ',
+        })
+      );
+
+      expect(circuit1.description).toBeUndefined();
+      expect(circuit2.description).toBeUndefined();
     });
 
     it('should accept custom groundNodeId', () => {
@@ -526,7 +562,7 @@ describe('CircuitImpl', () => {
         expect(result.errors.some(e => e.code === 'NO_GROUND')).toBe(true);
       });
 
-      it('should detect floating node with no connections', () => {
+      it('should not have floating nodes when all components are properly connected', () => {
         const circuit = new CircuitImpl(makeCircuitData());
         const v1 = createDCVoltageSource({
           id: 'V1',
@@ -538,14 +574,10 @@ describe('CircuitImpl', () => {
           resistance: 1000,
           nodes: ['1', '0'],
         });
-        // Node '99' would be floating if it existed, but since nodes are derived,
-        // we can't create a truly floating node this way.
-        // This test would require manual node injection which we don't support.
 
         circuit.addComponent(v1);
         circuit.addComponent(r1);
 
-        // This circuit should be valid since all nodes are properly connected
         const result = circuit.validate();
         expect(result.valid).toBe(true);
       });
