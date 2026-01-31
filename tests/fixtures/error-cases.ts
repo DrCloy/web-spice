@@ -263,17 +263,25 @@ export const EMPTY_CIRCUIT_ERROR: ErrorCaseFixture = {
  * Expected error: INVALID_COMPONENT
  */
 export const DUPLICATE_COMPONENT_ID_ERROR: ErrorCaseFixture = {
-  circuit: createTestCircuit({
+  circuit: {
     id: 'error-duplicate-id',
     name: 'Duplicate ID Error',
     components: [
       createDCVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
       createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
-      createResistor({ id: 'R1', resistance: 2000, nodes: ['1', '0'] }), // Duplicate ID!
+      createResistor({ id: 'R1', resistance: 2000, nodes: ['1', '0'] }),
       createGround({ id: 'GND', nodeId: '0' }),
     ],
+    nodes: [
+      {
+        id: '0',
+        isGround: true,
+        connectedComponents: ['V1', 'R1', 'R1', 'GND'],
+      },
+      { id: '1', isGround: false, connectedComponents: ['V1', 'R1', 'R1'] },
+    ],
     groundNodeId: '0',
-  }),
+  },
   description: 'Circuit with duplicate component IDs',
   expectedErrorCode: 'INVALID_COMPONENT',
   expectedErrorMessage: 'Duplicate component ID',
