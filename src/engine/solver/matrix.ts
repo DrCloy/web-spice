@@ -1246,6 +1246,11 @@ export function conditionNumber(A: Matrix): number {
   for (let iter = 0; iter < maxIterations; iter++) {
     const Av = multiplyMatrixVector(ATA, v);
     const lambdaNew = normL2(Av);
+
+    if (lambdaNew === 0) {
+      return Infinity;
+    }
+
     v = scaleVector(Av, 1 / lambdaNew);
 
     if (Math.abs(lambdaNew - lambdaMax) < tolerance) {
@@ -1468,6 +1473,13 @@ export function cooToCSR(coo: SparseMatrix): CSRMatrix {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
       'Sparse matrix cannot be null or undefined'
+    );
+  }
+
+  if (!isValidCOO(coo)) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Invalid COO matrix: contains out-of-bounds indices or duplicate entries'
     );
   }
 
@@ -1745,9 +1757,20 @@ export function isValidCSR(csr: CSRMatrix): boolean {
     return false;
   }
 
-  // Check rowPointers are monotonically non-decreasing
+  // Check rowPointers structural constraints
+  if (csr.rowPointers[0] !== 0) {
+    return false;
+  }
+  if (csr.rowPointers[csr.rows] !== csr.values.length) {
+    return false;
+  }
+
+  // Check rowPointers are monotonically non-decreasing and within bounds
   for (let i = 1; i < csr.rowPointers.length; i++) {
-    if (csr.rowPointers[i] < csr.rowPointers[i - 1]) {
+    if (
+      csr.rowPointers[i] < csr.rowPointers[i - 1] ||
+      csr.rowPointers[i] > csr.values.length
+    ) {
       return false;
     }
   }
