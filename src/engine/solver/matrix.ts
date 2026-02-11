@@ -18,6 +18,19 @@ import type {
 import { WebSpiceError } from '@/types/circuit';
 
 // ============================================================================
+// Internal Helpers
+// ============================================================================
+
+function validateTolerance(tolerance: number): void {
+  if (!Number.isFinite(tolerance) || tolerance < 0) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Tolerance must be a finite non-negative number'
+    );
+  }
+}
+
+// ============================================================================
 // Vector Operations
 // ============================================================================
 
@@ -407,6 +420,8 @@ export function distance(v1: Vector, v2: Vector): number {
  * @throws {WebSpiceError} If vector is null
  */
 export function isZeroVector(v: Vector, tolerance = 0): boolean {
+  validateTolerance(tolerance);
+
   // Validate input
   if (!v) {
     throw new WebSpiceError(
@@ -439,6 +454,8 @@ export function areVectorsEqual(
   v2: Vector,
   tolerance = 0
 ): boolean {
+  validateTolerance(tolerance);
+
   // Validate inputs
   if (!v1 || !v2) {
     throw new WebSpiceError(
@@ -1067,6 +1084,8 @@ export function frobeniusNorm(A: Matrix): number {
  * @returns True if matrix is symmetric
  */
 export function isSymmetric(A: Matrix, tolerance = 0): boolean {
+  validateTolerance(tolerance);
+
   if (!A) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1099,6 +1118,8 @@ export function isSymmetric(A: Matrix, tolerance = 0): boolean {
  * @returns True if matrix is diagonal
  */
 export function isDiagonal(A: Matrix, tolerance = 0): boolean {
+  validateTolerance(tolerance);
+
   if (!A) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1129,6 +1150,8 @@ export function isDiagonal(A: Matrix, tolerance = 0): boolean {
  * @returns True if matrix is identity
  */
 export function isIdentity(A: Matrix, tolerance = 0): boolean {
+  validateTolerance(tolerance);
+
   if (!A) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1160,6 +1183,8 @@ export function isIdentity(A: Matrix, tolerance = 0): boolean {
  * @returns True if all elements are zero
  */
 export function isZeroMatrix(A: Matrix, tolerance = 0): boolean {
+  validateTolerance(tolerance);
+
   if (!A) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1185,6 +1210,8 @@ export function isZeroMatrix(A: Matrix, tolerance = 0): boolean {
  * @returns True if matrices are equal
  */
 export function areMatricesEqual(A: Matrix, B: Matrix, tolerance = 0): boolean {
+  validateTolerance(tolerance);
+
   if (!A || !B) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1266,7 +1293,9 @@ export function conditionNumber(A: Matrix): number {
   const sigmaMax = Math.sqrt(lambdaMax);
   const sigmaMin = fNorm / (sigmaMax * Math.sqrt(n));
 
-  return sigmaMin > 0 ? sigmaMax / sigmaMin : Infinity;
+  // Condition number is always >= 1 for invertible matrices
+  const estimate = sigmaMin > 0 ? sigmaMax / sigmaMin : Infinity;
+  return Math.max(estimate, 1);
 }
 
 // ============================================================================
@@ -1344,11 +1373,15 @@ export function replaceNaN(A: Matrix, replacement: number): Matrix {
 }
 
 /**
- * Estimate condition number using a simple heuristic
- * Faster but less accurate than full SVD-based method
+ * Estimate condition number using a diagonal-based heuristic
+ * Faster but less accurate than power iteration based conditionNumber().
+ *
+ * Note: This heuristic relies on diagonal elements. For matrices with zero
+ * diagonal entries (e.g., permutation matrices), it falls back to the
+ * power iteration based conditionNumber() for a more accurate estimate.
  *
  * @param A - Square matrix
- * @returns Condition number estimate
+ * @returns Condition number estimate (always >= 1)
  * @throws {WebSpiceError} If matrix is not square
  */
 export function estimateConditionNumber(A: Matrix): number {
@@ -1381,11 +1414,12 @@ export function estimateConditionNumber(A: Matrix): number {
     }
   }
 
+  // Fallback to power iteration when diagonal heuristic is not applicable
   if (minDiag === Infinity || minDiag === 0) {
-    return Infinity;
+    return conditionNumber(A);
   }
 
-  return maxRowSum / minDiag;
+  return Math.max(maxRowSum / minDiag, 1);
 }
 
 /**
@@ -1396,6 +1430,8 @@ export function estimateConditionNumber(A: Matrix): number {
  * @returns Matrix rank
  */
 export function rank(A: Matrix, tolerance = 1e-10): number {
+  validateTolerance(tolerance);
+
   if (!A) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1533,6 +1569,8 @@ export function cooToCSR(coo: SparseMatrix): CSRMatrix {
  * @returns Sparse matrix in COO format
  */
 export function denseToSparse(matrix: Matrix, tolerance = 0): SparseMatrix {
+  validateTolerance(tolerance);
+
   if (!matrix) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1565,6 +1603,13 @@ export function sparseToDense(sparse: SparseMatrix): Matrix {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
       'Sparse matrix cannot be null or undefined'
+    );
+  }
+
+  if (!isValidCOO(sparse)) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Invalid COO matrix: contains out-of-bounds indices or duplicate entries'
     );
   }
 
