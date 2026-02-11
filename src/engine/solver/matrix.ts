@@ -1341,6 +1341,20 @@ export function clampMatrix(A: Matrix, min: number, max: number): Matrix {
     );
   }
 
+  if (!Number.isFinite(min) || !Number.isFinite(max)) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Clamp min and max must be finite numbers'
+    );
+  }
+
+  if (min > max) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Clamp min must be less than or equal to max'
+    );
+  }
+
   const data = new Float64Array(A.data.length);
   for (let i = 0; i < A.data.length; i++) {
     data[i] = Math.max(min, Math.min(max, A.data[i]));
@@ -1361,6 +1375,13 @@ export function replaceNaN(A: Matrix, replacement: number): Matrix {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
       'Matrix cannot be null or undefined'
+    );
+  }
+
+  if (!Number.isFinite(replacement)) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Replacement value must be a finite number'
     );
   }
 

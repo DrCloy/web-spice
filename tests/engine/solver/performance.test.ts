@@ -14,7 +14,7 @@ import type { Matrix, SparseMatrix } from '@/types/circuit';
  * for practical circuit simulation use cases.
  *
  * Skipped by default to avoid flaky CI failures.
- * Run with: RUN_PERF_TESTS=1 npm run test
+ * Run with: npm run test:bench
  */
 const runPerf = !!process.env.RUN_PERF_TESTS;
 
