@@ -440,4 +440,74 @@ describe('Sparse Matrix Operations', () => {
       expect(sparsity).toBe(0);
     });
   });
+
+  // ============================================================================
+  // Invalid COO Validation
+  // ============================================================================
+
+  describe('Invalid COO Input Validation', () => {
+    const outOfBoundsCOO: SparseMatrix = {
+      rows: 2,
+      cols: 2,
+      entries: [{ row: 5, col: 0, value: 1 }],
+    };
+
+    const duplicateEntriesCOO: SparseMatrix = {
+      rows: 2,
+      cols: 2,
+      entries: [
+        { row: 0, col: 0, value: 1 },
+        { row: 0, col: 0, value: 2 },
+      ],
+    };
+
+    it('should throw on invalid COO in cooToCSR', () => {
+      expect(() => cooToCSR(outOfBoundsCOO)).toThrow('Invalid COO matrix');
+      expect(() => cooToCSR(duplicateEntriesCOO)).toThrow('Invalid COO matrix');
+    });
+
+    it('should throw on invalid COO in sparseToDense', () => {
+      expect(() => sparseToDense(outOfBoundsCOO)).toThrow('Invalid COO matrix');
+      expect(() => sparseToDense(duplicateEntriesCOO)).toThrow(
+        'Invalid COO matrix'
+      );
+    });
+
+    it('should throw on invalid COO in sparseMatrixVectorMultiply', () => {
+      const v = createTestVector([1, 2]);
+      expect(() => sparseMatrixVectorMultiply(outOfBoundsCOO, v)).toThrow(
+        'Invalid COO matrix'
+      );
+      expect(() => sparseMatrixVectorMultiply(duplicateEntriesCOO, v)).toThrow(
+        'Invalid COO matrix'
+      );
+    });
+
+    it('should throw on invalid COO in sparseTranspose', () => {
+      expect(() => sparseTranspose(outOfBoundsCOO)).toThrow(
+        'Invalid COO matrix'
+      );
+      expect(() => sparseTranspose(duplicateEntriesCOO)).toThrow(
+        'Invalid COO matrix'
+      );
+    });
+
+    it('should throw on invalid COO in getSparseRow', () => {
+      expect(() => getSparseRow(outOfBoundsCOO, 0)).toThrow(
+        'Invalid COO matrix'
+      );
+      expect(() => getSparseRow(duplicateEntriesCOO, 0)).toThrow(
+        'Invalid COO matrix'
+      );
+    });
+
+    it('should throw on invalid COO in estimateSparsity', () => {
+      expect(() => estimateSparsity(outOfBoundsCOO)).toThrow(
+        'Invalid COO matrix'
+      );
+      expect(() => estimateSparsity(duplicateEntriesCOO)).toThrow(
+        'Invalid COO matrix'
+      );
+    });
+  });
 });

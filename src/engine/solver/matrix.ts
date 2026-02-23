@@ -1698,6 +1698,13 @@ export function sparseTranspose(sparse: SparseMatrix): SparseMatrix {
     );
   }
 
+  if (!isValidCOO(sparse)) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Invalid COO matrix: contains out-of-bounds indices or duplicate entries'
+    );
+  }
+
   const entries = sparse.entries.map(e => ({
     row: e.col,
     col: e.row,
@@ -1720,6 +1727,13 @@ export function getSparseRow(sparse: SparseMatrix, rowIndex: number): Vector {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
       'Sparse matrix cannot be null or undefined'
+    );
+  }
+
+  if (!isValidCOO(sparse)) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Invalid COO matrix: contains out-of-bounds indices or duplicate entries'
     );
   }
 
