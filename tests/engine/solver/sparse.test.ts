@@ -474,7 +474,7 @@ describe('Sparse Matrix Operations', () => {
     });
 
     it('should throw on invalid COO in sparseMatrixVectorMultiply', () => {
-      const v = createTestVector([1, 2]);
+      const v = createTestVector({ length: 2, data: [1, 2] });
       expect(() => sparseMatrixVectorMultiply(outOfBoundsCOO, v)).toThrow(
         'Invalid COO matrix'
       );

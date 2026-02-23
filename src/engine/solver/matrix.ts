@@ -1898,11 +1898,6 @@ export function estimateSparsity(sparse: SparseMatrix): number {
   }
 
   const totalElements = sparse.rows * sparse.cols;
-
-  if (totalElements === 0) {
-    return 1; // Empty matrix is fully sparse
-  }
-
   const nonZeros = sparse.entries.length;
   const density = nonZeros / totalElements;
 
