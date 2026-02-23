@@ -1661,6 +1661,13 @@ export function sparseMatrixVectorMultiply(
     );
   }
 
+  if (!isValidCOO(sparse)) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Invalid COO matrix: contains out-of-bounds indices or duplicate entries'
+    );
+  }
+
   if (sparse.cols !== v.length) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1866,6 +1873,13 @@ export function estimateSparsity(sparse: SparseMatrix): number {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
       'Sparse matrix cannot be null or undefined'
+    );
+  }
+
+  if (!isValidCOO(sparse)) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Invalid COO matrix: contains out-of-bounds indices or duplicate entries'
     );
   }
 
