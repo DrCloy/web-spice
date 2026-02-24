@@ -69,6 +69,14 @@ export function luDecompose(
 
   const pivotTolerance =
     options?.pivotTolerance ?? DEFAULT_SOLVER_OPTIONS.pivotTolerance;
+
+  if (!Number.isFinite(pivotTolerance) || pivotTolerance < 0) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Pivot tolerance must be a finite non-negative number'
+    );
+  }
+
   const n = A.rows;
 
   // Create mutable copy of input data
@@ -95,7 +103,7 @@ export function luDecompose(
     }
 
     // Check for singularity
-    if (maxVal < pivotTolerance) {
+    if (maxVal <= pivotTolerance) {
       singular = true;
       continue;
     }

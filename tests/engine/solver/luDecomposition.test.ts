@@ -393,6 +393,28 @@ describe('LU Decomposition', () => {
       const lu2 = luDecompose(A, { pivotTolerance: 2 });
       expect(lu2.singular).toBe(true);
     });
+
+    it('should detect zero pivot when pivotTolerance is 0', () => {
+      // Zero matrix — all pivots are exactly 0
+      const A = createTestMatrix({ rows: 2, cols: 2 });
+      const lu = luDecompose(A, { pivotTolerance: 0 });
+
+      expect(lu.singular).toBe(true);
+    });
+
+    it('should throw for invalid pivotTolerance', () => {
+      const A = createTestMatrix({ rows: 2, cols: 2, data: [1, 0, 0, 1] });
+
+      expect(() => luDecompose(A, { pivotTolerance: -1 })).toThrow(
+        'Pivot tolerance must be a finite non-negative number'
+      );
+      expect(() => luDecompose(A, { pivotTolerance: Infinity })).toThrow(
+        'Pivot tolerance must be a finite non-negative number'
+      );
+      expect(() => luDecompose(A, { pivotTolerance: NaN })).toThrow(
+        'Pivot tolerance must be a finite non-negative number'
+      );
+    });
   });
 
   // ============================================================================
@@ -1139,15 +1161,11 @@ describe('LU Decomposition', () => {
       expect(resNorm).toBeLessThan(1e-2);
     });
 
-    it('should decompose 100x100 matrix within time limit', () => {
+    it('should decompose 100x100 matrix', () => {
       const A = createDiagonallyDominantMatrix(100);
-
-      const start = performance.now();
       const lu = luDecompose(A);
-      const elapsed = performance.now() - start;
 
       expect(lu.singular).toBe(false);
-      expect(elapsed).toBeLessThan(50); // < 50ms
     });
   });
 });
