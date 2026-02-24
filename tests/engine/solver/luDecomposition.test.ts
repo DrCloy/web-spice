@@ -13,6 +13,7 @@ import { multiplyMatrices, multiplyMatrixVector } from '@/engine/solver/matrix';
 import type { LUResult, Matrix, Vector } from '@/types/circuit';
 import {
   createDiagonalMatrix,
+  createDiagonallyDominantMatrix,
   createHilbertMatrix,
   createIdentityMatrix,
   createSingularMatrix,
@@ -23,20 +24,6 @@ import {
 // ============================================================================
 // Helpers
 // ============================================================================
-
-/**
- * Create a diagonally dominant (well-conditioned, non-singular) matrix.
- * A[i][i] = size + 1, A[i][j] = 1 for i != j.
- */
-function createDiagonallyDominantMatrix(size: number): Matrix {
-  const data = new Float64Array(size * size);
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      data[i * size + j] = i === j ? size + 1 : 1;
-    }
-  }
-  return { rows: size, cols: size, data };
-}
 
 /** Check that two arrays are approximately equal */
 function expectArrayClose(

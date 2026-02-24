@@ -12,6 +12,7 @@ import {
   sparseMatrixVectorMultiply,
 } from '@/engine/solver/matrix';
 import type { Matrix, SparseMatrix, Vector } from '@/types/circuit';
+import { createDiagonallyDominantMatrix } from '../../factories/matrix';
 
 /**
  * Performance benchmarks for matrix operations
@@ -276,19 +277,6 @@ describe.skipIf(!runPerf)('Performance Benchmarks', () => {
 // ============================================================================
 // Helper Functions
 // ============================================================================
-
-/**
- * Create a diagonally dominant (non-singular) matrix for LU benchmarks
- */
-function createDiagonallyDominantMatrix(size: number): Matrix {
-  const data = new Float64Array(size * size);
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      data[i * size + j] = i === j ? size + 1 : 1;
-    }
-  }
-  return { rows: size, cols: size, data };
-}
 
 /**
  * Create a random dense matrix
