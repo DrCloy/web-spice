@@ -161,6 +161,56 @@ export function createOnesVector(length: number): Vector {
  * @example
  * const wellConditioned = createWellConditionedMatrix(3);
  */
+/**
+ * Creates a singular matrix (linearly dependent rows)
+ *
+ * @example
+ * const singular = createSingularMatrix(3);
+ * // Row 2 = Row 0 + Row 1
+ */
+export function createSingularMatrix(size: number): Matrix {
+  const data = new Float64Array(size * size);
+
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      data[i * size + j] = i + j + 1;
+    }
+  }
+
+  // Make last row = sum of all other rows (linearly dependent)
+  for (let j = 0; j < size; j++) {
+    let sum = 0;
+    for (let i = 0; i < size - 1; i++) {
+      sum += data[i * size + j];
+    }
+    data[(size - 1) * size + j] = sum;
+  }
+
+  return { rows: size, cols: size, data };
+}
+
+/**
+ * Creates a Hilbert matrix (notoriously ill-conditioned)
+ * H[i][j] = 1 / (i + j + 1)
+ *
+ * @example
+ * const hilbert = createHilbertMatrix(3);
+ * // [[1, 1/2, 1/3],
+ * //  [1/2, 1/3, 1/4],
+ * //  [1/3, 1/4, 1/5]]
+ */
+export function createHilbertMatrix(size: number): Matrix {
+  const data = new Float64Array(size * size);
+
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      data[i * size + j] = 1 / (i + j + 1);
+    }
+  }
+
+  return { rows: size, cols: size, data };
+}
+
 export function createWellConditionedMatrix(size: number): Matrix {
   const data = new Float64Array(size * size);
 
