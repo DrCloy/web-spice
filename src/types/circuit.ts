@@ -71,6 +71,20 @@ export interface CSRMatrix {
   rowPointers: Int32Array; // Index where each row starts in values array
 }
 
+/** Result of LU decomposition with partial pivoting (PA = LU) */
+export interface LUResult {
+  /** Combined LU matrix: upper triangle stores U, strict lower triangle stores L (unit diagonal implicit) */
+  LU: Matrix;
+  /** Permutation vector: row i of permuted system = row permutation[i] of original */
+  permutation: Int32Array;
+  /** Number of row swaps performed (for determinant sign) */
+  swapCount: number;
+  /** Size of the system (n x n) */
+  size: number;
+  /** Whether the matrix was found to be singular or near-singular */
+  singular: boolean;
+}
+
 // =============================================================================
 // Error Types
 // =============================================================================

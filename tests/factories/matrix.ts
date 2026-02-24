@@ -155,11 +155,82 @@ export function createOnesVector(length: number): Vector {
 }
 
 /**
- * Creates a well-conditioned matrix for testing numerical stability
- * This creates a symmetric positive definite matrix
+ * Creates a diagonally dominant (well-conditioned, non-singular) matrix.
+ * A[i][i] = size + 1, A[i][j] = 1 for i != j.
  *
  * @example
- * const wellConditioned = createWellConditionedMatrix(3);
+ * const A = createDiagonallyDominantMatrix(3);
+ * // [[4, 1, 1], [1, 4, 1], [1, 1, 4]]
+ */
+export function createDiagonallyDominantMatrix(size: number): Matrix {
+  const data = new Float64Array(size * size);
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      data[i * size + j] = i === j ? size + 1 : 1;
+    }
+  }
+  return { rows: size, cols: size, data };
+}
+
+/**
+ * Creates a singular matrix (linearly dependent rows)
+ *
+ * @example
+ * const singular = createSingularMatrix(3);
+ * // Row 2 = Row 0 + Row 1
+ */
+export function createSingularMatrix(size: number): Matrix {
+  const data = new Float64Array(size * size);
+
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      data[i * size + j] = i + j + 1;
+    }
+  }
+
+  // Make last row = sum of all other rows (linearly dependent)
+  for (let j = 0; j < size; j++) {
+    let sum = 0;
+    for (let i = 0; i < size - 1; i++) {
+      sum += data[i * size + j];
+    }
+    data[(size - 1) * size + j] = sum;
+  }
+
+  return { rows: size, cols: size, data };
+}
+
+/**
+ * Creates a Hilbert matrix (notoriously ill-conditioned)
+ * H[i][j] = 1 / (i + j + 1)
+ *
+ * @example
+ * const hilbert = createHilbertMatrix(3);
+ * // [[1, 1/2, 1/3],
+ * //  [1/2, 1/3, 1/4],
+ * //  [1/3, 1/4, 1/5]]
+ */
+export function createHilbertMatrix(size: number): Matrix {
+  const data = new Float64Array(size * size);
+
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      data[i * size + j] = 1 / (i + j + 1);
+    }
+  }
+
+  return { rows: size, cols: size, data };
+}
+
+/**
+ * Creates a well-conditioned matrix for testing numerical stability.
+ * This creates a symmetric positive definite matrix using A = B^T * B.
+ *
+ * WARNING: This produces singular matrices for size >= 3 (rank-2).
+ * Use createDiagonallyDominantMatrix instead for reliable non-singular matrices.
+ *
+ * @example
+ * const wellConditioned = createWellConditionedMatrix(2);
  */
 export function createWellConditionedMatrix(size: number): Matrix {
   const data = new Float64Array(size * size);

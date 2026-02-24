@@ -1,11 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import {
+  luDecompose,
+  luInverse,
+  luSolve,
+  solveLinearSystem,
+} from '@/engine/solver/luDecomposition';
+import {
   cooToCSR,
   multiplyMatrices,
   multiplyMatrixVector,
   sparseMatrixVectorMultiply,
 } from '@/engine/solver/matrix';
-import type { Matrix, SparseMatrix } from '@/types/circuit';
+import type { Matrix, SparseMatrix, Vector } from '@/types/circuit';
+import { createDiagonallyDominantMatrix } from '../../factories/matrix';
 
 /**
  * Performance benchmarks for matrix operations
@@ -132,6 +139,90 @@ describe.skipIf(!runPerf)('Performance Benchmarks', () => {
       // For 1% density, sparse COO should be significantly faster
       // At 1% density, sparse only processes 10,000 entries vs 1,000,000 for dense
       expect(sparseDuration).toBeLessThan(denseDuration);
+    });
+  });
+
+  // ============================================================================
+  // LU Decomposition Performance
+  // ============================================================================
+
+  describe('LU Decomposition', () => {
+    it('should decompose 100x100 matrix in under 50ms', () => {
+      const A = createDiagonallyDominantMatrix(100);
+
+      // Warmup
+      luDecompose(A);
+
+      const start = performance.now();
+      const lu = luDecompose(A);
+      const elapsed = performance.now() - start;
+
+      expect(lu.singular).toBe(false);
+      expect(elapsed).toBeLessThan(50);
+    });
+
+    it('should solve 100x100 system (decompose + solve) in under 50ms', () => {
+      const n = 100;
+      const A = createDiagonallyDominantMatrix(n);
+      const b = createRandomVector(n);
+
+      // Warmup
+      solveLinearSystem(A, b);
+
+      const start = performance.now();
+      const x = solveLinearSystem(A, b);
+      const elapsed = performance.now() - start;
+
+      expect(x.length).toBe(n);
+      expect(elapsed).toBeLessThan(50);
+    });
+
+    it('should reuse LU factorization for multiple RHS faster than re-decomposing', () => {
+      const n = 50;
+      const numRHS = 10;
+      const A = createDiagonallyDominantMatrix(n);
+      const vectors: Vector[] = [];
+      for (let i = 0; i < numRHS; i++) {
+        vectors.push(createRandomVector(n));
+      }
+
+      // Warmup
+      const luWarmup = luDecompose(A);
+      luSolve(luWarmup, vectors[0]);
+      solveLinearSystem(A, vectors[0]);
+
+      // Approach 1: decompose once, solve many
+      const start1 = performance.now();
+      const lu = luDecompose(A);
+      for (const v of vectors) {
+        luSolve(lu, v);
+      }
+      const elapsed1 = performance.now() - start1;
+
+      // Approach 2: decompose each time
+      const start2 = performance.now();
+      for (const v of vectors) {
+        solveLinearSystem(A, v);
+      }
+      const elapsed2 = performance.now() - start2;
+
+      // Reuse should be faster
+      expect(elapsed1).toBeLessThan(elapsed2);
+    });
+
+    it('should compute inverse of 50x50 matrix in under 50ms', () => {
+      const A = createDiagonallyDominantMatrix(50);
+      const lu = luDecompose(A);
+
+      // Warmup
+      luInverse(lu);
+
+      const start = performance.now();
+      const inv = luInverse(lu);
+      const elapsed = performance.now() - start;
+
+      expect(inv.rows).toBe(50);
+      expect(elapsed).toBeLessThan(50);
     });
   });
 
