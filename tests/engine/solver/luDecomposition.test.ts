@@ -634,6 +634,20 @@ describe('LU Decomposition', () => {
       );
     });
 
+    it('should throw for singular matrix', () => {
+      const A = createSingularMatrix(3);
+      const lu = luDecompose(A);
+      const B = createTestMatrix({
+        rows: 3,
+        cols: 2,
+        data: [1, 2, 3, 4, 5, 6],
+      });
+
+      expect(() => luSolveMultiple(lu, B)).toThrow(
+        'Matrix is singular or near-singular'
+      );
+    });
+
     it('should solve for multiple right-hand sides', () => {
       // A = [[2, 1], [4, 3]]
       // B = [[5, 1], [11, 3]]
