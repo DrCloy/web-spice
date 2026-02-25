@@ -37,9 +37,9 @@ export const SMALL_CIRCUIT_10_NODES: PerformanceBenchmark = (() => {
   circuit.name = 'Performance: Small Circuit (10 resistors)';
   return {
     circuit,
-    description: 'Small circuit with 10 resistors (12 nodes)',
+    description: 'Small circuit with 10 resistors (11 nodes)',
     expectedComplexity: 'O(n)' as const,
-    nodeCount: 12, // Nodes 0-11 (10 resistors create 12 nodes total)
+    nodeCount: 11, // Nodes 0-10 (last resistor connects back to ground)
     componentCount: 12, // 10 resistors + voltage source + ground
   };
 })();

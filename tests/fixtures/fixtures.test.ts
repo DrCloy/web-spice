@@ -116,9 +116,9 @@ describe('Circuit Fixtures', () => {
           expect(r2.terminals[0].nodeId).toBe('2');
           expect(r2.terminals[1].nodeId).toBe('3');
 
-          // R3 connects node 3 to node 4
+          // R3 connects node 3 to ground (node 0)
           expect(r3.terminals[0].nodeId).toBe('3');
-          expect(r3.terminals[1].nodeId).toBe('4');
+          expect(r3.terminals[1].nodeId).toBe('0');
         }
       });
     });
