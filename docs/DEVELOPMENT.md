@@ -139,9 +139,9 @@ export class Resistor {
 # 새 기능 개발
 git checkout -b feature/1-resistor-model
 
-# 브랜치명 규칙
-feature/이슈번호-간단설명    # 새 기능
-bugfix/이슈번호-간단설명     # 버그 수정
+# 브랜치명 규칙 (TASK_BREAKDOWN.md의 태스크 번호 사용)
+feature/태스크번호-간단설명    # 새 기능
+bugfix/태스크번호-간단설명     # 버그 수정
 docs/간단설명              # 문서 업데이트
 refactor/간단설명          # 리팩토링
 ```
