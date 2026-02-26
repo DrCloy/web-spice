@@ -337,9 +337,16 @@ function validateCircuitForDC(circuit: Circuit): void {
   for (const component of circuit.components) {
     switch (component.type) {
       case 'resistor':
+      case 'ground':
+        break;
       case 'voltage_source':
       case 'current_source':
-      case 'ground':
+        if ('sourceType' in component && component.sourceType !== 'dc') {
+          throw new WebSpiceError(
+            'UNSUPPORTED_ANALYSIS',
+            `AC ${component.type} '${component.id}' is not supported in DC analysis`
+          );
+        }
         break;
       default:
         throw new WebSpiceError(

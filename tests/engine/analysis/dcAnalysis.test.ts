@@ -3,6 +3,7 @@ import { analyzeDC } from '@/engine/analysis/dcAnalysis';
 import type { Circuit } from '@/types/circuit';
 import { createTestCircuit } from '../../factories/circuits';
 import {
+  createACVoltageSource,
   createDCCurrentSource,
   createDCVoltageSource,
   createGround,
@@ -83,6 +84,23 @@ describe('analyzeDC', () => {
               { name: 'negative', nodeId: '0' },
             ],
           } as any,
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      expect(() => analyzeDC(circuit)).toThrow('not supported in DC analysis');
+    });
+
+    it('should throw for AC voltage source', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createACVoltageSource({
+            id: 'V1',
+            amplitude: 10,
+            frequency: 60,
+            nodes: ['1', '0'],
+          }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
           createGround({ id: 'GND', nodeId: '0' }),
         ],
         groundNodeId: '0',
@@ -448,8 +466,8 @@ describe('analyzeDC', () => {
         ],
         groundNodeId: '0',
       };
-      // Ground-only circuit has no solvable nodes
-      // This should either throw or return trivial result
+      // Ground-only circuit has no non-ground nodes to solve;
+      // analyzeDC is expected to return a trivial result (and not throw).
       const result = analyzeDC(circuit);
       expect(result.operatingPoint.nodeVoltages['0']).toBe(0);
     });
