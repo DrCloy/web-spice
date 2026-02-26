@@ -434,7 +434,7 @@ describe('analyzeDC', () => {
       expect(() => analyzeDC(circuit)).toThrow('singular');
     });
 
-    it('should throw for circuit with only ground', () => {
+    it('should return trivial result for ground-only circuit', () => {
       const circuit: Circuit = {
         id: 'only-ground',
         name: 'Only Ground',

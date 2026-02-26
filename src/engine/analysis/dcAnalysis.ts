@@ -260,6 +260,8 @@ function extractResults(
         const vp = nodeVoltages[cs.terminals[0].nodeId] ?? 0;
         const vq = nodeVoltages[cs.terminals[1].nodeId] ?? 0;
         branchCurrents[cs.id] = cs.current;
+        // (vp - vq) * I is power absorbed by the source; negative means
+        // the current source is delivering power to the circuit
         componentPowers[cs.id] = (vp - vq) * cs.current;
         break;
       }
