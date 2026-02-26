@@ -111,7 +111,8 @@ export function createSeriesResistors(params?: {
   // Create series resistors
   resistances.forEach((resistance, index) => {
     const nodeA = (index + 1).toString();
-    const nodeB = (index + 2).toString();
+    const nodeB =
+      index === resistances.length - 1 ? '0' : (index + 2).toString();
     components.push(
       createResistor({
         id: `R${index + 1}`,
@@ -267,7 +268,6 @@ export const SIMPLE_RESISTOR_10V: CircuitFixture = (() => {
       nodeVoltages: {
         '0': 0, // Ground
         '1': 10, // Voltage source positive terminal
-        '2': 0, // After R1 (connects to ground)
       },
       branchCurrents: {
         V1: 0.01, // 10mA
@@ -309,7 +309,6 @@ export const SERIES_RESISTORS_EQUAL: CircuitFixture = (() => {
         '1': 9, // Voltage source
         '2': 6, // After R1
         '3': 3, // After R2
-        '4': 0, // After R3 (ground)
       },
       branchCurrents: {
         V1: 0.003, // 3mA
@@ -394,7 +393,6 @@ export const BOUNDARY_SMALL_VALUES: CircuitFixture = (() => {
       nodeVoltages: {
         '0': 0,
         '1': 0.001,
-        '2': 0,
       },
       branchCurrents: {
         V1: 0.001,
@@ -431,7 +429,6 @@ export const BOUNDARY_LARGE_VALUES: CircuitFixture = (() => {
       nodeVoltages: {
         '0': 0,
         '1': 1000,
-        '2': 0,
       },
       branchCurrents: {
         V1: 0.001,
