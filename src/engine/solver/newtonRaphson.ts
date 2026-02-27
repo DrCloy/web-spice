@@ -161,12 +161,13 @@ export function solveNewtonRaphson(
     finalUpdateNorm = 0;
     let updateConverged = true;
     for (let i = 0; i < n; i++) {
+      const oldXi = x.data[i];
       const step = opts.dampingFactor * delta.data[i];
-      x.data[i] += step;
+      x.data[i] = oldXi + step;
       const absStep = Math.abs(step);
       if (absStep > finalUpdateNorm) finalUpdateNorm = absStep;
       const threshold =
-        opts.absoluteTolerance + opts.relativeTolerance * Math.abs(x.data[i]);
+        opts.absoluteTolerance + opts.relativeTolerance * Math.abs(oldXi);
       if (absStep >= threshold) updateConverged = false;
     }
 
