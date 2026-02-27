@@ -105,16 +105,36 @@ export function solveNewtonRaphson(
 
   const opts = { ...DEFAULT_NR_OPTIONS, ...options };
 
-  if (opts.dampingFactor <= 0 || opts.dampingFactor > 1) {
+  if (
+    !Number.isFinite(opts.dampingFactor) ||
+    opts.dampingFactor <= 0 ||
+    opts.dampingFactor > 1
+  ) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
-      'Damping factor must be in range (0, 1]'
+      'Damping factor must be a finite number in range (0, 1]'
     );
   }
-  if (opts.maxIterations <= 0) {
+  if (!Number.isFinite(opts.absoluteTolerance) || opts.absoluteTolerance < 0) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
-      'maxIterations must be a positive integer'
+      'absoluteTolerance must be a finite, non-negative number'
+    );
+  }
+  if (!Number.isFinite(opts.relativeTolerance) || opts.relativeTolerance < 0) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'relativeTolerance must be a finite, non-negative number'
+    );
+  }
+  if (
+    !Number.isFinite(opts.maxIterations) ||
+    !Number.isInteger(opts.maxIterations) ||
+    opts.maxIterations <= 0
+  ) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'maxIterations must be a finite, positive integer'
     );
   }
 

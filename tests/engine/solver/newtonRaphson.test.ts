@@ -67,6 +67,12 @@ describe('solveNewtonRaphson', () => {
       expect(() =>
         solveNewtonRaphson(system, guess, { dampingFactor: 1.5 })
       ).toThrowWebSpiceError('INVALID_PARAMETER', 'Damping factor');
+      expect(() =>
+        solveNewtonRaphson(system, guess, { dampingFactor: NaN })
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Damping factor');
+      expect(() =>
+        solveNewtonRaphson(system, guess, { dampingFactor: Infinity })
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Damping factor');
     });
 
     it('should throw for invalid maxIterations', () => {
@@ -75,6 +81,40 @@ describe('solveNewtonRaphson', () => {
       expect(() =>
         solveNewtonRaphson(system, guess, { maxIterations: 0 })
       ).toThrowWebSpiceError('INVALID_PARAMETER', 'maxIterations');
+      expect(() =>
+        solveNewtonRaphson(system, guess, { maxIterations: NaN })
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'maxIterations');
+      expect(() =>
+        solveNewtonRaphson(system, guess, { maxIterations: 1.5 })
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'maxIterations');
+    });
+
+    it('should throw for invalid absoluteTolerance', () => {
+      const system = createSquareSystem(2);
+      const guess: Vector = { length: 1, data: new Float64Array([1]) };
+      expect(() =>
+        solveNewtonRaphson(system, guess, { absoluteTolerance: -1 })
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'absoluteTolerance');
+      expect(() =>
+        solveNewtonRaphson(system, guess, { absoluteTolerance: NaN })
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'absoluteTolerance');
+      expect(() =>
+        solveNewtonRaphson(system, guess, { absoluteTolerance: Infinity })
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'absoluteTolerance');
+    });
+
+    it('should throw for invalid relativeTolerance', () => {
+      const system = createSquareSystem(2);
+      const guess: Vector = { length: 1, data: new Float64Array([1]) };
+      expect(() =>
+        solveNewtonRaphson(system, guess, { relativeTolerance: -1 })
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'relativeTolerance');
+      expect(() =>
+        solveNewtonRaphson(system, guess, { relativeTolerance: NaN })
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'relativeTolerance');
+      expect(() =>
+        solveNewtonRaphson(system, guess, { relativeTolerance: Infinity })
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'relativeTolerance');
     });
   });
 
