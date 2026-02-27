@@ -352,6 +352,42 @@ describe('solveNewtonRaphson', () => {
   // Boundary Values
   // ============================================================================
 
+  describe('Relative Tolerance', () => {
+    it('should use per-element relative tolerance for update convergence', () => {
+      // x² = 1e12, solution x = 1e6
+      // With reltol=1e-3, update threshold near solution ≈ 1e-3 × 1e6 = 1000
+      // This is much more lenient than abstol alone (1e-12)
+      const system = createSquareSystem(1e12);
+      const guess: Vector = { length: 1, data: new Float64Array([1e5]) };
+
+      const withReltol = solveNewtonRaphson(system, guess, {
+        relativeTolerance: 1e-3,
+      });
+      const withoutReltol = solveNewtonRaphson(system, guess, {
+        relativeTolerance: 0,
+      });
+
+      expect(withReltol.converged).toBe(true);
+      expect(withoutReltol.converged).toBe(true);
+      // Both converge, but the final update norm can differ
+      // because reltol relaxes the per-element update check
+      expect(withReltol.solution.data[0]).toBeCloseTo(1e6, 0);
+      expect(withoutReltol.solution.data[0]).toBeCloseTo(1e6, 0);
+    });
+
+    it('should converge with reltol=0 (absolute tolerance only)', () => {
+      const system = createSquareSystem(2);
+      const guess: Vector = { length: 1, data: new Float64Array([1]) };
+
+      const result = solveNewtonRaphson(system, guess, {
+        relativeTolerance: 0,
+      });
+
+      expect(result.converged).toBe(true);
+      expect(result.solution.data[0]).toBeCloseTo(Math.SQRT2, 10);
+    });
+  });
+
   describe('Boundary Values', () => {
     it('should solve for very small solution (x² = 1e-20)', () => {
       const system = createSquareSystem(1e-20);

@@ -58,6 +58,25 @@ export const DEFAULT_NR_OPTIONS: NewtonRaphsonOptions = {
 
 /**
  * Solve a nonlinear system F(x) = 0 using Newton-Raphson iteration.
+ *
+ * Each iteration linearizes the system at the current estimate xₖ,
+ * solves J(xₖ)·Δx = -F(xₖ) via LU decomposition, and updates
+ * xₖ₊₁ = xₖ + α·Δx where α is the damping factor.
+ *
+ * Convergence requires both conditions to be met:
+ * - Update: ∀i, |Δxᵢ| < absoluteTolerance + relativeTolerance × |xᵢ|
+ * - Residual: ‖F(x)‖∞ < absoluteTolerance
+ *
+ * @param system - Nonlinear system providing residual and Jacobian evaluations.
+ * @param initialGuess - Initial estimate of the solution vector x.
+ * @param options - Optional solver configuration; unspecified fields
+ *   fall back to {@link DEFAULT_NR_OPTIONS}.
+ * @returns The {@link NewtonRaphsonResult} containing the solution,
+ *   convergence status, iteration count, and residual/update norms.
+ * @throws {WebSpiceError} `INVALID_PARAMETER` if system or initialGuess is
+ *   null/undefined, dimensions mismatch, or options are out of range.
+ * @throws {WebSpiceError} `CONVERGENCE_FAILED` if the solver does not converge
+ *   within maxIterations or encounters a singular Jacobian.
  */
 export function solveNewtonRaphson(
   system: NonlinearSystem,
@@ -138,23 +157,25 @@ export function solveNewtonRaphson(
     }
 
     // Apply damping: x += α·Δx
+    // Check per-element update convergence: |Δxᵢ| < abstol + reltol × |xᵢ|
     finalUpdateNorm = 0;
+    let updateConverged = true;
     for (let i = 0; i < n; i++) {
       const step = opts.dampingFactor * delta.data[i];
       x.data[i] += step;
       const absStep = Math.abs(step);
       if (absStep > finalUpdateNorm) finalUpdateNorm = absStep;
+      const threshold =
+        opts.absoluteTolerance + opts.relativeTolerance * Math.abs(x.data[i]);
+      if (absStep >= threshold) updateConverged = false;
     }
 
     // Recompute residual at updated x (carried forward to next iteration)
     F = system.residual(x);
     residualNorm = normInfinity(F);
 
-    // Convergence: both update and residual are small
-    if (
-      finalUpdateNorm < opts.absoluteTolerance &&
-      residualNorm < opts.absoluteTolerance
-    ) {
+    // Convergence: update within tolerance AND residual is small
+    if (updateConverged && residualNorm < opts.absoluteTolerance) {
       return {
         solution: x,
         converged: true,
