@@ -4,6 +4,7 @@
  */
 
 import { expect } from 'vitest';
+import type { ErrorCode } from '@/types/circuit';
 import * as matchers from './utils/matchers';
 
 /**
@@ -120,6 +121,13 @@ declare module 'vitest' {
       tolerance: number;
       error: number;
     }): T;
+
+    /**
+     * Asserts that a function throws a WebSpiceError with the expected error code
+     * @param code - Expected WebSpiceError error code
+     * @param messageMatch - Optional substring that must appear in the error message
+     */
+    toThrowWebSpiceError(code: ErrorCode, messageMatch?: string): T;
   }
 
   interface AsymmetricMatchersContaining {
@@ -140,5 +148,6 @@ declare module 'vitest' {
       tolerance: number;
       error: number;
     }): unknown;
+    toThrowWebSpiceError(code: ErrorCode, messageMatch?: string): unknown;
   }
 }

@@ -2,7 +2,8 @@
  * Custom Vitest matchers for WebSpice numerical and circuit testing
  */
 
-import type { Matrix } from '@/types/circuit';
+import type { ErrorCode, Matrix } from '@/types/circuit';
+import { WebSpiceError } from '@/types/circuit';
 import type { Resistor } from '@/types/component';
 import { DEFAULT_TOLERANCE } from '../setup';
 
@@ -361,4 +362,67 @@ export function toConvergeWithin(
         : `Expected to converge within constraints:\n  Iterations: ${iterations}/${maxIterations}\n  Error: ${error} (tolerance: ${tolerance})`;
     },
   };
+}
+
+/**
+ * Custom matcher: toThrowWebSpiceError
+ * Asserts that a function throws a WebSpiceError with the expected error code.
+ * Optionally checks that the error message contains a given substring.
+ *
+ * @param received - Function expected to throw
+ * @param code - Expected WebSpiceError error code
+ * @param messageMatch - Optional substring that must appear in the error message
+ *
+ * @example
+ * expect(() => solveLinearSystem(singularMatrix, b)).toThrowWebSpiceError('SINGULAR_MATRIX');
+ * expect(() => luDecompose(null)).toThrowWebSpiceError('INVALID_PARAMETER', 'cannot be null');
+ */
+export function toThrowWebSpiceError(
+  this: { isNot: boolean },
+  received: () => void,
+  code: ErrorCode,
+  messageMatch?: string
+) {
+  const { isNot } = this;
+
+  try {
+    received();
+    return {
+      pass: false,
+      message: () =>
+        isNot
+          ? `Expected function NOT to throw WebSpiceError('${code}'), and it didn't`
+          : `Expected function to throw WebSpiceError('${code}'), but it did not throw`,
+    };
+  } catch (e) {
+    if (!(e instanceof WebSpiceError)) {
+      return {
+        pass: false,
+        message: () =>
+          `Expected WebSpiceError('${code}') but got ${(e as Error)?.constructor?.name}: ${(e as Error)?.message}`,
+      };
+    }
+
+    const codeMatch = e.code === code;
+    const msgMatch =
+      messageMatch === undefined || e.message.includes(messageMatch);
+    const pass = codeMatch && msgMatch;
+
+    const errors: string[] = [];
+    if (!codeMatch) errors.push(`code: expected '${code}', got '${e.code}'`);
+    if (!msgMatch)
+      errors.push(
+        `message: expected to contain '${messageMatch}', got '${e.message}'`
+      );
+
+    return {
+      pass,
+      message: () => {
+        if (isNot) {
+          return `Expected function NOT to throw WebSpiceError('${code}'), but it did: ${e.message}`;
+        }
+        return `WebSpiceError mismatch:\n${errors.map(err => `  - ${err}`).join('\n')}`;
+      },
+    };
+  }
 }

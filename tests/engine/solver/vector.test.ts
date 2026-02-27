@@ -34,7 +34,10 @@ describe('Vector Operations', () => {
       const v1 = createTestVector({ length: 2, data: [1, 2] });
       const v2 = createTestVector({ length: 3, data: [1, 2, 3] });
 
-      expect(() => addVectors(v1, v2)).toThrow('Vector dimensions must match');
+      expect(() => addVectors(v1, v2)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Vector dimensions must match'
+      );
     });
 
     it('should handle zero vectors', () => {
@@ -62,7 +65,8 @@ describe('Vector Operations', () => {
       const v1 = createTestVector({ length: 2, data: [1, 2] });
       const v2 = createTestVector({ length: 3, data: [1, 2, 3] });
 
-      expect(() => subtractVectors(v1, v2)).toThrow(
+      expect(() => subtractVectors(v1, v2)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'Vector dimensions must match'
       );
     });
@@ -136,7 +140,10 @@ describe('Vector Operations', () => {
       const v1 = createTestVector({ length: 2, data: [1, 2] });
       const v2 = createTestVector({ length: 3, data: [1, 2, 3] });
 
-      expect(() => dotProduct(v1, v2)).toThrow('Vector dimensions must match');
+      expect(() => dotProduct(v1, v2)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Vector dimensions must match'
+      );
     });
   });
 
@@ -154,7 +161,8 @@ describe('Vector Operations', () => {
       const v1 = createTestVector({ length: 2, data: [1, 2] });
       const v2 = createTestVector({ length: 3, data: [1, 2, 3] });
 
-      expect(() => hadamardProduct(v1, v2)).toThrow(
+      expect(() => hadamardProduct(v1, v2)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'Vector dimensions must match'
       );
     });
@@ -231,7 +239,10 @@ describe('Vector Operations', () => {
     it('should throw error for zero vector', () => {
       const v = createZeroVector(3);
 
-      expect(() => normalize(v)).toThrow('Cannot normalize zero vector');
+      expect(() => normalize(v)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Cannot normalize zero vector'
+      );
     });
   });
 
@@ -250,7 +261,10 @@ describe('Vector Operations', () => {
       const v1 = createTestVector({ length: 2, data: [1, 2] });
       const v2 = createTestVector({ length: 3, data: [1, 2, 3] });
 
-      expect(() => distance(v1, v2)).toThrow('Vector dimensions must match');
+      expect(() => distance(v1, v2)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Vector dimensions must match'
+      );
     });
   });
 
