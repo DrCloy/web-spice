@@ -60,7 +60,10 @@ describe('Matrix Operations', () => {
         data: [1, 2, 3, 4, 5, 6],
       });
 
-      expect(() => addMatrices(A, B)).toThrow('Matrix dimensions must match');
+      expect(() => addMatrices(A, B)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Matrix dimensions must match'
+      );
     });
   });
 
@@ -82,7 +85,8 @@ describe('Matrix Operations', () => {
         data: [1, 2, 3, 4, 5, 6],
       });
 
-      expect(() => subtractMatrices(A, B)).toThrow(
+      expect(() => subtractMatrices(A, B)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'Matrix dimensions must match'
       );
     });
@@ -148,7 +152,8 @@ describe('Matrix Operations', () => {
       });
       const B = createTestMatrix({ rows: 2, cols: 2, data: [1, 2, 3, 4] });
 
-      expect(() => multiplyMatrices(A, B)).toThrow(
+      expect(() => multiplyMatrices(A, B)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'Matrix dimensions incompatible for multiplication'
       );
     });
@@ -187,7 +192,8 @@ describe('Matrix Operations', () => {
       });
       const v = createTestVector({ length: 2, data: [1, 2] });
 
-      expect(() => multiplyMatrixVector(A, v)).toThrow(
+      expect(() => multiplyMatrixVector(A, v)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'Matrix columns must match vector length'
       );
     });
@@ -217,7 +223,8 @@ describe('Matrix Operations', () => {
         data: [1, 2, 3, 4, 5, 6],
       });
 
-      expect(() => multiplyVectorMatrix(v, A)).toThrow(
+      expect(() => multiplyVectorMatrix(v, A)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'Vector length must match matrix rows'
       );
     });
@@ -271,7 +278,10 @@ describe('Matrix Operations', () => {
     it('should throw error for invalid row index', () => {
       const A = createTestMatrix({ rows: 2, cols: 2, data: [1, 2, 3, 4] });
 
-      expect(() => getRow(A, 3)).toThrow('Row index out of bounds');
+      expect(() => getRow(A, 3)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Row index out of bounds'
+      );
     });
   });
 
@@ -292,7 +302,10 @@ describe('Matrix Operations', () => {
     it('should throw error for invalid column index', () => {
       const A = createTestMatrix({ rows: 2, cols: 2, data: [1, 2, 3, 4] });
 
-      expect(() => getColumn(A, 3)).toThrow('Column index out of bounds');
+      expect(() => getColumn(A, 3)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Column index out of bounds'
+      );
     });
   });
 
@@ -318,7 +331,8 @@ describe('Matrix Operations', () => {
       });
       const newRow = [7, 8];
 
-      expect(() => setRow(A, 1, newRow)).toThrow(
+      expect(() => setRow(A, 1, newRow)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'Row length must match matrix columns'
       );
     });
@@ -346,7 +360,8 @@ describe('Matrix Operations', () => {
       });
       const newCol = [7, 8];
 
-      expect(() => setColumn(A, 1, newCol)).toThrow(
+      expect(() => setColumn(A, 1, newCol)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'Column length must match matrix rows'
       );
     });
@@ -371,7 +386,8 @@ describe('Matrix Operations', () => {
     it('should throw error for invalid indices', () => {
       const A = createTestMatrix({ rows: 2, cols: 2, data: [1, 2, 3, 4] });
 
-      expect(() => submatrix(A, 0, 3, 0, 2)).toThrow(
+      expect(() => submatrix(A, 0, 3, 0, 2)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'Invalid submatrix indices'
       );
     });
@@ -402,7 +418,10 @@ describe('Matrix Operations', () => {
         data: [1, 2, 3, 4, 5, 6],
       });
 
-      expect(() => trace(A)).toThrow('Matrix must be square');
+      expect(() => trace(A)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Matrix must be square'
+      );
     });
   });
 
@@ -567,7 +586,10 @@ describe('Matrix Operations', () => {
         data: [1, 2, 3, 4, 5, 6],
       });
 
-      expect(() => conditionNumber(A)).toThrow('Matrix must be square');
+      expect(() => conditionNumber(A)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Matrix must be square'
+      );
     });
   });
 
@@ -651,7 +673,10 @@ describe('Matrix Operations', () => {
         data: [1, 2, 3, 4, 5, 6],
       });
 
-      expect(() => estimateConditionNumber(A)).toThrow('Matrix must be square');
+      expect(() => estimateConditionNumber(A)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Matrix must be square'
+      );
     });
   });
 

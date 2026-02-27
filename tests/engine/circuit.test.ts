@@ -84,28 +84,19 @@ describe('CircuitImpl', () => {
 
       expect(
         () => new CircuitImpl(makeCircuitData({ components: [r1, r2] }))
-      ).toThrow(WebSpiceError);
-      expect(
-        () => new CircuitImpl(makeCircuitData({ components: [r1, r2] }))
-      ).toThrow("Component with ID 'R1' already exists in circuit");
+      ).toThrowWebSpiceError('INVALID_COMPONENT', 'already exists');
     });
 
     it('should throw error for empty circuit ID', () => {
-      expect(() => new CircuitImpl(makeCircuitData({ id: '' }))).toThrow(
-        WebSpiceError
-      );
-      expect(() => new CircuitImpl(makeCircuitData({ id: '' }))).toThrow(
-        'Circuit ID cannot be empty'
-      );
+      expect(
+        () => new CircuitImpl(makeCircuitData({ id: '' }))
+      ).toThrowWebSpiceError('INVALID_CIRCUIT', 'Circuit ID cannot be empty');
     });
 
     it('should throw error for empty circuit name', () => {
-      expect(() => new CircuitImpl(makeCircuitData({ name: '' }))).toThrow(
-        WebSpiceError
-      );
-      expect(() => new CircuitImpl(makeCircuitData({ name: '' }))).toThrow(
-        'Circuit name cannot be empty'
-      );
+      expect(
+        () => new CircuitImpl(makeCircuitData({ name: '' }))
+      ).toThrowWebSpiceError('INVALID_CIRCUIT', 'Circuit name cannot be empty');
     });
 
     it('should trim and normalize ID', () => {
@@ -196,9 +187,9 @@ describe('CircuitImpl', () => {
 
       circuit.addComponent(r1);
 
-      expect(() => circuit.addComponent(r2)).toThrow(WebSpiceError);
-      expect(() => circuit.addComponent(r2)).toThrow(
-        "Component with ID 'R1' already exists in circuit"
+      expect(() => circuit.addComponent(r2)).toThrowWebSpiceError(
+        'INVALID_COMPONENT',
+        'already exists'
       );
     });
 
@@ -221,9 +212,9 @@ describe('CircuitImpl', () => {
     it('should throw error when removing non-existent component', () => {
       const circuit = new CircuitImpl(makeCircuitData());
 
-      expect(() => circuit.removeComponent('R1')).toThrow(WebSpiceError);
-      expect(() => circuit.removeComponent('R1')).toThrow(
-        "Component with ID 'R1' not found in circuit"
+      expect(() => circuit.removeComponent('R1')).toThrowWebSpiceError(
+        'INVALID_COMPONENT',
+        'not found'
       );
     });
 

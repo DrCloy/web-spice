@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DCCurrentSourceImpl } from '@/engine/components/dcCurrentSource';
 import type { DCCurrentSource } from '@/types/component';
-import { WebSpiceError } from '@/types/circuit';
 
 /**
  * Helper function to create DC current source test data with optional overrides
@@ -55,7 +54,10 @@ describe('DCCurrentSourceImpl', () => {
     it('should throw error for empty component ID', () => {
       expect(
         () => new DCCurrentSourceImpl(makeDCCurrentSourceData({ id: '' }))
-      ).toThrow('Component ID cannot be empty');
+      ).toThrowWebSpiceError(
+        'INVALID_COMPONENT',
+        'Component ID cannot be empty'
+      );
     });
 
     it('should throw error for empty positive node ID', () => {
@@ -69,7 +71,7 @@ describe('DCCurrentSourceImpl', () => {
               ],
             })
           )
-      ).toThrow(WebSpiceError);
+      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
     });
 
     it('should throw error for empty negative node ID', () => {
@@ -83,7 +85,7 @@ describe('DCCurrentSourceImpl', () => {
               ],
             })
           )
-      ).toThrow(WebSpiceError);
+      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
     });
 
     it('should throw error for identical node IDs', () => {
@@ -97,7 +99,10 @@ describe('DCCurrentSourceImpl', () => {
               ],
             })
           )
-      ).toThrow('Terminals cannot be connected to the same node');
+      ).toThrowWebSpiceError(
+        'INVALID_COMPONENT',
+        'Terminals cannot be connected to the same node'
+      );
     });
 
     it('should throw error for node IDs that are identical after trimming', () => {
@@ -111,13 +116,19 @@ describe('DCCurrentSourceImpl', () => {
               ],
             })
           )
-      ).toThrow('Terminals cannot be connected to the same node');
+      ).toThrowWebSpiceError(
+        'INVALID_COMPONENT',
+        'Terminals cannot be connected to the same node'
+      );
     });
 
     it('should throw error for invalid current (NaN)', () => {
       expect(
         () => new DCCurrentSourceImpl(makeDCCurrentSourceData({ current: NaN }))
-      ).toThrow('Current must be a valid number');
+      ).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Current must be a valid number'
+      );
     });
 
     it('should throw error for invalid current (Infinity)', () => {
@@ -126,7 +137,10 @@ describe('DCCurrentSourceImpl', () => {
           new DCCurrentSourceImpl(
             makeDCCurrentSourceData({ current: Infinity })
           )
-      ).toThrow('Current must be a valid number');
+      ).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Current must be a valid number'
+      );
     });
 
     it('should throw error for invalid terminals (not exactly 2)', () => {
@@ -137,7 +151,7 @@ describe('DCCurrentSourceImpl', () => {
               terminals: [{ name: 'pos', nodeId: 'n1' }] as any,
             })
           )
-      ).toThrow('DC current source must have exactly 2 terminals');
+      ).toThrowWebSpiceError('INVALID_COMPONENT', 'exactly 2 terminals');
     });
   });
 

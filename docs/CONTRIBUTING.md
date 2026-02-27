@@ -56,12 +56,12 @@ git fetch upstream
 git checkout main
 git merge upstream/main
 
-# 새 브랜치 생성 (이슈 기반 네이밍)
-git checkout -b feature/123-resistor-component
+# 새 브랜치 생성 (TASK_BREAKDOWN.md 태스크 번호 기반 네이밍)
+git checkout -b feature/4-resistor-component
 
 # 브랜치 네이밍 규칙:
-# feature/이슈번호-간단설명    # 새 기능
-# bugfix/이슈번호-간단설명     # 버그 수정
+# feature/태스크번호-간단설명    # 새 기능
+# bugfix/태스크번호-간단설명     # 버그 수정
 # docs/간단설명              # 문서 업데이트
 # refactor/간단설명          # 리팩토링
 ```
@@ -103,7 +103,7 @@ git commit -m "feat: add resistor component model
 Closes #123"
 
 # 브랜치 푸시
-git push origin feature/123-resistor-component
+git push origin feature/4-resistor-component
 ```
 
 ### 6. Pull Request 생성

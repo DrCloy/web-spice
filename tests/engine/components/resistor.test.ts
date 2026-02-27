@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ResistorImpl } from '@/engine/components/resistor';
 import type { Resistor } from '@/types/component';
-import { WebSpiceError } from '@/types/circuit';
 
 /**
  * Helper function to create resistor test data with optional overrides
@@ -49,29 +48,44 @@ describe('Resistor', () => {
     it('should throw error for zero resistance', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: 0 }))
-      ).toThrow('Resistance must be greater than 0');
+      ).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Resistance must be greater than 0'
+      );
     });
 
     it('should throw error for negative resistance', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: -100 }))
-      ).toThrow('Resistance must be greater than 0');
+      ).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Resistance must be greater than 0'
+      );
     });
 
     it('should throw error for invalid resistance (NaN)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: NaN }))
-      ).toThrow('Resistance must be a valid number');
+      ).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Resistance must be a valid number'
+      );
     });
 
     it('should throw error for invalid resistance (Infinity)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: Infinity }))
-      ).toThrow('Resistance must be a valid number');
+      ).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Resistance must be a valid number'
+      );
     });
 
     it('should throw error for empty component ID', () => {
-      expect(() => new ResistorImpl(makeResistorData({ id: '' }))).toThrow(
+      expect(
+        () => new ResistorImpl(makeResistorData({ id: '' }))
+      ).toThrowWebSpiceError(
+        'INVALID_COMPONENT',
         'Component ID cannot be empty'
       );
     });
@@ -87,7 +101,7 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrow(WebSpiceError);
+      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
 
       expect(
         () =>
@@ -99,7 +113,7 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrow(WebSpiceError);
+      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
     });
 
     it('should throw error for identical node IDs', () => {
@@ -113,7 +127,10 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrow('Terminals cannot be connected to the same node');
+      ).toThrowWebSpiceError(
+        'INVALID_COMPONENT',
+        'Terminals cannot be connected to the same node'
+      );
     });
 
     it('should throw error for node IDs that are identical after trimming', () => {
@@ -127,7 +144,10 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrow('Terminals cannot be connected to the same node');
+      ).toThrowWebSpiceError(
+        'INVALID_COMPONENT',
+        'Terminals cannot be connected to the same node'
+      );
     });
 
     it('should throw error for invalid terminals (not exactly 2)', () => {
@@ -138,7 +158,7 @@ describe('Resistor', () => {
               terminals: [{ name: 'terminal1', nodeId: 'n1' }] as any,
             })
           )
-      ).toThrow('Resistor must have exactly 2 terminals');
+      ).toThrowWebSpiceError('INVALID_COMPONENT', 'exactly 2 terminals');
     });
   });
 
@@ -156,13 +176,13 @@ describe('Resistor', () => {
     it('should throw error for resistance below minimum (< 1 mΩ)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: 1e-4 }))
-      ).toThrow('Resistance must be between 1e-3 and 1e12 Ohms');
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'between 1e-3 and 1e12');
     });
 
     it('should throw error for resistance above maximum (> 1 TΩ)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: 1e13 }))
-      ).toThrow('Resistance must be between 1e-3 and 1e12 Ohms');
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'between 1e-3 and 1e12');
     });
 
     it('should accept typical resistor values', () => {
