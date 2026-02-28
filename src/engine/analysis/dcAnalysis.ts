@@ -185,10 +185,10 @@ function stampVoltageSource(
 
 /**
  * Stamp a DC current source into the RHS vector.
- * SPICE convention: current I flows out of positive terminal (terminals[0])
- * through external circuit into negative terminal (terminals[1]).
- *   i[p] -= I  (current leaves positive terminal node)
- *   i[q] += I  (current enters negative terminal node)
+ * SPICE convention: positive current I flows from the positive terminal (N+)
+ * through the source to the negative terminal (N-).
+ *   b[N+] -= I  (current drawn from N+ into source)
+ *   b[N-] += I  (current injected from source into N-)
  */
 function stampCurrentSource(
   b: Vector,
@@ -248,8 +248,8 @@ function extractResults(
       case 'voltage_source': {
         const vs = component as DCVoltageSource;
         const vsIdx = map.voltageSourceIds.indexOf(vs.id);
-        // MNA j is current into positive terminal; negate to get
-        // conventional "current supplied to circuit" direction
+        // MNA variable j_k is defined as current from N+ through source to N-.
+        // Negate to get the conventional direction (current out of N+ into external circuit).
         const current = -x.data[map.numNodes + vsIdx];
         branchCurrents[vs.id] = current;
         componentPowers[vs.id] = -vs.voltage * current;
