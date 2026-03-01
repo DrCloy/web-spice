@@ -14,12 +14,13 @@ import type {
   NodeId,
   Resistor,
   Terminal,
+  TerminalName,
 } from '@/types/component';
 
 /**
  * Creates a terminal object
  */
-function createTerminal(name: string, nodeId: NodeId): Terminal {
+function createTerminal(name: TerminalName, nodeId: NodeId): Terminal {
   return { name, nodeId };
 }
 
