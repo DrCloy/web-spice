@@ -5,6 +5,7 @@ import { CircuitImpl } from '@/engine/circuit';
 import { ResistorImpl } from '@/engine/components/resistor';
 import { DCVoltageSourceImpl } from '@/engine/components/dcVoltageSource';
 import { DCCurrentSourceImpl } from '@/engine/components/dcCurrentSource';
+import { parseSIValue } from '@/engine/parser/siPrefix';
 
 /**
  * Parses a CircuitJSON object into a CircuitImpl instance.
@@ -92,7 +93,7 @@ function parseResistor(json: ComponentJSON): Component {
     id: json.id,
     type: 'resistor',
     name: json.name,
-    resistance: Number(json.parameters.resistance),
+    resistance: parseSIValue(json.parameters.resistance),
     terminals: [
       { name: 'terminal1', nodeId: json.nodes[0] },
       { name: 'terminal2', nodeId: json.nodes[1] },
@@ -131,7 +132,7 @@ function parseVoltageSource(json: ComponentJSON): Component {
     type: 'voltage_source',
     sourceType: 'dc',
     name: json.name,
-    voltage: Number(json.parameters.voltage),
+    voltage: parseSIValue(json.parameters.voltage),
     terminals: [
       { name: 'pos', nodeId: json.nodes[0] },
       { name: 'neg', nodeId: json.nodes[1] },
@@ -170,7 +171,7 @@ function parseCurrentSource(json: ComponentJSON): Component {
     type: 'current_source',
     sourceType: 'dc',
     name: json.name,
-    current: Number(json.parameters.current),
+    current: parseSIValue(json.parameters.current),
     terminals: [
       { name: 'pos', nodeId: json.nodes[0] },
       { name: 'neg', nodeId: json.nodes[1] },

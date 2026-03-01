@@ -311,6 +311,74 @@ describe('Circuit Parser', () => {
     });
   });
 
+  describe('SI prefix parsing in parameters', () => {
+    it('should parse resistance with SI prefix', () => {
+      const json = makeCircuitJSON({
+        components: [
+          {
+            id: 'R1',
+            type: 'resistor',
+            name: 'R1',
+            nodes: ['1', '0'],
+            parameters: { resistance: '4.7k' },
+          },
+          {
+            id: 'V1',
+            type: 'voltage_source',
+            name: 'V1',
+            nodes: ['1', '0'],
+            parameters: { sourceType: 'dc', voltage: 5 },
+          },
+          {
+            id: 'GND',
+            type: 'ground',
+            name: 'GND',
+            nodes: ['0'],
+            parameters: {},
+          },
+        ],
+      });
+
+      const circuit = parseCircuit(json);
+      const resistor = circuit.components.find(c => c.id === 'R1');
+
+      expect(resistor).toBeDefined();
+      if (resistor!.type === 'resistor') {
+        expect(resistor!.resistance).toBe(4700);
+      }
+    });
+
+    it('should parse current with SI prefix', () => {
+      const json = makeCircuitJSON({
+        components: [
+          {
+            id: 'I1',
+            type: 'current_source',
+            name: 'I1',
+            nodes: ['1', '0'],
+            parameters: { sourceType: 'dc', current: '10m' },
+          },
+          makeComponentJSON(),
+          {
+            id: 'GND',
+            type: 'ground',
+            name: 'GND',
+            nodes: ['0'],
+            parameters: {},
+          },
+        ],
+      });
+
+      const circuit = parseCircuit(json);
+      const source = circuit.components.find(c => c.id === 'I1');
+
+      expect(source).toBeDefined();
+      if (source!.type === 'current_source' && source!.sourceType === 'dc') {
+        expect(source!.current).toBeCloseTo(0.01, 10);
+      }
+    });
+  });
+
   describe('error: circuit-level validation', () => {
     it('should throw error for null input', () => {
       expect(() =>
