@@ -15,7 +15,11 @@ import type {
   NodeId,
   Resistor,
 } from '@/types/component';
-import type { DCAnalysisResult, SolverOptions } from '@/types/simulation';
+import type {
+  DCAnalysisConfig,
+  DCAnalysisResult,
+  SolverOptions,
+} from '@/types/simulation';
 import { solveLinearSystem } from '@/engine/solver/luDecomposition';
 
 // ============================================================================
@@ -37,21 +41,18 @@ interface NodeIndexMap {
  */
 export function analyzeDC(
   circuit: Circuit,
+  config?: DCAnalysisConfig,
   options?: Partial<SolverOptions>
 ): DCAnalysisResult {
   validateCircuitForDC(circuit);
 
-  const map = buildNodeIndexMap(circuit);
+  const operatingPoint = solveOperatingPoint(circuit, options);
 
-  // Trivial circuit (ground only, no solvable nodes)
-  if (map.systemSize === 0) {
+  // If no sweep config, return single operating point
+  if (!config?.sweep) {
     return {
       type: 'dc',
-      operatingPoint: {
-        nodeVoltages: { [circuit.groundNodeId]: 0 },
-        branchCurrents: {},
-        componentPowers: {},
-      },
+      operatingPoint,
       convergenceInfo: {
         converged: true,
         iterations: 1,
@@ -59,6 +60,58 @@ export function analyzeDC(
         tolerance: 0,
         finalError: 0,
       },
+    };
+  }
+
+  // DC sweep: vary source value and solve at each step
+  const sweep = config.sweep;
+  const sweepValues = generateSweepValues(
+    sweep.startValue,
+    sweep.endValue,
+    sweep.stepValue
+  );
+  const operatingPoints = sweepValues.map(value => {
+    const modifiedCircuit = applySourceValue(circuit, sweep.sourceId, value);
+    return solveOperatingPoint(modifiedCircuit, options);
+  });
+
+  return {
+    type: 'dc',
+    operatingPoint,
+    sweep: { sweepValues, operatingPoints },
+    convergenceInfo: {
+      converged: true,
+      iterations: 1,
+      maxIterations: 1,
+      tolerance: 0,
+      finalError: 0,
+    },
+  };
+}
+
+// ============================================================================
+// MNA System Construction
+// ============================================================================
+
+/**
+ * Solve for a single DC operating point.
+ * Extracted from analyzeDC to allow reuse in sweep mode.
+ */
+function solveOperatingPoint(
+  circuit: Circuit,
+  options?: Partial<SolverOptions>
+): {
+  nodeVoltages: Record<NodeId, number>;
+  branchCurrents: Record<ComponentId, number>;
+  componentPowers: Record<ComponentId, number>;
+} {
+  const map = buildNodeIndexMap(circuit);
+
+  if (map.systemSize === 0) {
+    return {
+      nodeVoltages: { [circuit.groundNodeId]: 0 },
+      branchCurrents: {},
+      componentPowers: {},
     };
   }
 
@@ -77,18 +130,49 @@ export function analyzeDC(
     throw error;
   }
 
-  const operatingPoint = extractResults(solution, circuit, map);
+  return extractResults(solution, circuit, map);
+}
 
+/**
+ * Generate an array of sweep values from start to end with given step.
+ * Always includes startValue; includes endValue if the range is evenly divisible.
+ */
+function generateSweepValues(
+  start: number,
+  end: number,
+  step: number
+): number[] {
+  const values: number[] = [];
+  const direction = start <= end ? 1 : -1;
+  const absStep = step * direction;
+
+  for (let v = start; direction * (end - v) >= -1e-12; v += absStep) {
+    values.push(v);
+  }
+  return values;
+}
+
+/**
+ * Create a shallow copy of the circuit with one source's value changed.
+ * Used by DC sweep to vary the sweep source at each step.
+ */
+function applySourceValue(
+  circuit: Circuit,
+  sourceId: ComponentId,
+  value: number
+): Circuit {
   return {
-    type: 'dc',
-    operatingPoint,
-    convergenceInfo: {
-      converged: true,
-      iterations: 1,
-      maxIterations: 1,
-      tolerance: 0,
-      finalError: 0,
-    },
+    ...circuit,
+    components: circuit.components.map(comp => {
+      if (comp.id !== sourceId) return comp;
+      if (comp.type === 'voltage_source') {
+        return { ...comp, voltage: value } as DCVoltageSource;
+      }
+      if (comp.type === 'current_source') {
+        return { ...comp, current: value } as DCCurrentSource;
+      }
+      return comp;
+    }),
   };
 }
 

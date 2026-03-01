@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { analyzeDC } from '@/engine/analysis/dcAnalysis';
 import type { Circuit } from '@/types/circuit';
+import type { DCAnalysisConfig } from '@/types/simulation';
 import { createTestCircuit } from '../../factories/circuits';
 import {
   createACVoltageSource,
@@ -579,6 +580,158 @@ describe('analyzeDC', () => {
       ).reduce((sum, p) => sum + p, 0);
 
       expect(totalPower).toBeCloseTo(0, 10);
+    });
+  });
+
+  // ============================================================================
+  // DC Sweep
+  // ============================================================================
+
+  describe('DC Sweep', () => {
+    it('should sweep voltage source and return multiple operating points', () => {
+      // V1(12V) -- R1(1kΩ) -- node2 -- R2(2kΩ) -- GND
+      // Sweep V1 from 0V to 12V in 3V steps → 5 points (0, 3, 6, 9, 12)
+      // At each step: V(node2) = V1 * R2/(R1+R2) = V1 * 2/3
+      const circuit = createVoltageDivider({
+        inputVoltage: 12,
+        r1: 1000,
+        r2: 2000,
+      });
+
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: {
+          sourceId: 'V1',
+          startValue: 0,
+          endValue: 12,
+          stepValue: 3,
+        },
+      };
+
+      const result = analyzeDC(circuit, config);
+
+      expect(result.sweep).toBeDefined();
+      expect(result.sweep!.sweepValues).toEqual([0, 3, 6, 9, 12]);
+      expect(result.sweep!.operatingPoints).toHaveLength(5);
+
+      // Verify each operating point
+      for (let i = 0; i < 5; i++) {
+        const v1 = result.sweep!.sweepValues[i];
+        const op = result.sweep!.operatingPoints[i];
+        expect(op.nodeVoltages['2']).toBeCloseTo((v1 * 2) / 3, 6);
+      }
+    });
+
+    it('should handle reverse sweep (startValue > endValue)', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 10, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: {
+          sourceId: 'V1',
+          startValue: 10,
+          endValue: 0,
+          stepValue: 5,
+        },
+      };
+
+      const result = analyzeDC(circuit, config);
+
+      expect(result.sweep!.sweepValues).toEqual([10, 5, 0]);
+      expect(result.sweep!.operatingPoints).toHaveLength(3);
+      expect(result.sweep!.operatingPoints[0].nodeVoltages['1']).toBeCloseTo(
+        10
+      );
+      expect(result.sweep!.operatingPoints[2].nodeVoltages['1']).toBeCloseTo(0);
+    });
+
+    it('should sweep current source', () => {
+      // I1 into node 1, R1(1kΩ) to GND → V = I * R
+      const circuit = createTestCircuit({
+        components: [
+          createDCCurrentSource({
+            id: 'I1',
+            current: 0.01,
+            nodes: ['0', '1'],
+          }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: {
+          sourceId: 'I1',
+          startValue: 0,
+          endValue: 0.01,
+          stepValue: 0.005,
+        },
+      };
+
+      const result = analyzeDC(circuit, config);
+
+      expect(result.sweep!.sweepValues).toEqual([0, 0.005, 0.01]);
+      // V = I * R: 0V, 5V, 10V
+      expect(result.sweep!.operatingPoints[0].nodeVoltages['1']).toBeCloseTo(0);
+      expect(result.sweep!.operatingPoints[1].nodeVoltages['1']).toBeCloseTo(5);
+      expect(result.sweep!.operatingPoints[2].nodeVoltages['1']).toBeCloseTo(
+        10
+      );
+    });
+
+    it('should still return operatingPoint (original circuit) alongside sweep', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 10, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: {
+          sourceId: 'V1',
+          startValue: 0,
+          endValue: 5,
+          stepValue: 5,
+        },
+      };
+
+      const result = analyzeDC(circuit, config);
+
+      // operatingPoint is the original circuit's result (V1=10V)
+      expect(result.operatingPoint.nodeVoltages['1']).toBeCloseTo(10);
+      // sweep has its own results
+      expect(result.sweep!.operatingPoints[0].nodeVoltages['1']).toBeCloseTo(0);
+      expect(result.sweep!.operatingPoints[1].nodeVoltages['1']).toBeCloseTo(5);
+    });
+
+    it('should return no sweep when config has no sweep field', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 10, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+
+      const config: DCAnalysisConfig = { type: 'dc' };
+      const result = analyzeDC(circuit, config);
+
+      expect(result.sweep).toBeUndefined();
+      expect(result.operatingPoint.nodeVoltages['1']).toBeCloseTo(10);
     });
   });
 });
