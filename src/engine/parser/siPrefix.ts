@@ -96,7 +96,7 @@ export function parseSIValue(value: number | string): number {
     return numericPart * multiplier;
   }
 
-  // Unknown suffix — treat as plain number (SPICE ignores unknown suffixes)
+  // Unknown suffix — throw rather than silently ignoring to catch typos early
   throw new WebSpiceError(
     'INVALID_PARAMETER',
     `Unknown SI prefix '${firstChar}' in value '${value}'`

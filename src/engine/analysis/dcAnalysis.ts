@@ -90,7 +90,7 @@ export function analyzeDC(
 }
 
 // ============================================================================
-// MNA System Construction
+// Operating Point & Sweep Helpers
 // ============================================================================
 
 /**
@@ -144,10 +144,11 @@ function generateSweepValues(
 ): number[] {
   const values: number[] = [];
   const direction = start <= end ? 1 : -1;
-  const absStep = step * direction;
+  const signedStep = step * direction;
+  const count = Math.floor(Math.abs(end - start) / step + 1 + 1e-12);
 
-  for (let v = start; direction * (end - v) >= -1e-12; v += absStep) {
-    values.push(v);
+  for (let i = 0; i < count; i++) {
+    values.push(start + i * signedStep);
   }
   return values;
 }
@@ -155,12 +156,26 @@ function generateSweepValues(
 /**
  * Create a shallow copy of the circuit with one source's value changed.
  * Used by DC sweep to vary the sweep source at each step.
+ *
+ * @throws {WebSpiceError} INVALID_PARAMETER if sourceId does not match a voltage or current source
  */
 function applySourceValue(
   circuit: Circuit,
   sourceId: ComponentId,
   value: number
 ): Circuit {
+  const target = circuit.components.find(c => c.id === sourceId);
+
+  if (
+    !target ||
+    (target.type !== 'voltage_source' && target.type !== 'current_source')
+  ) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `Sweep sourceId '${sourceId}' does not match any voltage or current source in the circuit`
+    );
+  }
+
   return {
     ...circuit,
     components: circuit.components.map(comp => {
@@ -168,10 +183,7 @@ function applySourceValue(
       if (comp.type === 'voltage_source') {
         return { ...comp, voltage: value } as DCVoltageSource;
       }
-      if (comp.type === 'current_source') {
-        return { ...comp, current: value } as DCCurrentSource;
-      }
-      return comp;
+      return { ...comp, current: value } as DCCurrentSource;
     }),
   };
 }

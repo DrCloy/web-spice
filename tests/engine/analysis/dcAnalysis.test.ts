@@ -733,5 +733,57 @@ describe('analyzeDC', () => {
       expect(result.sweep).toBeUndefined();
       expect(result.operatingPoint.nodeVoltages['1']).toBeCloseTo(10);
     });
+
+    it('should throw for non-existent sourceId', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 10, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: {
+          sourceId: 'V_TYPO',
+          startValue: 0,
+          endValue: 10,
+          stepValue: 5,
+        },
+      };
+
+      expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'does not match any voltage or current source'
+      );
+    });
+
+    it('should throw when sourceId refers to a resistor', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 10, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: {
+          sourceId: 'R1',
+          startValue: 0,
+          endValue: 10,
+          stepValue: 5,
+        },
+      };
+
+      expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'does not match any voltage or current source'
+      );
+    });
   });
 });
