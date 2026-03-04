@@ -187,10 +187,28 @@ function applySourceValue(
     nodes: circuit.nodes,
     components: circuit.components.map(comp => {
       if (comp.id !== sourceId) return comp;
+      // Explicitly enumerate interface properties instead of spreading, because
+      // comp may be a class instance whose prototype getters are not own properties.
       if (comp.type === 'voltage_source') {
-        return { ...comp, voltage: value } as DCVoltageSource;
+        const vs = comp as DCVoltageSource;
+        return {
+          id: vs.id,
+          type: vs.type,
+          sourceType: vs.sourceType,
+          name: vs.name,
+          terminals: vs.terminals,
+          voltage: value,
+        } as DCVoltageSource;
       }
-      return { ...comp, current: value } as DCCurrentSource;
+      const cs = comp as DCCurrentSource;
+      return {
+        id: cs.id,
+        type: cs.type,
+        sourceType: cs.sourceType,
+        name: cs.name,
+        terminals: cs.terminals,
+        current: value,
+      } as DCCurrentSource;
     }),
   };
 }

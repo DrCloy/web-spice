@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { CircuitJSON, ComponentJSON } from '@/types/circuit';
 import { parseCircuit } from '@/engine/parser/circuitParser';
+import { analyzeDC } from '@/engine/analysis/dcAnalysis';
+import type { DCAnalysisConfig } from '@/types/simulation';
 
 // ============================================================================
 // Test Helpers
@@ -612,6 +614,74 @@ describe('Circuit Parser', () => {
           })
         )
       ).toThrowWebSpiceError('INVALID_PARAMETER');
+    });
+  });
+
+  // ============================================================================
+  // Integration: parseCircuit + analyzeDC
+  // ============================================================================
+
+  describe('integration with analyzeDC', () => {
+    it('should run DC sweep on a parsed CircuitImpl instance', () => {
+      // Verifies that CircuitImpl (class instance with prototype getters) works
+      // correctly with analyzeDC sweep — the primary use case of this PR.
+      // V1(12V) -- R1(1kΩ) -- node2 -- R2(2kΩ) -- GND
+      // At each step: V(node2) = V1 * R2/(R1+R2) = V1 * 2/3
+      const json: CircuitJSON = {
+        name: 'Voltage Divider',
+        ground: '0',
+        components: [
+          {
+            id: 'V1',
+            type: 'voltage_source',
+            name: 'V1',
+            nodes: ['1', '0'],
+            parameters: { sourceType: 'dc', voltage: 12 },
+          },
+          {
+            id: 'R1',
+            type: 'resistor',
+            name: 'R1',
+            nodes: ['1', '2'],
+            parameters: { resistance: 1000 },
+          },
+          {
+            id: 'R2',
+            type: 'resistor',
+            name: 'R2',
+            nodes: ['2', '0'],
+            parameters: { resistance: 2000 },
+          },
+          {
+            id: 'GND',
+            type: 'ground',
+            name: 'GND',
+            nodes: ['0'],
+            parameters: {},
+          },
+        ],
+      };
+
+      const circuit = parseCircuit(json);
+
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: {
+          sourceId: 'V1',
+          startValue: 0,
+          endValue: 12,
+          stepValue: 6,
+        },
+      };
+
+      const result = analyzeDC(circuit, config);
+
+      expect(result.sweep).toBeDefined();
+      expect(result.sweep!.sweepValues).toEqual([0, 6, 12]);
+      // V(node2) = V1 * 2/3
+      expect(result.sweep!.operatingPoints[0].nodeVoltages['2']).toBeCloseTo(0);
+      expect(result.sweep!.operatingPoints[1].nodeVoltages['2']).toBeCloseTo(4);
+      expect(result.sweep!.operatingPoints[2].nodeVoltages['2']).toBeCloseTo(8);
     });
   });
 });
