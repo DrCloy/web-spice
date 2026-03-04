@@ -87,19 +87,31 @@ describe('SI Prefix Parser', () => {
 
   describe('edge cases and errors', () => {
     it('should throw for empty string', () => {
-      expect(() => parseSIValue('')).toThrow();
+      expect(() => parseSIValue('')).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'empty string'
+      );
     });
 
     it('should throw for non-numeric string', () => {
-      expect(() => parseSIValue('abc')).toThrow();
+      expect(() => parseSIValue('abc')).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        "Cannot parse numeric value: 'abc'"
+      );
     });
 
     it('should throw for NaN number input', () => {
-      expect(() => parseSIValue(NaN)).toThrow();
+      expect(() => parseSIValue(NaN)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'finite number'
+      );
     });
 
     it('should throw for Infinity number input', () => {
-      expect(() => parseSIValue(Infinity)).toThrow();
+      expect(() => parseSIValue(Infinity)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'finite number'
+      );
     });
   });
 });
