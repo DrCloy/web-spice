@@ -249,7 +249,7 @@ describe('Resistor', () => {
       const resistor = new ResistorImpl(makeResistorData());
       const originalTerminals = resistor.terminals;
       // Attempt to modify should not affect internal state
-      originalTerminals[0] = { name: 'modified', nodeId: 'n99' };
+      originalTerminals[0] = { name: 'terminal2', nodeId: 'n99' };
       expect(resistor.terminals[0].nodeId).toBe('n1');
     });
   });

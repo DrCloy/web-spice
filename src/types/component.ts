@@ -47,9 +47,18 @@ export type ComponentType =
   | 'mosfet'
   | 'ground';
 
+/** Terminal names for unpolarized components (resistor, inductor) */
+export type UnpolarizedTerminalName = 'terminal1' | 'terminal2';
+
+/** Terminal names for polarized components (sources, capacitor) */
+export type PolarizedTerminalName = 'pos' | 'neg';
+
+/** All valid terminal names */
+export type TerminalName = UnpolarizedTerminalName | PolarizedTerminalName;
+
 /** Terminal connection point on a component */
 export interface Terminal {
-  name: string;
+  name: TerminalName;
   nodeId: NodeId;
 }
 

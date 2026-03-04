@@ -248,7 +248,7 @@ describe('DCVoltageSourceImpl', () => {
       const source = new DCVoltageSourceImpl(makeDCVoltageSourceData());
       const originalTerminals = source.terminals;
       // Attempt to modify should not affect internal state
-      originalTerminals[0] = { name: 'modified', nodeId: 'n99' };
+      originalTerminals[0] = { name: 'neg', nodeId: 'n99' };
       expect(source.terminals[0].nodeId).toBe('n1');
     });
   });

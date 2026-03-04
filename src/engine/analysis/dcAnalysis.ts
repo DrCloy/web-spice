@@ -15,7 +15,11 @@ import type {
   NodeId,
   Resistor,
 } from '@/types/component';
-import type { DCAnalysisResult, SolverOptions } from '@/types/simulation';
+import type {
+  DCAnalysisConfig,
+  DCAnalysisResult,
+  SolverOptions,
+} from '@/types/simulation';
 import { solveLinearSystem } from '@/engine/solver/luDecomposition';
 
 // ============================================================================
@@ -37,21 +41,18 @@ interface NodeIndexMap {
  */
 export function analyzeDC(
   circuit: Circuit,
+  config?: DCAnalysisConfig,
   options?: Partial<SolverOptions>
 ): DCAnalysisResult {
   validateCircuitForDC(circuit);
 
-  const map = buildNodeIndexMap(circuit);
+  const operatingPoint = solveOperatingPoint(circuit, options);
 
-  // Trivial circuit (ground only, no solvable nodes)
-  if (map.systemSize === 0) {
+  // If no sweep config, return single operating point
+  if (!config?.sweep) {
     return {
       type: 'dc',
-      operatingPoint: {
-        nodeVoltages: { [circuit.groundNodeId]: 0 },
-        branchCurrents: {},
-        componentPowers: {},
-      },
+      operatingPoint,
       convergenceInfo: {
         converged: true,
         iterations: 1,
@@ -59,6 +60,58 @@ export function analyzeDC(
         tolerance: 0,
         finalError: 0,
       },
+    };
+  }
+
+  // DC sweep: vary source value and solve at each step
+  const sweep = config.sweep;
+  const sweepValues = generateSweepValues(
+    sweep.startValue,
+    sweep.endValue,
+    sweep.stepValue
+  );
+  const operatingPoints = sweepValues.map(value => {
+    const modifiedCircuit = applySourceValue(circuit, sweep.sourceId, value);
+    return solveOperatingPoint(modifiedCircuit, options);
+  });
+
+  return {
+    type: 'dc',
+    operatingPoint,
+    sweep: { sweepValues, operatingPoints },
+    convergenceInfo: {
+      converged: true,
+      iterations: 1,
+      maxIterations: 1,
+      tolerance: 0,
+      finalError: 0,
+    },
+  };
+}
+
+// ============================================================================
+// Operating Point & Sweep Helpers
+// ============================================================================
+
+/**
+ * Solve for a single DC operating point.
+ * Extracted from analyzeDC to allow reuse in sweep mode.
+ */
+function solveOperatingPoint(
+  circuit: Circuit,
+  options?: Partial<SolverOptions>
+): {
+  nodeVoltages: Record<NodeId, number>;
+  branchCurrents: Record<ComponentId, number>;
+  componentPowers: Record<ComponentId, number>;
+} {
+  const map = buildNodeIndexMap(circuit);
+
+  if (map.systemSize === 0) {
+    return {
+      nodeVoltages: { [circuit.groundNodeId]: 0 },
+      branchCurrents: {},
+      componentPowers: {},
     };
   }
 
@@ -77,18 +130,86 @@ export function analyzeDC(
     throw error;
   }
 
-  const operatingPoint = extractResults(solution, circuit, map);
+  return extractResults(solution, circuit, map);
+}
 
+/**
+ * Generate an array of sweep values from start to end with given step.
+ * Always includes startValue; includes endValue if the range is evenly divisible.
+ */
+function generateSweepValues(
+  start: number,
+  end: number,
+  step: number
+): number[] {
+  const values: number[] = [];
+  const direction = start <= end ? 1 : -1;
+  const signedStep = step * direction;
+  const count = Math.floor(Math.abs(end - start) / step + 1 + 1e-12);
+
+  for (let i = 0; i < count; i++) {
+    values.push(start + i * signedStep);
+  }
+  return values;
+}
+
+/**
+ * Create a shallow copy of the circuit with one source's value changed.
+ * Used by DC sweep to vary the sweep source at each step.
+ *
+ * @throws {WebSpiceError} INVALID_PARAMETER if sourceId does not match a voltage or current source
+ */
+function applySourceValue(
+  circuit: Circuit,
+  sourceId: ComponentId,
+  value: number
+): Circuit {
+  const target = circuit.components.find(c => c.id === sourceId);
+
+  if (
+    !target ||
+    (target.type !== 'voltage_source' && target.type !== 'current_source')
+  ) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `Sweep sourceId '${sourceId}' does not match any voltage or current source in the circuit`
+    );
+  }
+
+  // Explicitly enumerate Circuit interface properties instead of using spread,
+  // because circuit may be a CircuitImpl class instance whose prototype getters
+  // (id, name, groundNodeId, etc.) are not copied by object spread.
   return {
-    type: 'dc',
-    operatingPoint,
-    convergenceInfo: {
-      converged: true,
-      iterations: 1,
-      maxIterations: 1,
-      tolerance: 0,
-      finalError: 0,
-    },
+    id: circuit.id,
+    name: circuit.name,
+    description: circuit.description,
+    groundNodeId: circuit.groundNodeId,
+    nodes: circuit.nodes,
+    components: circuit.components.map(comp => {
+      if (comp.id !== sourceId) return comp;
+      // Explicitly enumerate interface properties instead of spreading, because
+      // comp may be a class instance whose prototype getters are not own properties.
+      if (comp.type === 'voltage_source') {
+        const vs = comp as DCVoltageSource;
+        return {
+          id: vs.id,
+          type: vs.type,
+          sourceType: vs.sourceType,
+          name: vs.name,
+          terminals: vs.terminals,
+          voltage: value,
+        } as DCVoltageSource;
+      }
+      const cs = comp as DCCurrentSource;
+      return {
+        id: cs.id,
+        type: cs.type,
+        sourceType: cs.sourceType,
+        name: cs.name,
+        terminals: cs.terminals,
+        current: value,
+      } as DCCurrentSource;
+    }),
   };
 }
 
@@ -185,10 +306,10 @@ function stampVoltageSource(
 
 /**
  * Stamp a DC current source into the RHS vector.
- * SPICE convention: current I flows out of positive terminal (terminals[0])
- * through external circuit into negative terminal (terminals[1]).
- *   i[p] -= I  (current leaves positive terminal node)
- *   i[q] += I  (current enters negative terminal node)
+ * SPICE convention: positive current I flows from the positive terminal (N+)
+ * through the source to the negative terminal (N-).
+ *   b[N+] -= I  (current drawn from N+ into source)
+ *   b[N-] += I  (current injected from source into N-)
  */
 function stampCurrentSource(
   b: Vector,
@@ -248,8 +369,8 @@ function extractResults(
       case 'voltage_source': {
         const vs = component as DCVoltageSource;
         const vsIdx = map.voltageSourceIds.indexOf(vs.id);
-        // MNA j is current into positive terminal; negate to get
-        // conventional "current supplied to circuit" direction
+        // MNA variable j_k is defined as current from N+ through source to N-.
+        // Negate to get the conventional direction (current out of N+ into external circuit).
         const current = -x.data[map.numNodes + vsIdx];
         branchCurrents[vs.id] = current;
         componentPowers[vs.id] = -vs.voltage * current;
