@@ -176,8 +176,15 @@ function applySourceValue(
     );
   }
 
+  // Explicitly enumerate Circuit interface properties instead of using spread,
+  // because circuit may be a CircuitImpl class instance whose prototype getters
+  // (id, name, groundNodeId, etc.) are not copied by object spread.
   return {
-    ...circuit,
+    id: circuit.id,
+    name: circuit.name,
+    description: circuit.description,
+    groundNodeId: circuit.groundNodeId,
+    nodes: circuit.nodes,
     components: circuit.components.map(comp => {
       if (comp.id !== sourceId) return comp;
       if (comp.type === 'voltage_source') {

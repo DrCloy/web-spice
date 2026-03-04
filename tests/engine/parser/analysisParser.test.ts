@@ -66,20 +66,37 @@ describe('Analysis Parser', () => {
       expect(config.sweep!.endValue).toBe(12);
       expect(config.sweep!.stepValue).toBe(1);
     });
+
+    it('should parse sweep values with SI prefixes', () => {
+      const json = makeDCAnalysisJSON({
+        parameters: {
+          sourceId: 'V1',
+          startValue: '0',
+          endValue: '1k',
+          stepValue: '100m',
+        },
+      });
+
+      const config = parseAnalysis(json);
+
+      expect(config.sweep!.endValue).toBe(1000);
+      expect(config.sweep!.stepValue).toBeCloseTo(0.1);
+    });
   });
 
   describe('error: invalid input', () => {
     it('should throw INVALID_PARAMETER for null input', () => {
-      expect(() => parseAnalysis(null as unknown as AnalysisJSON)).toThrow(
-        'Analysis JSON is required'
-      );
+      expect(() =>
+        parseAnalysis(null as unknown as AnalysisJSON)
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Analysis JSON is required');
     });
 
     it('should throw UNSUPPORTED_ANALYSIS for non-DC analysis type', () => {
       const json = { type: 'ac', parameters: {} } as AnalysisJSON;
 
-      expect(() => parseAnalysis(json)).toThrow(
-        "Analysis type 'ac' is not yet supported"
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'UNSUPPORTED_ANALYSIS',
+        'not yet supported'
       );
     });
   });
@@ -90,7 +107,10 @@ describe('Analysis Parser', () => {
         parameters: { sourceId: 'V1', startValue: 0 },
       });
 
-      expect(() => parseAnalysis(json)).toThrow('Missing: endValue, stepValue');
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'Missing: endValue, stepValue'
+      );
     });
 
     it('should throw listing all missing keys', () => {
@@ -98,14 +118,15 @@ describe('Analysis Parser', () => {
         parameters: { sourceId: 'V1' },
       });
 
-      expect(() => parseAnalysis(json)).toThrow(
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'Missing: startValue, endValue, stepValue'
       );
     });
   });
 
   describe('error: invalid sweep values', () => {
-    it('should throw for non-finite startValue', () => {
+    it('should throw for non-parseable startValue', () => {
       const json = makeDCAnalysisJSON({
         parameters: {
           sourceId: 'V1',
@@ -115,8 +136,9 @@ describe('Analysis Parser', () => {
         },
       });
 
-      expect(() => parseAnalysis(json)).toThrow(
-        'startValue and endValue must be finite numbers'
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        "Cannot parse numeric value: 'abc'"
       );
     });
 
@@ -130,8 +152,9 @@ describe('Analysis Parser', () => {
         },
       });
 
-      expect(() => parseAnalysis(json)).toThrow(
-        'startValue and endValue must be finite numbers'
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'finite number'
       );
     });
 
@@ -145,7 +168,8 @@ describe('Analysis Parser', () => {
         },
       });
 
-      expect(() => parseAnalysis(json)).toThrow(
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'stepValue must be a positive finite number'
       );
     });
@@ -160,7 +184,8 @@ describe('Analysis Parser', () => {
         },
       });
 
-      expect(() => parseAnalysis(json)).toThrow(
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
         'stepValue must be a positive finite number'
       );
     });

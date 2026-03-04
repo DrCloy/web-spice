@@ -1,5 +1,6 @@
 import type { AnalysisJSON, DCAnalysisConfig } from '@/types/simulation';
 import { WebSpiceError } from '@/types/circuit';
+import { parseSIValue } from '@/engine/parser/siPrefix';
 
 /**
  * Parses an AnalysisJSON object into a typed DCAnalysisConfig.
@@ -49,18 +50,11 @@ function parseDCAnalysis(json: AnalysisJSON): DCAnalysisConfig {
   }
 
   const sourceId = String(params.sourceId);
-  const startValue = Number(params.startValue);
-  const endValue = Number(params.endValue);
-  const stepValue = Number(params.stepValue);
+  const startValue = parseSIValue(params.startValue as number | string);
+  const endValue = parseSIValue(params.endValue as number | string);
+  const stepValue = parseSIValue(params.stepValue as number | string);
 
-  if (!Number.isFinite(startValue) || !Number.isFinite(endValue)) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Sweep startValue and endValue must be finite numbers'
-    );
-  }
-
-  if (!Number.isFinite(stepValue) || stepValue <= 0) {
+  if (stepValue <= 0) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
       'Sweep stepValue must be a positive finite number'
