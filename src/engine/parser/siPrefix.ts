@@ -102,3 +102,53 @@ export function parseSIValue(value: number | string): number {
     `Unknown SI prefix '${firstChar}' in value '${value}'`
   );
 }
+
+// Ordered from smallest to largest for formatSIValue prefix selection.
+// Each entry: [prefix character, multiplier]
+const FORMAT_PREFIXES: [string, number][] = [
+  ['f', 1e-15],
+  ['p', 1e-12],
+  ['n', 1e-9],
+  ['u', 1e-6],
+  ['m', 1e-3],
+  ['', 1],
+  ['k', 1e3],
+  ['M', 1e6],
+  ['G', 1e9],
+  ['T', 1e12],
+];
+
+/**
+ * Format a numeric value with an appropriate SI prefix.
+ *
+ * Selects the SI prefix that places the absolute value in [1, 1000).
+ * Zero is formatted without a prefix.
+ *
+ * @param value - Numeric value to format
+ * @param unit - Unit string to append (e.g. "V", "A", "W")
+ * @param precision - Decimal places (default: 3)
+ * @returns Formatted string (e.g. "4.000 mA", "-48.000 mW", "0.000 V")
+ */
+export function formatSIValue(
+  value: number,
+  unit: string,
+  precision = 3
+): string {
+  if (value === 0) {
+    return `${(0).toFixed(precision)} ${unit}`;
+  }
+
+  const abs = Math.abs(value);
+
+  // Find the largest prefix whose multiplier is <= abs
+  let chosen = FORMAT_PREFIXES[0];
+  for (const entry of FORMAT_PREFIXES) {
+    if (abs >= entry[1]) {
+      chosen = entry;
+    }
+  }
+
+  const scaled = value / chosen[1];
+  const prefix = chosen[0];
+  return `${scaled.toFixed(precision)} ${prefix}${unit}`;
+}
