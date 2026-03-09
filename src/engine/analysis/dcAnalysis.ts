@@ -65,6 +65,10 @@ export function analyzeDC(
 
   // DC sweep: vary source value and solve at each step
   const sweep = config.sweep;
+  const sweepSource = circuit.components.find(c => c.id === sweep.sourceId);
+  const sourceType = (sweepSource?.type ?? 'voltage_source') as
+    | 'voltage_source'
+    | 'current_source';
   const sweepValues = generateSweepValues(
     sweep.startValue,
     sweep.endValue,
@@ -78,7 +82,7 @@ export function analyzeDC(
   return {
     type: 'dc',
     operatingPoint,
-    sweep: { sweepValues, operatingPoints },
+    sweep: { sourceType, sweepValues, operatingPoints },
     convergenceInfo: {
       converged: true,
       iterations: 1,
