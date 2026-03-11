@@ -756,7 +756,7 @@ describe('analyzeDC', () => {
 
       expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
         'INVALID_PARAMETER',
-        'does not match any voltage or current source'
+        'not found in circuit'
       );
     });
 
@@ -782,7 +782,7 @@ describe('analyzeDC', () => {
 
       expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
         'INVALID_PARAMETER',
-        'does not match any voltage or current source'
+        'must be a voltage or current source'
       );
     });
   });

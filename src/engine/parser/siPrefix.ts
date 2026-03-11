@@ -134,6 +134,13 @@ export function formatSIValue(
   unit: string,
   precision = 3
 ): string {
+  if (!Number.isFinite(value)) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `Value must be a finite number, got ${value}`
+    );
+  }
+
   if (value === 0) {
     return `${(0).toFixed(precision)} ${unit}`;
   }
@@ -141,14 +148,26 @@ export function formatSIValue(
   const abs = Math.abs(value);
 
   // Find the largest prefix whose multiplier is <= abs
-  let chosen = FORMAT_PREFIXES[0];
-  for (const entry of FORMAT_PREFIXES) {
-    if (abs >= entry[1]) {
-      chosen = entry;
+  let chosenIndex = 0;
+  for (let i = 0; i < FORMAT_PREFIXES.length; i++) {
+    if (abs >= FORMAT_PREFIXES[i][1]) {
+      chosenIndex = i;
     }
   }
 
-  const scaled = value / chosen[1];
-  const prefix = chosen[0];
+  let [prefix, multiplier] = FORMAT_PREFIXES[chosenIndex];
+  let scaled = value / multiplier;
+
+  // After rounding, values very close to a prefix boundary can produce "1000.000 <prefix>".
+  // Promote to the next prefix when that happens.
+  if (
+    Math.abs(Number(scaled.toFixed(precision))) >= 1000 &&
+    chosenIndex < FORMAT_PREFIXES.length - 1
+  ) {
+    chosenIndex += 1;
+    [prefix, multiplier] = FORMAT_PREFIXES[chosenIndex];
+    scaled = value / multiplier;
+  }
+
   return `${scaled.toFixed(precision)} ${prefix}${unit}`;
 }

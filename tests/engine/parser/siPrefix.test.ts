@@ -178,5 +178,33 @@ describe('SI Value Formatter', () => {
     it('should use precision parameter', () => {
       expect(formatSIValue(1.23456, 'V', 2)).toBe('1.23 V');
     });
+
+    it('should promote prefix when rounding would produce 1000', () => {
+      // 9.9999999e-4 is in the µ range, but rounds to 1000.000 µV — should promote to mV
+      expect(formatSIValue(9.9999999e-4, 'V')).toBe('1.000 mV');
+    });
+  });
+
+  describe('errors', () => {
+    it('should throw for NaN', () => {
+      expect(() => formatSIValue(NaN, 'V')).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'finite number'
+      );
+    });
+
+    it('should throw for Infinity', () => {
+      expect(() => formatSIValue(Infinity, 'V')).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'finite number'
+      );
+    });
+
+    it('should throw for -Infinity', () => {
+      expect(() => formatSIValue(-Infinity, 'V')).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'finite number'
+      );
+    });
   });
 });

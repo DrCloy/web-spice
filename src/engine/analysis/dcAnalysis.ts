@@ -66,9 +66,23 @@ export function analyzeDC(
   // DC sweep: vary source value and solve at each step
   const sweep = config.sweep;
   const sweepSource = circuit.components.find(c => c.id === sweep.sourceId);
-  const sourceType = (sweepSource?.type ?? 'voltage_source') as
-    | 'voltage_source'
-    | 'current_source';
+
+  if (!sweepSource) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `DC sweep source '${sweep.sourceId}' not found in circuit`
+    );
+  }
+  if (
+    sweepSource.type !== 'voltage_source' &&
+    sweepSource.type !== 'current_source'
+  ) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `DC sweep source '${sweep.sourceId}' must be a voltage or current source, got '${sweepSource.type}'`
+    );
+  }
+  const sourceType: 'voltage_source' | 'current_source' = sweepSource.type;
   const sweepValues = generateSweepValues(
     sweep.startValue,
     sweep.endValue,
