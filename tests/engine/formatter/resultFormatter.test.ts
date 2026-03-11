@@ -3,6 +3,8 @@ import type { DCAnalysisResult, DCOperatingPoint } from '@/types/simulation';
 import {
   formatDCOperatingPoint,
   formatDCResult,
+  serializeDCResultToJSON,
+  serializeDCResultToText,
 } from '@/engine/formatter/resultFormatter';
 
 // ============================================================================
@@ -147,5 +149,83 @@ describe('formatDCResult', () => {
       '1.000 mA',
       '2.000 mA',
     ]);
+  });
+});
+
+describe('serializeDCResultToJSON', () => {
+  const dcResult: DCAnalysisResult = {
+    type: 'dc',
+    operatingPoint: VOLTAGE_DIVIDER_OP,
+    convergenceInfo: CONVERGENCE_INFO,
+  };
+
+  it('should produce valid JSON', () => {
+    const json = serializeDCResultToJSON(dcResult);
+
+    expect(() => JSON.parse(json)).not.toThrow();
+  });
+
+  it('should preserve original numeric values', () => {
+    const json = serializeDCResultToJSON(dcResult);
+    const parsed = JSON.parse(json);
+
+    expect(parsed.operatingPoint.nodeVoltages['node1']).toBe(12);
+    expect(parsed.operatingPoint.branchCurrents['V1']).toBe(4e-3);
+  });
+});
+
+describe('serializeDCResultToText', () => {
+  const dcResult: DCAnalysisResult = {
+    type: 'dc',
+    operatingPoint: VOLTAGE_DIVIDER_OP,
+    convergenceInfo: CONVERGENCE_INFO,
+  };
+
+  it('should include the header', () => {
+    expect(serializeDCResultToText(dcResult)).toContain(
+      '=== DC Analysis Result ==='
+    );
+  });
+
+  it('should include section labels', () => {
+    const text = serializeDCResultToText(dcResult);
+
+    expect(text).toContain('Node Voltages:');
+    expect(text).toContain('Branch Currents:');
+    expect(text).toContain('Component Powers:');
+  });
+
+  it('should include formatted values', () => {
+    const text = serializeDCResultToText(dcResult);
+
+    expect(text).toContain('12.000 V');
+    expect(text).toContain('4.000 mA');
+    expect(text).toContain('-48.000 mW');
+  });
+
+  it('should include convergence info', () => {
+    expect(serializeDCResultToText(dcResult)).toContain(
+      'converged in 1 iteration'
+    );
+  });
+
+  it('should include sweep values when sweep is present', () => {
+    const withSweep: DCAnalysisResult = {
+      ...dcResult,
+      sweep: {
+        sourceType: 'voltage_source',
+        sweepValues: [0, 6, 12],
+        operatingPoints: [
+          { nodeVoltages: {}, branchCurrents: {}, componentPowers: {} },
+          { nodeVoltages: {}, branchCurrents: {}, componentPowers: {} },
+          { nodeVoltages: {}, branchCurrents: {}, componentPowers: {} },
+        ],
+      },
+    };
+
+    const text = serializeDCResultToText(withSweep);
+
+    expect(text).toContain('6.000 V');
+    expect(text).toContain('12.000 V');
   });
 });

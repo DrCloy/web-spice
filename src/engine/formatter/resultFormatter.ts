@@ -56,6 +56,61 @@ export function formatDCOperatingPoint(
 }
 
 /**
+ * Serialize a DC analysis result to a JSON string.
+ * Raw numeric values are preserved as-is.
+ */
+export function serializeDCResultToJSON(result: DCAnalysisResult): string {
+  return JSON.stringify(result);
+}
+
+/**
+ * Serialize a DC analysis result to a human-readable text table.
+ * Each operating point lists node voltages, branch currents, and component powers.
+ * Sweep results include a header line per sweep point.
+ */
+export function serializeDCResultToText(result: DCAnalysisResult): string {
+  const lines: string[] = ['=== DC Analysis Result ==='];
+
+  if (result.sweep) {
+    const sweepUnit = result.sweep.sourceType === 'current_source' ? 'A' : 'V';
+    for (let i = 0; i < result.sweep.sweepValues.length; i++) {
+      const sweepLabel = formatSIValue(result.sweep.sweepValues[i], sweepUnit);
+      lines.push('', `Sweep: ${sweepLabel}`);
+      appendOperatingPointLines(lines, result.sweep.operatingPoints[i]);
+    }
+  } else {
+    lines.push('');
+    appendOperatingPointLines(lines, result.operatingPoint);
+  }
+
+  const ci = result.convergenceInfo;
+  const status = ci.converged ? 'converged' : 'did not converge';
+  lines.push('', `Convergence: ${status} in ${ci.iterations} iteration(s)`);
+
+  return lines.join('\n');
+}
+
+function appendOperatingPointLines(
+  lines: string[],
+  op: DCOperatingPoint
+): void {
+  lines.push('Node Voltages:');
+  for (const [id, v] of Object.entries(op.nodeVoltages)) {
+    lines.push(`  ${id}: ${formatSIValue(v, 'V')}`);
+  }
+
+  lines.push('', 'Branch Currents:');
+  for (const [id, i] of Object.entries(op.branchCurrents)) {
+    lines.push(`  ${id}: ${formatSIValue(i, 'A')}`);
+  }
+
+  lines.push('', 'Component Powers:');
+  for (const [id, p] of Object.entries(op.componentPowers)) {
+    lines.push(`  ${id}: ${formatSIValue(p, 'W')}`);
+  }
+}
+
+/**
  * Format a full DC analysis result into human-readable strings.
  * Sweep values are formatted in V for voltage sources, A for current sources.
  */
