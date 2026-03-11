@@ -78,6 +78,7 @@ export interface DCOperatingPoint {
 
 /** DC sweep result */
 export interface DCSweepResult {
+  sourceType: 'voltage_source' | 'current_source';
   sweepValues: number[];
   operatingPoints: DCOperatingPoint[];
 }
