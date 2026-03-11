@@ -94,19 +94,21 @@ function appendOperatingPointLines(
   lines: string[],
   op: DCOperatingPoint
 ): void {
+  const formatted = formatDCOperatingPoint(op);
+
   lines.push('Node Voltages:');
-  for (const [id, v] of Object.entries(op.nodeVoltages)) {
-    lines.push(`  ${id}: ${formatSIValue(v, 'V')}`);
+  for (const [id, v] of Object.entries(formatted.nodeVoltages)) {
+    lines.push(`  ${id}: ${v}`);
   }
 
   lines.push('', 'Branch Currents:');
-  for (const [id, i] of Object.entries(op.branchCurrents)) {
-    lines.push(`  ${id}: ${formatSIValue(i, 'A')}`);
+  for (const [id, i] of Object.entries(formatted.branchCurrents)) {
+    lines.push(`  ${id}: ${i}`);
   }
 
   lines.push('', 'Component Powers:');
-  for (const [id, p] of Object.entries(op.componentPowers)) {
-    lines.push(`  ${id}: ${formatSIValue(p, 'W')}`);
+  for (const [id, p] of Object.entries(formatted.componentPowers)) {
+    lines.push(`  ${id}: ${p}`);
   }
 }
 

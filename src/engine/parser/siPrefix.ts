@@ -121,13 +121,16 @@ const FORMAT_PREFIXES: [string, number][] = [
 /**
  * Format a numeric value with an appropriate SI prefix.
  *
- * Selects the SI prefix that places the absolute value in [1, 1000).
+ * Tries to select an SI prefix so that the absolute scaled value lies in [1, 1000).
  * Zero is formatted without a prefix.
+ * For magnitudes outside the supported prefix range (f…T), the smallest or largest
+ * available prefix is used and the scaled value may fall outside [1, 1000).
  *
  * @param value - Numeric value to format
  * @param unit - Unit string to append (e.g. "V", "A", "W")
  * @param precision - Decimal places (default: 3)
  * @returns Formatted string (e.g. "4.000 mA", "-48.000 mW", "0.000 V")
+ * @throws {WebSpiceError} INVALID_PARAMETER for non-finite values
  */
 export function formatSIValue(
   value: number,
