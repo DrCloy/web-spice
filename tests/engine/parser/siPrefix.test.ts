@@ -206,5 +206,19 @@ describe('SI Value Formatter', () => {
         'finite number'
       );
     });
+
+    it('should throw for negative precision', () => {
+      expect(() => formatSIValue(1, 'V', -1)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'precision'
+      );
+    });
+
+    it('should throw for precision > 100', () => {
+      expect(() => formatSIValue(1, 'V', 101)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'precision'
+      );
+    });
   });
 });

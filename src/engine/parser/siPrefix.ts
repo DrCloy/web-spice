@@ -144,6 +144,13 @@ export function formatSIValue(
     );
   }
 
+  if (!Number.isFinite(precision) || precision < 0 || precision > 100) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `precision must be an integer between 0 and 100, got ${precision}`
+    );
+  }
+
   if (value === 0) {
     return `${(0).toFixed(precision)} ${unit}`;
   }

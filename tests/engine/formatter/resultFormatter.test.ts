@@ -209,6 +209,24 @@ describe('serializeDCResultToText', () => {
     );
   });
 
+  it('should throw when sweep lengths are mismatched', () => {
+    const mismatchedSweep = {
+      ...dcResult,
+      sweep: {
+        sourceType: 'voltage_source' as const,
+        sweepValues: [0, 6, 12],
+        operatingPoints: [
+          { nodeVoltages: {}, branchCurrents: {}, componentPowers: {} },
+        ],
+      },
+    };
+
+    expect(() => serializeDCResultToText(mismatchedSweep)).toThrowWebSpiceError(
+      'INVALID_PARAMETER',
+      'sweep'
+    );
+  });
+
   it('should include sweep values when sweep is present', () => {
     const withSweep: DCAnalysisResult = {
       ...dcResult,

@@ -1,4 +1,5 @@
 import type { ComponentId, NodeId } from '@/types/component';
+import { WebSpiceError } from '@/types/circuit';
 import type {
   ConvergenceInfo,
   DCAnalysisResult,
@@ -72,6 +73,14 @@ export function serializeDCResultToText(result: DCAnalysisResult): string {
   const lines: string[] = ['=== DC Analysis Result ==='];
 
   if (result.sweep) {
+    if (
+      result.sweep.sweepValues.length !== result.sweep.operatingPoints.length
+    ) {
+      throw new WebSpiceError(
+        'INVALID_PARAMETER',
+        `Sweep data is inconsistent: ${result.sweep.sweepValues.length} sweep values but ${result.sweep.operatingPoints.length} operating points`
+      );
+    }
     const sweepUnit = result.sweep.sourceType === 'current_source' ? 'A' : 'V';
     for (let i = 0; i < result.sweep.sweepValues.length; i++) {
       const sweepLabel = formatSIValue(result.sweep.sweepValues[i], sweepUnit);
