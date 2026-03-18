@@ -220,5 +220,12 @@ describe('SI Value Formatter', () => {
         'precision'
       );
     });
+
+    it('should throw for non-integer precision', () => {
+      expect(() => formatSIValue(1, 'V', 2.5)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'precision'
+      );
+    });
   });
 });

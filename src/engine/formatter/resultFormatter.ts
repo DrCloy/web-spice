@@ -136,6 +136,13 @@ export function formatDCResult(result: DCAnalysisResult): FormattedDCResult {
     };
   }
 
+  if (result.sweep.sweepValues.length !== result.sweep.operatingPoints.length) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `Sweep data is inconsistent: ${result.sweep.sweepValues.length} sweep values but ${result.sweep.operatingPoints.length} operating points`
+    );
+  }
+
   const sweepUnit = result.sweep.sourceType === 'current_source' ? 'A' : 'V';
   const sweepValues = result.sweep.sweepValues.map(v =>
     formatSIValue(v, sweepUnit)

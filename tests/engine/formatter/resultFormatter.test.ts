@@ -150,6 +150,26 @@ describe('formatDCResult', () => {
       '2.000 mA',
     ]);
   });
+
+  it('should throw when sweep lengths are mismatched', () => {
+    const mismatchedSweep: DCAnalysisResult = {
+      type: 'dc',
+      operatingPoint: VOLTAGE_DIVIDER_OP,
+      sweep: {
+        sourceType: 'voltage_source',
+        sweepValues: [0, 6, 12],
+        operatingPoints: [
+          { nodeVoltages: {}, branchCurrents: {}, componentPowers: {} },
+        ],
+      },
+      convergenceInfo: CONVERGENCE_INFO,
+    };
+
+    expect(() => formatDCResult(mismatchedSweep)).toThrowWebSpiceError(
+      'INVALID_PARAMETER',
+      'sweep'
+    );
+  });
 });
 
 describe('serializeDCResultToJSON', () => {
