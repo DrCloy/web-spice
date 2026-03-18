@@ -207,26 +207,27 @@ function applySourceValue(
       if (comp.id !== sourceId) return comp;
       // Explicitly enumerate interface properties instead of spreading, because
       // comp may be a class instance whose prototype getters are not own properties.
-      if (comp.type === 'voltage_source') {
-        const vs = comp as DCVoltageSource;
+      if (comp.type === 'voltage_source' && comp.sourceType === 'dc') {
         return {
-          id: vs.id,
-          type: vs.type,
-          sourceType: vs.sourceType,
-          name: vs.name,
-          terminals: vs.terminals,
+          id: comp.id,
+          type: comp.type,
+          sourceType: comp.sourceType,
+          name: comp.name,
+          terminals: comp.terminals,
           voltage: value,
-        } as DCVoltageSource;
+        };
       }
-      const cs = comp as DCCurrentSource;
-      return {
-        id: cs.id,
-        type: cs.type,
-        sourceType: cs.sourceType,
-        name: cs.name,
-        terminals: cs.terminals,
-        current: value,
-      } as DCCurrentSource;
+      if (comp.type === 'current_source' && comp.sourceType === 'dc') {
+        return {
+          id: comp.id,
+          type: comp.type,
+          sourceType: comp.sourceType,
+          name: comp.name,
+          terminals: comp.terminals,
+          current: value,
+        };
+      }
+      return comp; // unreachable: validateCircuitForDC ensures only DC sources reach here
     }),
   };
 }
@@ -250,14 +251,18 @@ function buildMNASystem(
   for (const component of circuit.components) {
     switch (component.type) {
       case 'resistor':
-        stampResistor(A, component as Resistor, map);
+        stampResistor(A, component, map);
         break;
       case 'voltage_source':
-        stampVoltageSource(A, b, component as DCVoltageSource, map, vsIndex);
-        vsIndex++;
+        if (component.sourceType === 'dc') {
+          stampVoltageSource(A, b, component, map, vsIndex);
+          vsIndex++;
+        }
         break;
       case 'current_source':
-        stampCurrentSource(b, component as DCCurrentSource, map);
+        if (component.sourceType === 'dc') {
+          stampCurrentSource(b, component, map);
+        }
         break;
     }
   }
@@ -376,32 +381,31 @@ function extractResults(
 
     switch (component.type) {
       case 'resistor': {
-        const r = component as Resistor;
-        const vp = nodeVoltages[r.terminals[0].nodeId] ?? 0;
-        const vq = nodeVoltages[r.terminals[1].nodeId] ?? 0;
-        const current = (vp - vq) / r.resistance;
-        branchCurrents[r.id] = current;
-        componentPowers[r.id] = (vp - vq) * current;
+        const vp = nodeVoltages[component.terminals[0].nodeId] ?? 0;
+        const vq = nodeVoltages[component.terminals[1].nodeId] ?? 0;
+        const current = (vp - vq) / component.resistance;
+        branchCurrents[component.id] = current;
+        componentPowers[component.id] = (vp - vq) * current;
         break;
       }
       case 'voltage_source': {
-        const vs = component as DCVoltageSource;
-        const vsIdx = map.voltageSourceIds.indexOf(vs.id);
+        if (component.sourceType !== 'dc') break;
+        const vsIdx = map.voltageSourceIds.indexOf(component.id);
         // MNA variable j_k is defined as current from N+ through source to N-.
         // Negate to get the conventional direction (current out of N+ into external circuit).
         const current = -x.data[map.numNodes + vsIdx];
-        branchCurrents[vs.id] = current;
-        componentPowers[vs.id] = -vs.voltage * current;
+        branchCurrents[component.id] = current;
+        componentPowers[component.id] = -component.voltage * current;
         break;
       }
       case 'current_source': {
-        const cs = component as DCCurrentSource;
-        const vp = nodeVoltages[cs.terminals[0].nodeId] ?? 0;
-        const vq = nodeVoltages[cs.terminals[1].nodeId] ?? 0;
-        branchCurrents[cs.id] = cs.current;
+        if (component.sourceType !== 'dc') break;
+        const vp = nodeVoltages[component.terminals[0].nodeId] ?? 0;
+        const vq = nodeVoltages[component.terminals[1].nodeId] ?? 0;
+        branchCurrents[component.id] = component.current;
         // (vp - vq) * I is power absorbed by the source; negative means
         // the current source is delivering power to the circuit
-        componentPowers[cs.id] = (vp - vq) * cs.current;
+        componentPowers[component.id] = (vp - vq) * component.current;
         break;
       }
     }
