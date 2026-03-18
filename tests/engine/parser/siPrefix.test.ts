@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseSIValue } from '@/engine/parser/siPrefix';
+import { formatSIValue, parseSIValue } from '@/engine/parser/siPrefix';
 
 describe('SI Prefix Parser', () => {
   describe('plain numbers (no prefix)', () => {
@@ -118,6 +118,113 @@ describe('SI Prefix Parser', () => {
       expect(() => parseSIValue('1x')).toThrowWebSpiceError(
         'INVALID_PARAMETER',
         "Unknown SI prefix 'x'"
+      );
+    });
+  });
+});
+
+describe('SI Value Formatter', () => {
+  describe('SI prefix selection', () => {
+    it('should format femto range (1e-15)', () => {
+      expect(formatSIValue(1e-15, 'F')).toBe('1.000 fF');
+    });
+
+    it('should format pico range (1e-12)', () => {
+      expect(formatSIValue(10e-12, 'F')).toBe('10.000 pF');
+    });
+
+    it('should format nano range (1e-9)', () => {
+      expect(formatSIValue(100e-9, 'H')).toBe('100.000 nH');
+    });
+
+    it('should format micro range (1e-6)', () => {
+      expect(formatSIValue(4.7e-6, 'F')).toBe('4.700 uF');
+    });
+
+    it('should format milli range (1e-3)', () => {
+      expect(formatSIValue(4e-3, 'A')).toBe('4.000 mA');
+    });
+
+    it('should format base range (no prefix)', () => {
+      expect(formatSIValue(8, 'V')).toBe('8.000 V');
+    });
+
+    it('should format kilo range (1e3)', () => {
+      expect(formatSIValue(1000, 'Ω')).toBe('1.000 kΩ');
+    });
+
+    it('should format mega range (1e6)', () => {
+      expect(formatSIValue(2.2e6, 'Ω')).toBe('2.200 MΩ');
+    });
+
+    it('should format giga range (1e9)', () => {
+      expect(formatSIValue(1e9, 'Hz')).toBe('1.000 GHz');
+    });
+
+    it('should format tera range (1e12)', () => {
+      expect(formatSIValue(1e12, 'Hz')).toBe('1.000 THz');
+    });
+  });
+
+  describe('special values', () => {
+    it('should format zero without prefix', () => {
+      expect(formatSIValue(0, 'V')).toBe('0.000 V');
+    });
+
+    it('should format negative values', () => {
+      expect(formatSIValue(-48e-3, 'W')).toBe('-48.000 mW');
+    });
+
+    it('should use precision parameter', () => {
+      expect(formatSIValue(1.23456, 'V', 2)).toBe('1.23 V');
+    });
+
+    it('should promote prefix when rounding would produce 1000', () => {
+      // 9.9999999e-4 is in the µ range, but rounds to 1000.000 µV — should promote to mV
+      expect(formatSIValue(9.9999999e-4, 'V')).toBe('1.000 mV');
+    });
+  });
+
+  describe('errors', () => {
+    it('should throw for NaN', () => {
+      expect(() => formatSIValue(NaN, 'V')).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'finite number'
+      );
+    });
+
+    it('should throw for Infinity', () => {
+      expect(() => formatSIValue(Infinity, 'V')).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'finite number'
+      );
+    });
+
+    it('should throw for -Infinity', () => {
+      expect(() => formatSIValue(-Infinity, 'V')).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'finite number'
+      );
+    });
+
+    it('should throw for negative precision', () => {
+      expect(() => formatSIValue(1, 'V', -1)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'precision'
+      );
+    });
+
+    it('should throw for precision > 100', () => {
+      expect(() => formatSIValue(1, 'V', 101)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'precision'
+      );
+    });
+
+    it('should throw for non-integer precision', () => {
+      expect(() => formatSIValue(1, 'V', 2.5)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'precision'
       );
     });
   });
