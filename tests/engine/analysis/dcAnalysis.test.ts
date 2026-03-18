@@ -785,5 +785,50 @@ describe('analyzeDC', () => {
         'must be a voltage or current source'
       );
     });
+
+    it('should throw for stepValue of zero when calling analyzeDC directly', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 10, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: { sourceId: 'V1', startValue: 0, endValue: 10, stepValue: 0 },
+      };
+
+      expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'stepValue'
+      );
+    });
+
+    it('should throw for non-finite stepValue when calling analyzeDC directly', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 10, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: {
+          sourceId: 'V1',
+          startValue: 0,
+          endValue: 10,
+          stepValue: Infinity,
+        },
+      };
+
+      expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'stepValue'
+      );
+    });
   });
 });

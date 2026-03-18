@@ -160,6 +160,19 @@ function generateSweepValues(
   end: number,
   step: number
 ): number[] {
+  if (!Number.isFinite(start) || !Number.isFinite(end)) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `Sweep startValue and endValue must be finite numbers`
+    );
+  }
+  if (!Number.isFinite(step) || step <= 0) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `Sweep stepValue must be a positive finite number, got ${step}`
+    );
+  }
+
   const values: number[] = [];
   const direction = start <= end ? 1 : -1;
   const signedStep = step * direction;
