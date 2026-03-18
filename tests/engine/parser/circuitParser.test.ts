@@ -539,6 +539,24 @@ describe('Circuit Parser', () => {
         )
       ).toThrowWebSpiceError('INVALID_PARAMETER', 'current');
     });
+
+    it('should throw error for component with missing parameters object', () => {
+      expect(() =>
+        parseCircuit(
+          makeCircuitJSON({
+            components: [
+              {
+                id: 'R1',
+                type: 'resistor',
+                name: 'R1',
+                nodes: ['1', '0'],
+                parameters: null as unknown as Record<string, number | string>,
+              },
+            ],
+          })
+        )
+      ).toThrowWebSpiceError('INVALID_PARAMETER', 'parameters');
+    });
   });
 
   describe('error: invalid nodes', () => {
