@@ -220,73 +220,6 @@ export class CircuitImpl implements Circuit {
   }
 
   /**
-   * Validate circuit topology and structure
-   *
-   * Checks for:
-   * - Empty circuit (no components)
-   * - Missing ground node
-   * - Floating nodes (nodes with 0 or 1 connection, except ground)
-   *
-   * @returns Validation result with errors if any
-   */
-  validate(): { valid: boolean; errors: WebSpiceError[] } {
-    const errors: WebSpiceError[] = [];
-
-    // 1. Check for empty circuit
-    if (this._components.size === 0) {
-      errors.push(
-        new WebSpiceError(
-          'INVALID_CIRCUIT',
-          'Circuit must have at least one component'
-        )
-      );
-      return { valid: false, errors };
-    }
-
-    // Get all nodes from components
-    const nodes = this.getNodes();
-
-    // 2. Check for ground node existence
-    const groundNode = nodes.find(n => n.id === this._groundNodeId);
-    if (!groundNode) {
-      errors.push(
-        new WebSpiceError(
-          'NO_GROUND',
-          `Ground node '${this._groundNodeId}' not found in circuit`
-        )
-      );
-    }
-
-    // 3. Check for floating nodes
-    for (const node of nodes) {
-      if (node.connectedComponents.length === 0) {
-        // Node with no connections
-        errors.push(
-          new WebSpiceError(
-            'FLOATING_NODE',
-            `Node '${node.id}' has no connections`,
-            { nodeId: node.id }
-          )
-        );
-      } else if (node.connectedComponents.length === 1 && !node.isGround) {
-        // Non-ground node with only one connection
-        errors.push(
-          new WebSpiceError(
-            'FLOATING_NODE',
-            `Node '${node.id}' is connected to only one component`,
-            { nodeId: node.id }
-          )
-        );
-      }
-    }
-
-    return {
-      valid: errors.length === 0,
-      errors,
-    };
-  }
-
-  /**
    * Serialize to JSON
    * Required for JSON.stringify() since getters are not enumerable
    */
@@ -316,4 +249,67 @@ export class CircuitImpl implements Circuit {
       components: data.components,
     });
   }
+}
+
+// =============================================================================
+// Circuit Validation
+// =============================================================================
+
+/**
+ * Validate circuit topology and structure.
+ *
+ * Checks for:
+ * - Empty circuit (no components)
+ * - Missing ground node
+ * - Floating nodes (nodes with 0 or 1 connection, except ground)
+ *
+ * @param circuit - Circuit to validate
+ * @returns Array of validation errors (empty if valid)
+ */
+export function validateCircuitStructure(circuit: Circuit): WebSpiceError[] {
+  const errors: WebSpiceError[] = [];
+
+  if (circuit.components.length === 0) {
+    errors.push(
+      new WebSpiceError(
+        'INVALID_CIRCUIT',
+        'Circuit must have at least one component'
+      )
+    );
+    return errors;
+  }
+
+  const groundNode = circuit.nodes.find(n => n.id === circuit.groundNodeId);
+  if (!groundNode) {
+    errors.push(
+      new WebSpiceError(
+        'NO_GROUND',
+        `Ground node '${circuit.groundNodeId}' not found in circuit`
+      )
+    );
+  }
+
+  for (const node of circuit.nodes) {
+    if (node.connectedComponents.length === 0) {
+      errors.push(
+        new WebSpiceError(
+          'FLOATING_NODE',
+          `Node '${node.id}' has no connections`,
+          {
+            nodeId: node.id,
+          }
+        )
+      );
+    } else if (node.connectedComponents.length === 1 && !node.isGround) {
+      errors.push(
+        new WebSpiceError(
+          'FLOATING_NODE',
+          `Node '${node.id}' is connected to only one component`,
+          { nodeId: node.id }
+        )
+      );
+    }
+  }
+
+  return errors;
 }
