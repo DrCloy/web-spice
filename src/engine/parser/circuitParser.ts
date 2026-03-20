@@ -54,6 +54,22 @@ export function parseCircuit(json: CircuitJSON): CircuitImpl {
  * before delegating value validation to Impl constructors.
  */
 function parseComponent(json: ComponentJSON): Component {
+  if (!Array.isArray(json.nodes)) {
+    throw new WebSpiceError(
+      'INVALID_COMPONENT',
+      `Component '${json.id}' has invalid or missing 'nodes' array`,
+      { componentId: json.id }
+    );
+  }
+
+  if (json.type !== 'ground' && !json.parameters) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `Component '${json.id}' is missing required 'parameters' object`,
+      { componentId: json.id }
+    );
+  }
+
   switch (json.type) {
     case 'resistor':
       return parseResistor(json);

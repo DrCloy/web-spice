@@ -32,6 +32,13 @@ export function parseAnalysis(json: AnalysisJSON): DCAnalysisConfig {
 function parseDCAnalysis(json: AnalysisJSON): DCAnalysisConfig {
   const params = json.parameters;
 
+  if (!params || typeof params !== 'object') {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      'Analysis JSON is missing required parameters object'
+    );
+  }
+
   const sweepKeys = ['sourceId', 'startValue', 'endValue', 'stepValue'];
   const presentKeys = sweepKeys.filter(k => params[k] != null);
 
@@ -49,7 +56,16 @@ function parseDCAnalysis(json: AnalysisJSON): DCAnalysisConfig {
     );
   }
 
-  const sourceId = String(params.sourceId);
+  if (
+    typeof params.sourceId !== 'string' ||
+    params.sourceId.trim().length === 0
+  ) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `DC sweep 'sourceId' must be a non-empty string, got ${typeof params.sourceId}`
+    );
+  }
+  const sourceId = params.sourceId;
   const startValue = parseSIValue(params.startValue as number | string);
   const endValue = parseSIValue(params.endValue as number | string);
   const stepValue = parseSIValue(params.stepValue as number | string);

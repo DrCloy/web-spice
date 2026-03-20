@@ -91,12 +91,58 @@ describe('Analysis Parser', () => {
       ).toThrowWebSpiceError('INVALID_PARAMETER', 'Analysis JSON is required');
     });
 
+    it('should throw INVALID_PARAMETER for missing parameters object', () => {
+      const json = {
+        type: 'dc',
+        parameters: null,
+      } as unknown as AnalysisJSON;
+
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'parameters'
+      );
+    });
+
     it('should throw UNSUPPORTED_ANALYSIS for non-DC analysis type', () => {
       const json = { type: 'ac', parameters: {} } as AnalysisJSON;
 
       expect(() => parseAnalysis(json)).toThrowWebSpiceError(
         'UNSUPPORTED_ANALYSIS',
         'not yet supported'
+      );
+    });
+  });
+
+  describe('error: invalid sourceId', () => {
+    it('should throw for numeric sourceId', () => {
+      const json = makeDCAnalysisJSON({
+        parameters: {
+          sourceId: 123,
+          startValue: 0,
+          endValue: 10,
+          stepValue: 1,
+        },
+      });
+
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'sourceId'
+      );
+    });
+
+    it('should throw for empty string sourceId', () => {
+      const json = makeDCAnalysisJSON({
+        parameters: {
+          sourceId: '   ',
+          startValue: 0,
+          endValue: 10,
+          stepValue: 1,
+        },
+      });
+
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'INVALID_PARAMETER',
+        'sourceId'
       );
     });
   });

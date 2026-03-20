@@ -39,6 +39,13 @@ const SI_VALUE_REGEX = /^([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)\s*(.*)$/;
  * @throws {WebSpiceError} INVALID_PARAMETER for non-parseable values
  */
 export function parseSIValue(value: number | string): number {
+  if (typeof value !== 'number' && typeof value !== 'string') {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `Value must be a number or string, got ${typeof value}`
+    );
+  }
+
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) {
       throw new WebSpiceError(
