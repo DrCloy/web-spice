@@ -6,7 +6,6 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { CircuitJSON } from '@/types/circuit';
-import { WebSpiceError } from '@/types/circuit';
 import { validateCircuitStructure } from '@/engine/circuit';
 import { parseCircuit } from '@/engine/parser/circuitParser';
 import { parseAnalysis } from '@/engine/parser/analysisParser';
@@ -263,11 +262,13 @@ describe('DC Analysis Pipeline', () => {
   // ============================================================================
 
   describe('error propagation', () => {
-    it('should throw WebSpiceError for null circuit JSON', () => {
-      expect(() => parseCircuit(null as never)).toThrow(WebSpiceError);
+    it('should throw INVALID_CIRCUIT for null circuit JSON', () => {
+      expect(() => parseCircuit(null as never)).toThrowWebSpiceError(
+        'INVALID_CIRCUIT'
+      );
     });
 
-    it('should throw WebSpiceError for unsupported component type', () => {
+    it('should throw INVALID_COMPONENT for unsupported component type', () => {
       const json: CircuitJSON = {
         name: 'Bad Circuit',
         ground: '0',
@@ -281,10 +282,12 @@ describe('DC Analysis Pipeline', () => {
           },
         ],
       };
-      expect(() => parseCircuit(json)).toThrow(WebSpiceError);
+      expect(() => parseCircuit(json)).toThrowWebSpiceError(
+        'INVALID_COMPONENT'
+      );
     });
 
-    it('should throw WebSpiceError for floating node', () => {
+    it('should throw FLOATING_NODE for floating node in parsed circuit', () => {
       const json: CircuitJSON = {
         name: 'Floating Node',
         ground: '0',
@@ -306,38 +309,7 @@ describe('DC Analysis Pipeline', () => {
         ],
       };
       const circuit = parseCircuit(json);
-      expect(() => analyzeDC(circuit)).toThrow(WebSpiceError);
-    });
-
-    it('should throw WebSpiceError with FLOATING_NODE code for floating node', () => {
-      const json: CircuitJSON = {
-        name: 'Floating Node',
-        ground: '0',
-        components: [
-          {
-            id: 'V1',
-            type: 'voltage_source',
-            name: 'V1',
-            nodes: ['1', '0'],
-            parameters: { voltage: 12 },
-          },
-          {
-            id: 'R1',
-            type: 'resistor',
-            name: 'R1',
-            nodes: ['1', '2'],
-            parameters: { resistance: 1000 },
-          },
-        ],
-      };
-      const circuit = parseCircuit(json);
-      try {
-        analyzeDC(circuit);
-        expect.fail('should have thrown');
-      } catch (e) {
-        expect(e).toBeInstanceOf(WebSpiceError);
-        expect((e as WebSpiceError).code).toBe('FLOATING_NODE');
-      }
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('FLOATING_NODE');
     });
 
     it('should throw WebSpiceError with SINGULAR_MATRIX for parallel voltage sources', () => {
@@ -363,16 +335,10 @@ describe('DC Analysis Pipeline', () => {
         ],
       };
       const circuit = parseCircuit(json);
-      try {
-        analyzeDC(circuit);
-        expect.fail('should have thrown');
-      } catch (e) {
-        expect(e).toBeInstanceOf(WebSpiceError);
-        expect((e as WebSpiceError).code).toBe('SINGULAR_MATRIX');
-      }
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('SINGULAR_MATRIX');
     });
 
-    it('should throw WebSpiceError for missing sweep source', () => {
+    it('should throw INVALID_PARAMETER for missing sweep source', () => {
       const circuit = parseCircuit(VOLTAGE_DIVIDER_JSON);
       const config = parseAnalysis({
         type: 'dc',
@@ -383,7 +349,9 @@ describe('DC Analysis Pipeline', () => {
           stepValue: 5,
         },
       });
-      expect(() => analyzeDC(circuit, config)).toThrow(WebSpiceError);
+      expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
+        'INVALID_PARAMETER'
+      );
     });
   });
 
@@ -538,13 +506,9 @@ describe('DC Analysis Pipeline', () => {
       };
 
       // floating node has only 1 connection → FLOATING_NODE
-      try {
-        analyzeDC(brokenCircuit);
-        expect.fail('should have thrown');
-      } catch (e) {
-        expect(e).toBeInstanceOf(WebSpiceError);
-        expect((e as WebSpiceError).code).toBe('FLOATING_NODE');
-      }
+      expect(() => analyzeDC(brokenCircuit)).toThrowWebSpiceError(
+        'FLOATING_NODE'
+      );
     });
   });
 });
