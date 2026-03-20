@@ -5,6 +5,15 @@
  * Handles node index mapping, matrix stamping, and result extraction.
  *
  * @module engine/analysis/mnaAssembler
+ * @internal
+ *
+ * All exported symbols are internal helpers consumed exclusively by dcAnalysis.ts.
+ * They are not part of the public engine API and rely on the following preconditions
+ * being satisfied by the caller (enforced by validateCircuitForDC in analyzeDC):
+ *   - Circuit has passed structural validation (validateCircuitStructure)
+ *   - All components are DC-compatible (no AC sources, no capacitors/inductors)
+ *   - At least one component is present and a ground node exists
+ * Calling these functions directly without prior validation produces undefined behavior.
  */
 
 import type { Circuit, Matrix, Vector } from '@/types/circuit';
@@ -20,7 +29,10 @@ import type {
 // Types
 // ============================================================================
 
-/** Maps node IDs to matrix indices and tracks system dimensions */
+/**
+ * Maps node IDs to matrix indices and tracks system dimensions.
+ * @internal
+ */
 export interface NodeIndexMap {
   nodeToIndex: Map<NodeId, number>;
   indexToNode: NodeId[];
@@ -38,6 +50,7 @@ export interface NodeIndexMap {
  * Build a mapping from node IDs to matrix indices.
  * Ground node is excluded (implicit V=0).
  * Voltage sources get additional indices after nodes.
+ * @internal Precondition: circuit has passed validateCircuitForDC.
  */
 export function buildNodeIndexMap(circuit: Circuit): NodeIndexMap {
   const groundNodeId = circuit.groundNodeId;
@@ -85,6 +98,7 @@ export function buildNodeIndexMap(circuit: Circuit): NodeIndexMap {
 
 /**
  * Build the MNA matrix A and RHS vector b from circuit components.
+ * @internal Precondition: circuit has passed validateCircuitForDC.
  */
 export function buildMNASystem(
   circuit: Circuit,
@@ -195,6 +209,7 @@ function stampCurrentSource(
 
 /**
  * Extract DC operating point results from the MNA solution vector.
+ * @internal Precondition: circuit has passed validateCircuitForDC.
  */
 export function extractResults(
   x: Vector,

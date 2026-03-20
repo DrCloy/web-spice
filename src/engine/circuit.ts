@@ -18,7 +18,7 @@ import { WebSpiceError } from '@/types/circuit';
  * });
  *
  * circuit.addComponent(capacitor);
- * const validation = circuit.validate();
+ * const errors = validateCircuitStructure(circuit);
  * ```
  */
 export class CircuitImpl implements Circuit {
