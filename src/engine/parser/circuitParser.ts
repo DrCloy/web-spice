@@ -62,14 +62,6 @@ function parseComponent(json: ComponentJSON): Component {
     );
   }
 
-  if (json.type !== 'ground' && !json.parameters) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      `Component '${json.id}' is missing required 'parameters' object`,
-      { componentId: json.id }
-    );
-  }
-
   switch (json.type) {
     case 'resistor':
       return parseResistor(json);
