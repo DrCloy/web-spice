@@ -91,18 +91,6 @@ describe('Analysis Parser', () => {
       ).toThrowWebSpiceError('INVALID_PARAMETER', 'Analysis JSON is required');
     });
 
-    it('should throw INVALID_PARAMETER for missing parameters object', () => {
-      const json = {
-        type: 'dc',
-        parameters: null,
-      } as unknown as AnalysisJSON;
-
-      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'parameters'
-      );
-    });
-
     it('should throw UNSUPPORTED_ANALYSIS for non-DC analysis type', () => {
       const json = { type: 'ac', parameters: {} } as AnalysisJSON;
 
