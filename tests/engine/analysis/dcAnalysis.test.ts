@@ -28,13 +28,6 @@ import { SINGULAR_MATRIX_ERROR } from '../../fixtures/error-cases';
 
 describe('analyzeDC', () => {
   describe('Input Validation', () => {
-    it('should throw for null circuit', () => {
-      expect(() => analyzeDC(null as unknown as Circuit)).toThrowWebSpiceError(
-        'INVALID_CIRCUIT',
-        'cannot be null'
-      );
-    });
-
     it('should throw for empty circuit', () => {
       const circuit: Circuit = {
         id: 'empty',

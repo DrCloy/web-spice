@@ -32,23 +32,6 @@ function createSquareSystem(target: number): NonlinearSystem {
 
 describe('solveNewtonRaphson', () => {
   describe('Input Validation', () => {
-    it('should throw for null system', () => {
-      const guess: Vector = { length: 1, data: new Float64Array([1]) };
-      expect(() =>
-        solveNewtonRaphson(null as unknown as NonlinearSystem, guess)
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'System cannot be null');
-    });
-
-    it('should throw for null initial guess', () => {
-      const system = createSquareSystem(2);
-      expect(() =>
-        solveNewtonRaphson(system, null as unknown as Vector)
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Initial guess cannot be null'
-      );
-    });
-
     it('should throw for dimension mismatch', () => {
       const system = createSquareSystem(2); // size = 1
       const guess: Vector = { length: 2, data: new Float64Array([1, 2]) };

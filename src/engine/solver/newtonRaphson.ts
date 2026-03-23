@@ -84,18 +84,6 @@ export function solveNewtonRaphson(
   options?: Partial<NewtonRaphsonOptions>
 ): NewtonRaphsonResult {
   // --- Input validation ---
-  if (!system) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'System cannot be null or undefined'
-    );
-  }
-  if (!initialGuess) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Initial guess cannot be null or undefined'
-    );
-  }
   if (initialGuess.length !== system.size) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',

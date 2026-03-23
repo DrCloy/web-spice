@@ -10,7 +10,7 @@ import {
   solveLinearSystem,
 } from '@/engine/solver/luDecomposition';
 import { multiplyMatrices, multiplyMatrixVector } from '@/engine/solver/matrix';
-import type { LUResult, Matrix, Vector } from '@/types/circuit';
+import type { Matrix, Vector } from '@/types/circuit';
 import {
   createDiagonalMatrix,
   createDiagonallyDominantMatrix,
@@ -66,13 +66,6 @@ describe('LU Decomposition', () => {
   // ============================================================================
 
   describe('Input Validation', () => {
-    it('should throw for null matrix', () => {
-      expect(() => luDecompose(null as unknown as Matrix)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'cannot be null'
-      );
-    });
-
     it('should throw for non-square matrix', () => {
       const A = createTestMatrix({
         rows: 2,
@@ -423,13 +416,6 @@ describe('LU Decomposition', () => {
   // ============================================================================
 
   describe('extractL', () => {
-    it('should throw for null input', () => {
-      expect(() => extractL(null as unknown as LUResult)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'LU result cannot be null'
-      );
-    });
-
     it('should have unit diagonal', () => {
       const A = createTestMatrix({
         rows: 3,
@@ -463,13 +449,6 @@ describe('LU Decomposition', () => {
   });
 
   describe('extractU', () => {
-    it('should throw for null input', () => {
-      expect(() => extractU(null as unknown as LUResult)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'LU result cannot be null'
-      );
-    });
-
     it('should be upper triangular', () => {
       const A = createTestMatrix({
         rows: 3,
@@ -508,22 +487,6 @@ describe('LU Decomposition', () => {
   // ============================================================================
 
   describe('luSolve', () => {
-    it('should throw for null LU result', () => {
-      const b = createTestVector({ length: 2, data: [1, 2] });
-      expect(() =>
-        luSolve(null as unknown as LUResult, b)
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'cannot be null');
-    });
-
-    it('should throw for null vector', () => {
-      const A = createTestMatrix({ rows: 2, cols: 2, data: [1, 0, 0, 1] });
-      const lu = luDecompose(A);
-      expect(() => luSolve(lu, null as unknown as Vector)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'cannot be null'
-      );
-    });
-
     it('should throw for singular matrix', () => {
       const A = createSingularMatrix(3);
       const lu = luDecompose(A);
@@ -641,13 +604,6 @@ describe('LU Decomposition', () => {
   // ============================================================================
 
   describe('luSolveMultiple', () => {
-    it('should throw for null LU result', () => {
-      const B = createTestMatrix({ rows: 2, cols: 2, data: [1, 2, 3, 4] });
-      expect(() =>
-        luSolveMultiple(null as unknown as LUResult, B)
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'cannot be null');
-    });
-
     it('should throw for dimension mismatch', () => {
       const A = createTestMatrix({ rows: 2, cols: 2, data: [1, 0, 0, 1] });
       const lu = luDecompose(A);
@@ -715,12 +671,6 @@ describe('LU Decomposition', () => {
   // ============================================================================
 
   describe('determinant', () => {
-    it('should throw for null input', () => {
-      expect(() =>
-        determinant(null as unknown as LUResult)
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'LU result cannot be null');
-    });
-
     it('should return 0 for singular matrix', () => {
       const A = createSingularMatrix(3);
       const lu = luDecompose(A);
@@ -784,13 +734,6 @@ describe('LU Decomposition', () => {
   // ============================================================================
 
   describe('luInverse', () => {
-    it('should throw for null input', () => {
-      expect(() => luInverse(null as unknown as LUResult)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'LU result cannot be null'
-      );
-    });
-
     it('should throw for singular matrix', () => {
       const A = createSingularMatrix(3);
       const lu = luDecompose(A);

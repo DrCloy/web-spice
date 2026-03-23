@@ -241,13 +241,6 @@ function applySourceValue(
  * and unsupported component types (capacitor, inductor, etc.).
  */
 function validateCircuitForDC(circuit: Circuit): void {
-  if (!circuit) {
-    throw new WebSpiceError(
-      'INVALID_CIRCUIT',
-      'Circuit cannot be null or undefined'
-    );
-  }
-
   const structuralErrors = validateCircuitStructure(circuit);
   if (structuralErrors.length > 0) {
     throw structuralErrors[0];
