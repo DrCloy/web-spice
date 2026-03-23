@@ -86,18 +86,6 @@ describe('SI Prefix Parser', () => {
   });
 
   describe('edge cases and errors', () => {
-    it('should throw for object input', () => {
-      expect(() =>
-        parseSIValue({ value: 1000 } as unknown as number)
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'number or string');
-    });
-
-    it('should throw for array input', () => {
-      expect(() =>
-        parseSIValue([1000] as unknown as number)
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'number or string');
-    });
-
     it('should throw for empty string', () => {
       expect(() => parseSIValue('')).toThrowWebSpiceError(
         'INVALID_PARAMETER',

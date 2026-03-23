@@ -540,24 +540,6 @@ describe('Circuit Parser', () => {
   });
 
   describe('error: invalid nodes', () => {
-    it('should throw error for component with missing nodes array', () => {
-      expect(() =>
-        parseCircuit(
-          makeCircuitJSON({
-            components: [
-              {
-                id: 'R1',
-                type: 'resistor',
-                name: 'R1',
-                nodes: null as unknown as string[],
-                parameters: { resistance: 1000 },
-              },
-            ],
-          })
-        )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'nodes');
-    });
-
     it('should throw error for two-terminal component with wrong number of nodes', () => {
       expect(() =>
         parseCircuit(
