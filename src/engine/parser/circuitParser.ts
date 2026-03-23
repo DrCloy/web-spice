@@ -81,7 +81,7 @@ function parseResistor(json: ComponentJSON): Component {
     );
   }
 
-  if (json.parameters.resistance == null) {
+  if (json.parameters.resistance === undefined) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
       `Resistor '${json.id}' requires 'resistance' parameter`,
@@ -119,7 +119,7 @@ function parseVoltageSource(json: ComponentJSON): Component {
     );
   }
 
-  if (json.parameters.voltage == null) {
+  if (json.parameters.voltage === undefined) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
       `Voltage source '${json.id}' requires 'voltage' parameter`,
@@ -158,7 +158,7 @@ function parseCurrentSource(json: ComponentJSON): Component {
     );
   }
 
-  if (json.parameters.current == null) {
+  if (json.parameters.current === undefined) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
       `Current source '${json.id}' requires 'current' parameter`,

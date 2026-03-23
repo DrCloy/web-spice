@@ -224,7 +224,8 @@ export function extractResults(
   const branchCurrents: Record<ComponentId, number> = {};
   const componentPowers: Record<ComponentId, number> = {};
 
-  nodeVoltages[circuit.groundNodeId] = 0;
+  const GROUND_VOLTAGE = 0;
+  nodeVoltages[circuit.groundNodeId] = GROUND_VOLTAGE;
 
   for (let i = 0; i < map.numNodes; i++) {
     nodeVoltages[map.indexToNode[i]] = x.data[i];
@@ -239,8 +240,10 @@ export function extractResults(
 
     switch (component.type) {
       case 'resistor': {
-        const vp = nodeVoltages[component.terminals[0].nodeId] ?? 0;
-        const vq = nodeVoltages[component.terminals[1].nodeId] ?? 0;
+        const vp =
+          nodeVoltages[component.terminals[0].nodeId] ?? GROUND_VOLTAGE;
+        const vq =
+          nodeVoltages[component.terminals[1].nodeId] ?? GROUND_VOLTAGE;
         const current = (vp - vq) / component.resistance;
         branchCurrents[component.id] = current;
         componentPowers[component.id] = (vp - vq) * current;
@@ -259,8 +262,10 @@ export function extractResults(
       }
       case 'current_source': {
         if (component.sourceType !== 'dc') break;
-        const vp = nodeVoltages[component.terminals[0].nodeId] ?? 0;
-        const vq = nodeVoltages[component.terminals[1].nodeId] ?? 0;
+        const vp =
+          nodeVoltages[component.terminals[0].nodeId] ?? GROUND_VOLTAGE;
+        const vq =
+          nodeVoltages[component.terminals[1].nodeId] ?? GROUND_VOLTAGE;
         branchCurrents[component.id] = component.current;
         // (vp - vq) * I is power absorbed by the source; negative means
         // the current source is delivering power to the circuit

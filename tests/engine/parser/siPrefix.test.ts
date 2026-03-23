@@ -117,7 +117,7 @@ describe('SI Prefix Parser', () => {
     it('should throw for unknown SI prefix', () => {
       expect(() => parseSIValue('1x')).toThrowWebSpiceError(
         'INVALID_PARAMETER',
-        "Unknown SI prefix 'x'"
+        "Unknown unit suffix 'x'"
       );
     });
   });

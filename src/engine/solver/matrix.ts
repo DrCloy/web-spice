@@ -49,14 +49,6 @@ function validateTolerance(tolerance: number): void {
  * // result.data = [5, 7, 9]
  */
 export function addVectors(v1: Vector, v2: Vector): Vector {
-  // Validate inputs exist
-  if (!v1 || !v2) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vectors cannot be null or undefined'
-    );
-  }
-
   // Validate dimensions
   if (v1.length !== v2.length) {
     throw new WebSpiceError(
@@ -83,14 +75,6 @@ export function addVectors(v1: Vector, v2: Vector): Vector {
  * @throws {WebSpiceError} If vector dimensions don't match
  */
 export function subtractVectors(v1: Vector, v2: Vector): Vector {
-  // Validate inputs exist
-  if (!v1 || !v2) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vectors cannot be null or undefined'
-    );
-  }
-
   // Validate dimensions
   if (v1.length !== v2.length) {
     throw new WebSpiceError(
@@ -118,12 +102,6 @@ export function subtractVectors(v1: Vector, v2: Vector): Vector {
  */
 export function scaleVector(v: Vector, scalar: number): Vector {
   // Validate inputs
-  if (!v) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vector cannot be null or undefined'
-    );
-  }
 
   if (!Number.isFinite(scalar)) {
     throw new WebSpiceError(
@@ -150,12 +128,6 @@ export function scaleVector(v: Vector, scalar: number): Vector {
  */
 export function negateVector(v: Vector): Vector {
   // Validate input
-  if (!v) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vector cannot be null or undefined'
-    );
-  }
 
   // Perform operation
   const data = new Float64Array(v.length);
@@ -182,14 +154,6 @@ export function negateVector(v: Vector): Vector {
  * // result = 1*4 + 2*5 + 3*6 = 32
  */
 export function dotProduct(v1: Vector, v2: Vector): number {
-  // Validate inputs exist
-  if (!v1 || !v2) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vectors cannot be null or undefined'
-    );
-  }
-
   // Validate dimensions
   if (v1.length !== v2.length) {
     throw new WebSpiceError(
@@ -222,14 +186,6 @@ export function dotProduct(v1: Vector, v2: Vector): number {
  * // result.data = [4, 10, 18]
  */
 export function hadamardProduct(v1: Vector, v2: Vector): Vector {
-  // Validate inputs exist
-  if (!v1 || !v2) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vectors cannot be null or undefined'
-    );
-  }
-
   // Validate dimensions
   if (v1.length !== v2.length) {
     throw new WebSpiceError(
@@ -261,12 +217,6 @@ export function hadamardProduct(v1: Vector, v2: Vector): Vector {
  */
 export function normL1(v: Vector): number {
   // Validate input
-  if (!v) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vector cannot be null or undefined'
-    );
-  }
 
   // Perform operation
   let sum = 0;
@@ -292,12 +242,6 @@ export function normL1(v: Vector): number {
  */
 export function normL2(v: Vector): number {
   // Validate input
-  if (!v) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vector cannot be null or undefined'
-    );
-  }
 
   // Find maximum absolute value for scaling
   let maxAbs = 0;
@@ -337,12 +281,6 @@ export function normL2(v: Vector): number {
  */
 export function normInfinity(v: Vector): number {
   // Validate input
-  if (!v) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vector cannot be null or undefined'
-    );
-  }
 
   // Perform operation
   let maxAbs = 0;
@@ -370,12 +308,6 @@ export function normInfinity(v: Vector): number {
  */
 export function normalize(v: Vector): Vector {
   // Validate input
-  if (!v) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vector cannot be null or undefined'
-    );
-  }
 
   // Compute norm
   const norm = normL2(v);
@@ -423,12 +355,6 @@ export function isZeroVector(v: Vector, tolerance = 0): boolean {
   validateTolerance(tolerance);
 
   // Validate input
-  if (!v) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vector cannot be null or undefined'
-    );
-  }
 
   // Check all elements
   for (let i = 0; i < v.length; i++) {
@@ -457,12 +383,6 @@ export function areVectorsEqual(
   validateTolerance(tolerance);
 
   // Validate inputs
-  if (!v1 || !v2) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vectors cannot be null or undefined'
-    );
-  }
 
   // Check dimensions
   if (v1.length !== v2.length) {
@@ -493,12 +413,6 @@ export function areVectorsEqual(
  */
 export function maxElement(v: Vector): { value: number; index: number } {
   // Validate input
-  if (!v) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vector cannot be null or undefined'
-    );
-  }
 
   if (v.length === 0) {
     throw new WebSpiceError('INVALID_PARAMETER', 'Vector cannot be empty');
@@ -532,12 +446,6 @@ export function maxElement(v: Vector): { value: number; index: number } {
  */
 export function minElement(v: Vector): { value: number; index: number } {
   // Validate input
-  if (!v) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vector cannot be null or undefined'
-    );
-  }
 
   if (v.length === 0) {
     throw new WebSpiceError('INVALID_PARAMETER', 'Vector cannot be empty');
@@ -570,13 +478,6 @@ export function minElement(v: Vector): { value: number; index: number } {
  * @throws {WebSpiceError} If matrix dimensions don't match
  */
 export function addMatrices(A: Matrix, B: Matrix): Matrix {
-  if (!A || !B) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrices cannot be null or undefined'
-    );
-  }
-
   if (A.rows !== B.rows || A.cols !== B.cols) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -601,13 +502,6 @@ export function addMatrices(A: Matrix, B: Matrix): Matrix {
  * @throws {WebSpiceError} If matrix dimensions don't match
  */
 export function subtractMatrices(A: Matrix, B: Matrix): Matrix {
-  if (!A || !B) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrices cannot be null or undefined'
-    );
-  }
-
   if (A.rows !== B.rows || A.cols !== B.cols) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -631,13 +525,6 @@ export function subtractMatrices(A: Matrix, B: Matrix): Matrix {
  * @returns New matrix with all elements multiplied by scalar
  */
 export function scaleMatrix(A: Matrix, scalar: number): Matrix {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (!Number.isFinite(scalar)) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -660,13 +547,6 @@ export function scaleMatrix(A: Matrix, scalar: number): Matrix {
  * @returns New matrix with all elements negated
  */
 export function negateMatrix(A: Matrix): Matrix {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   const data = new Float64Array(A.rows * A.cols);
   for (let i = 0; i < data.length; i++) {
     data[i] = A.data[i] === 0 ? 0 : -A.data[i];
@@ -684,13 +564,6 @@ export function negateMatrix(A: Matrix): Matrix {
  * @throws {WebSpiceError} If matrix dimensions are incompatible
  */
 export function multiplyMatrices(A: Matrix, B: Matrix): Matrix {
-  if (!A || !B) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrices cannot be null or undefined'
-    );
-  }
-
   if (A.cols !== B.rows) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -722,13 +595,6 @@ export function multiplyMatrices(A: Matrix, B: Matrix): Matrix {
  * @throws {WebSpiceError} If dimensions are incompatible
  */
 export function multiplyMatrixVector(A: Matrix, v: Vector): Vector {
-  if (!A || !v) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix and vector cannot be null or undefined'
-    );
-  }
-
   if (A.cols !== v.length) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -758,13 +624,6 @@ export function multiplyMatrixVector(A: Matrix, v: Vector): Vector {
  * @throws {WebSpiceError} If dimensions are incompatible
  */
 export function multiplyVectorMatrix(v: Vector, A: Matrix): Vector {
-  if (!v || !A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Vector and matrix cannot be null or undefined'
-    );
-  }
-
   if (v.length !== A.rows) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -796,13 +655,6 @@ export function multiplyVectorMatrix(v: Vector, A: Matrix): Vector {
  * @returns Transposed matrix
  */
 export function transpose(A: Matrix): Matrix {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   const data = new Float64Array(A.rows * A.cols);
 
   for (let i = 0; i < A.rows; i++) {
@@ -823,13 +675,6 @@ export function transpose(A: Matrix): Matrix {
  * @throws {WebSpiceError} If row index is out of bounds
  */
 export function getRow(A: Matrix, rowIndex: number): Vector {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (rowIndex < 0 || rowIndex >= A.rows) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -854,13 +699,6 @@ export function getRow(A: Matrix, rowIndex: number): Vector {
  * @throws {WebSpiceError} If column index is out of bounds
  */
 export function getColumn(A: Matrix, colIndex: number): Vector {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (colIndex < 0 || colIndex >= A.cols) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -886,13 +724,6 @@ export function getColumn(A: Matrix, colIndex: number): Vector {
  * @throws {WebSpiceError} If row length doesn't match
  */
 export function setRow(A: Matrix, rowIndex: number, values: number[]): Matrix {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (rowIndex < 0 || rowIndex >= A.rows) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -929,13 +760,6 @@ export function setColumn(
   colIndex: number,
   values: number[]
 ): Matrix {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (colIndex < 0 || colIndex >= A.cols) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -976,13 +800,6 @@ export function submatrix(
   colStart: number,
   colEnd: number
 ): Matrix {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (
     rowStart < 0 ||
     rowEnd > A.rows ||
@@ -1019,13 +836,6 @@ export function submatrix(
  * @throws {WebSpiceError} If matrix is not square
  */
 export function trace(A: Matrix): number {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (A.rows !== A.cols) {
     throw new WebSpiceError('INVALID_PARAMETER', 'Matrix must be square');
   }
@@ -1046,13 +856,6 @@ export function trace(A: Matrix): number {
  * @returns Frobenius norm
  */
 export function frobeniusNorm(A: Matrix): number {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   // Find maximum absolute value for scaling
   let maxAbs = 0;
   for (let i = 0; i < A.data.length; i++) {
@@ -1086,13 +889,6 @@ export function frobeniusNorm(A: Matrix): number {
 export function isSymmetric(A: Matrix, tolerance = 0): boolean {
   validateTolerance(tolerance);
 
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (A.rows !== A.cols) {
     return false;
   }
@@ -1120,13 +916,6 @@ export function isSymmetric(A: Matrix, tolerance = 0): boolean {
 export function isDiagonal(A: Matrix, tolerance = 0): boolean {
   validateTolerance(tolerance);
 
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (A.rows !== A.cols) {
     return false;
   }
@@ -1151,13 +940,6 @@ export function isDiagonal(A: Matrix, tolerance = 0): boolean {
  */
 export function isIdentity(A: Matrix, tolerance = 0): boolean {
   validateTolerance(tolerance);
-
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
 
   if (A.rows !== A.cols) {
     return false;
@@ -1185,13 +967,6 @@ export function isIdentity(A: Matrix, tolerance = 0): boolean {
 export function isZeroMatrix(A: Matrix, tolerance = 0): boolean {
   validateTolerance(tolerance);
 
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   for (let i = 0; i < A.data.length; i++) {
     if (Math.abs(A.data[i]) > tolerance) {
       return false;
@@ -1211,13 +986,6 @@ export function isZeroMatrix(A: Matrix, tolerance = 0): boolean {
  */
 export function areMatricesEqual(A: Matrix, B: Matrix, tolerance = 0): boolean {
   validateTolerance(tolerance);
-
-  if (!A || !B) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrices cannot be null or undefined'
-    );
-  }
 
   if (A.rows !== B.rows || A.cols !== B.cols) {
     return false;
@@ -1241,13 +1009,6 @@ export function areMatricesEqual(A: Matrix, B: Matrix, tolerance = 0): boolean {
  * @throws {WebSpiceError} If matrix is not square
  */
 export function conditionNumber(A: Matrix): number {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (A.rows !== A.cols) {
     throw new WebSpiceError('INVALID_PARAMETER', 'Matrix must be square');
   }
@@ -1309,13 +1070,6 @@ export function conditionNumber(A: Matrix): number {
  * @returns True if contains NaN or Infinity
  */
 export function hasNaNOrInfinity(A: Matrix | Vector): boolean {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Input cannot be null or undefined'
-    );
-  }
-
   for (let i = 0; i < A.data.length; i++) {
     if (!Number.isFinite(A.data[i])) {
       return true;
@@ -1334,13 +1088,6 @@ export function hasNaNOrInfinity(A: Matrix | Vector): boolean {
  * @returns New matrix with clamped values
  */
 export function clampMatrix(A: Matrix, min: number, max: number): Matrix {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (!Number.isFinite(min) || !Number.isFinite(max)) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1371,13 +1118,6 @@ export function clampMatrix(A: Matrix, min: number, max: number): Matrix {
  * @returns New matrix with NaN replaced
  */
 export function replaceNaN(A: Matrix, replacement: number): Matrix {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (!Number.isFinite(replacement)) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1406,13 +1146,6 @@ export function replaceNaN(A: Matrix, replacement: number): Matrix {
  * @throws {WebSpiceError} If matrix is not square
  */
 export function estimateConditionNumber(A: Matrix): number {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (A.rows !== A.cols) {
     throw new WebSpiceError('INVALID_PARAMETER', 'Matrix must be square');
   }
@@ -1452,13 +1185,6 @@ export function estimateConditionNumber(A: Matrix): number {
  */
 export function rank(A: Matrix, tolerance = 1e-10): number {
   validateTolerance(tolerance);
-
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
 
   // Create a copy for elimination
   const m = A.rows;
@@ -1526,13 +1252,6 @@ export function rank(A: Matrix, tolerance = 1e-10): number {
  * @returns Sparse matrix in CSR format
  */
 export function cooToCSR(coo: SparseMatrix): CSRMatrix {
-  if (!coo) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Sparse matrix cannot be null or undefined'
-    );
-  }
-
   if (!isValidCOO(coo)) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1592,13 +1311,6 @@ export function cooToCSR(coo: SparseMatrix): CSRMatrix {
 export function denseToSparse(matrix: Matrix, tolerance = 0): SparseMatrix {
   validateTolerance(tolerance);
 
-  if (!matrix) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   const entries: SparseEntry[] = [];
 
   for (let i = 0; i < matrix.rows; i++) {
@@ -1620,13 +1332,6 @@ export function denseToSparse(matrix: Matrix, tolerance = 0): SparseMatrix {
  * @returns Dense matrix
  */
 export function sparseToDense(sparse: SparseMatrix): Matrix {
-  if (!sparse) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Sparse matrix cannot be null or undefined'
-    );
-  }
-
   if (!isValidCOO(sparse)) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1654,13 +1359,6 @@ export function sparseMatrixVectorMultiply(
   sparse: SparseMatrix,
   v: Vector
 ): Vector {
-  if (!sparse || !v) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Sparse matrix and vector cannot be null or undefined'
-    );
-  }
-
   if (!isValidCOO(sparse)) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1691,13 +1389,6 @@ export function sparseMatrixVectorMultiply(
  * @returns Transposed sparse matrix
  */
 export function sparseTranspose(sparse: SparseMatrix): SparseMatrix {
-  if (!sparse) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Sparse matrix cannot be null or undefined'
-    );
-  }
-
   if (!isValidCOO(sparse)) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1723,13 +1414,6 @@ export function sparseTranspose(sparse: SparseMatrix): SparseMatrix {
  * @throws {WebSpiceError} If row index is out of bounds
  */
 export function getSparseRow(sparse: SparseMatrix, rowIndex: number): Vector {
-  if (!sparse) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Sparse matrix cannot be null or undefined'
-    );
-  }
-
   if (!isValidCOO(sparse)) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -1759,13 +1443,6 @@ export function getSparseRow(sparse: SparseMatrix, rowIndex: number): Vector {
  * @returns Number of non-zero entries
  */
 export function countNonZeros(sparse: SparseMatrix): number {
-  if (!sparse) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Sparse matrix cannot be null or undefined'
-    );
-  }
-
   return sparse.entries.length;
 }
 
@@ -1883,13 +1560,6 @@ export function isValidCSR(csr: CSRMatrix): boolean {
  * @returns Sparsity ratio (0 to 1)
  */
 export function estimateSparsity(sparse: SparseMatrix): number {
-  if (!sparse) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Sparse matrix cannot be null or undefined'
-    );
-  }
-
   if (!isValidCOO(sparse)) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
