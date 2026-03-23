@@ -248,7 +248,8 @@ export function extractResults(
       }
       case 'voltage_source': {
         if (component.sourceType !== 'dc') break;
-        const vsIdx = vsIndexMap.get(component.id) ?? -1;
+        const vsIdx = vsIndexMap.get(component.id);
+        if (vsIdx === undefined) break;
         // MNA variable j_k is defined as current from N+ through source to N-.
         // Negate to get the conventional direction (current out of N+ into external circuit).
         const current = -x.data[map.numNodes + vsIdx];
