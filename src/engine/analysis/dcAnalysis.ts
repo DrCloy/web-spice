@@ -226,7 +226,7 @@ function applySourceValue(
           current: value,
         };
       }
-      return comp; // unreachable: validateCircuitForDC ensures only DC sources reach here
+      return comp; // non-source components (resistor, ground, etc.) are returned as-is
     }),
   };
 }

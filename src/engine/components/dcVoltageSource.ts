@@ -132,10 +132,7 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
   }
 
   get terminals(): [Terminal, Terminal] {
-    return [{ ...this._terminals[0] }, { ...this._terminals[1] }] as [
-      Terminal,
-      Terminal,
-    ];
+    return [{ ...this._terminals[0] }, { ...this._terminals[1] }];
   }
 
   /**
