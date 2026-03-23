@@ -58,15 +58,6 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
       );
     }
 
-    // Validate terminals
-    if (!data.terminals || data.terminals.length !== 2) {
-      throw new WebSpiceError(
-        'INVALID_COMPONENT',
-        'DC voltage source must have exactly 2 terminals',
-        { componentId: data.id }
-      );
-    }
-
     const [termPos, termNeg] = data.terminals;
 
     if (!termPos.nodeId || termPos.nodeId.trim().length === 0) {

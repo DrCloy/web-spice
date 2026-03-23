@@ -5,6 +5,7 @@ import type { DCAnalysisConfig } from '@/types/simulation';
 import { createTestCircuit } from '../../factories/circuits';
 import {
   createACVoltageSource,
+  createCapacitor,
   createDCCurrentSource,
   createDCVoltageSource,
   createGround,
@@ -76,16 +77,7 @@ describe('analyzeDC', () => {
       const circuit = createTestCircuit({
         components: [
           createDCVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
-          {
-            id: 'C1',
-            type: 'capacitor',
-            name: 'C1',
-            capacitance: 1e-6,
-            terminals: [
-              { name: 'positive', nodeId: '1' },
-              { name: 'negative', nodeId: '0' },
-            ],
-          } as any,
+          createCapacitor({ id: 'C1', capacitance: 1e-6, nodes: ['1', '0'] }),
           createGround({ id: 'GND', nodeId: '0' }),
         ],
         groundNodeId: '0',

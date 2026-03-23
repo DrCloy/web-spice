@@ -59,9 +59,9 @@ function parseDCAnalysis(json: AnalysisJSON): DCAnalysisConfig {
     );
   }
   const sourceId = params.sourceId;
-  const startValue = parseSIValue(params.startValue as number | string);
-  const endValue = parseSIValue(params.endValue as number | string);
-  const stepValue = parseSIValue(params.stepValue as number | string);
+  const startValue = parseSIValue(params.startValue);
+  const endValue = parseSIValue(params.endValue);
+  const stepValue = parseSIValue(params.stepValue);
 
   if (stepValue <= 0) {
     throw new WebSpiceError(

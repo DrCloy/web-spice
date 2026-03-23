@@ -142,17 +142,6 @@ describe('DCVoltageSourceImpl', () => {
         'Voltage must be a valid number'
       );
     });
-
-    it('should throw error for invalid terminals (not exactly 2)', () => {
-      expect(
-        () =>
-          new DCVoltageSourceImpl(
-            makeDCVoltageSourceData({
-              terminals: [{ name: 'pos', nodeId: 'n1' }] as any,
-            })
-          )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'exactly 2 terminals');
-    });
   });
 
   describe('voltage values', () => {

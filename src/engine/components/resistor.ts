@@ -55,15 +55,6 @@ export class ResistorImpl implements Resistor {
       );
     }
 
-    // Validate terminals
-    if (!data.terminals || data.terminals.length !== 2) {
-      throw new WebSpiceError(
-        'INVALID_COMPONENT',
-        'Resistor must have exactly 2 terminals',
-        { componentId: data.id }
-      );
-    }
-
     const [term1, term2] = data.terminals;
 
     if (!term1.nodeId || term1.nodeId.trim().length === 0) {

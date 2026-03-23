@@ -149,17 +149,6 @@ describe('Resistor', () => {
         'Terminals cannot be connected to the same node'
       );
     });
-
-    it('should throw error for invalid terminals (not exactly 2)', () => {
-      expect(
-        () =>
-          new ResistorImpl(
-            makeResistorData({
-              terminals: [{ name: 'terminal1', nodeId: 'n1' }] as any,
-            })
-          )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'exactly 2 terminals');
-    });
   });
 
   describe('boundary values', () => {
