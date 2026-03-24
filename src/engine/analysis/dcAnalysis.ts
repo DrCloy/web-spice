@@ -128,7 +128,7 @@ function solveOperatingPoint(
     if (error instanceof WebSpiceError && error.code === 'SINGULAR_MATRIX') {
       throw new WebSpiceError(
         'SINGULAR_MATRIX',
-        'Circuit produces a singular matrix. Check for parallel voltage sources, loops with only voltage sources, or disconnected subcircuits.'
+        'Circuit produces a singular matrix. Check for parallel voltage sources, loops with only voltage sources, or disconnected sub-circuits.'
       );
     }
     throw error;
@@ -237,7 +237,7 @@ function applySourceValue(
 
 /**
  * Validate that a circuit is suitable for DC analysis.
- * Checks: null input, empty circuit, missing ground, floating nodes,
+ * Checks: empty circuit, missing ground, floating nodes,
  * and unsupported component types (capacitor, inductor, etc.).
  */
 function validateCircuitForDC(circuit: Circuit): void {
