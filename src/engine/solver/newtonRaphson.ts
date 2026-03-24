@@ -73,8 +73,7 @@ export const DEFAULT_NR_OPTIONS: NewtonRaphsonOptions = {
  *   fall back to {@link DEFAULT_NR_OPTIONS}.
  * @returns The {@link NewtonRaphsonResult} containing the solution,
  *   convergence status, iteration count, and residual/update norms.
- * @throws {WebSpiceError} `INVALID_PARAMETER` if system or initialGuess is
- *   null/undefined, dimensions mismatch, or options are out of range.
+ * @throws {WebSpiceError} `INVALID_PARAMETER` if dimensions mismatch or options are out of range.
  * @throws {WebSpiceError} `CONVERGENCE_FAILED` if the solver does not converge
  *   within maxIterations or encounters a singular Jacobian.
  */

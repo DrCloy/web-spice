@@ -33,7 +33,7 @@ import { hasNaNOrInfinity } from '@/engine/solver/matrix';
  * @param A - Square matrix to decompose
  * @param options - Solver options (pivotTolerance for singularity detection)
  * @returns LU decomposition result (does not throw on singularity, sets singular flag)
- * @throws {WebSpiceError} If matrix is null, not square, or contains NaN/Infinity
+ * @throws {WebSpiceError} If matrix is not square, empty, or contains NaN/Infinity
  */
 export function luDecompose(
   A: Matrix,
