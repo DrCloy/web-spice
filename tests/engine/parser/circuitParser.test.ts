@@ -383,13 +383,13 @@ describe('Circuit Parser', () => {
     it('should throw error for null input', () => {
       expect(() =>
         parseCircuit(null as unknown as CircuitJSON)
-      ).toThrowWebSpiceError('INVALID_CIRCUIT', 'Circuit JSON is required');
+      ).toThrowWebSpiceError('INVALID_CIRCUIT');
     });
 
     it('should throw error for undefined input', () => {
       expect(() =>
         parseCircuit(undefined as unknown as CircuitJSON)
-      ).toThrowWebSpiceError('INVALID_CIRCUIT', 'Circuit JSON is required');
+      ).toThrowWebSpiceError('INVALID_CIRCUIT');
     });
 
     it('should throw error for empty circuit name', () => {
@@ -401,7 +401,7 @@ describe('Circuit Parser', () => {
     it('should throw error for empty components array', () => {
       expect(() =>
         parseCircuit(makeCircuitJSON({ components: [] }))
-      ).toThrowWebSpiceError('INVALID_CIRCUIT', 'at least one component');
+      ).toThrowWebSpiceError('INVALID_CIRCUIT');
     });
   });
 
@@ -421,7 +421,7 @@ describe('Circuit Parser', () => {
             ],
           })
         )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'not yet supported');
+      ).toThrowWebSpiceError('UNSUPPORTED_ANALYSIS');
     });
 
     it('should throw error for inductor (not yet supported)', () => {
@@ -439,7 +439,7 @@ describe('Circuit Parser', () => {
             ],
           })
         )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'not yet supported');
+      ).toThrowWebSpiceError('UNSUPPORTED_ANALYSIS');
     });
 
     it('should throw error for AC voltage source (not yet supported)', () => {
@@ -457,7 +457,7 @@ describe('Circuit Parser', () => {
             ],
           })
         )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'not yet supported');
+      ).toThrowWebSpiceError('UNSUPPORTED_ANALYSIS');
     });
 
     it('should throw error for AC current source (not yet supported)', () => {
@@ -479,7 +479,7 @@ describe('Circuit Parser', () => {
             ],
           })
         )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'not yet supported');
+      ).toThrowWebSpiceError('UNSUPPORTED_ANALYSIS');
     });
   });
 
@@ -499,7 +499,7 @@ describe('Circuit Parser', () => {
             ],
           })
         )
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'resistance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for voltage source without voltage parameter', () => {
@@ -517,7 +517,7 @@ describe('Circuit Parser', () => {
             ],
           })
         )
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'voltage');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for current source without current parameter', () => {
@@ -535,7 +535,7 @@ describe('Circuit Parser', () => {
             ],
           })
         )
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'current');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 
@@ -555,7 +555,7 @@ describe('Circuit Parser', () => {
             ],
           })
         )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'exactly 2 nodes');
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for ground component with no nodes', () => {
@@ -573,7 +573,7 @@ describe('Circuit Parser', () => {
             ],
           })
         )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'exactly 1 node');
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
   });
 

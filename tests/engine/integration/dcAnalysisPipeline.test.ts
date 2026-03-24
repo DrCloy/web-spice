@@ -268,7 +268,7 @@ describe('DC Analysis Pipeline', () => {
       );
     });
 
-    it('should throw INVALID_COMPONENT for unsupported component type', () => {
+    it('should throw UNSUPPORTED_ANALYSIS for unsupported component type', () => {
       const json: CircuitJSON = {
         name: 'Bad Circuit',
         ground: '0',
@@ -283,7 +283,7 @@ describe('DC Analysis Pipeline', () => {
         ],
       };
       expect(() => parseCircuit(json)).toThrowWebSpiceError(
-        'INVALID_COMPONENT'
+        'UNSUPPORTED_ANALYSIS'
       );
     });
 
@@ -338,7 +338,7 @@ describe('DC Analysis Pipeline', () => {
       expect(() => analyzeDC(circuit)).toThrowWebSpiceError('SINGULAR_MATRIX');
     });
 
-    it('should throw INVALID_PARAMETER for missing sweep source', () => {
+    it('should throw COMPONENT_NOT_FOUND for missing sweep source', () => {
       const circuit = parseCircuit(VOLTAGE_DIVIDER_JSON);
       const config = parseAnalysis({
         type: 'dc',
@@ -350,7 +350,7 @@ describe('DC Analysis Pipeline', () => {
         },
       });
       expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
-        'INVALID_PARAMETER'
+        'COMPONENT_NOT_FOUND'
       );
     });
   });

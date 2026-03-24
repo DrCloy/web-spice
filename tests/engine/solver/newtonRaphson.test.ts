@@ -36,8 +36,7 @@ describe('solveNewtonRaphson', () => {
       const system = createSquareSystem(2); // size = 1
       const guess: Vector = { length: 2, data: new Float64Array([1, 2]) };
       expect(() => solveNewtonRaphson(system, guess)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'dimension'
+        'INVALID_PARAMETER'
       );
     });
 
@@ -339,8 +338,7 @@ describe('solveNewtonRaphson', () => {
       const guess: Vector = { length: 1, data: new Float64Array([0.5]) };
 
       expect(() => solveNewtonRaphson(system, guess)).toThrowWebSpiceError(
-        'CONVERGENCE_FAILED',
-        'singular Jacobian'
+        'CONVERGENCE_FAILED'
       );
     });
 

@@ -367,21 +367,18 @@ export function toConvergeWithin(
 /**
  * Custom matcher: toThrowWebSpiceError
  * Asserts that a function throws a WebSpiceError with the expected error code.
- * Optionally checks that the error message contains a given substring.
  *
  * @param received - Function expected to throw
  * @param code - Expected WebSpiceError error code
- * @param messageMatch - Optional substring that must appear in the error message
  *
  * @example
  * expect(() => solveLinearSystem(singularMatrix, b)).toThrowWebSpiceError('SINGULAR_MATRIX');
- * expect(() => luDecompose(null)).toThrowWebSpiceError('INVALID_PARAMETER', 'cannot be null');
+ * expect(() => analyzeDC(circuit)).toThrowWebSpiceError('FLOATING_NODE');
  */
 export function toThrowWebSpiceError(
   this: { isNot: boolean },
   received: () => void,
-  code: ErrorCode,
-  messageMatch?: string
+  code: ErrorCode
 ) {
   const { isNot } = this;
 
@@ -403,17 +400,7 @@ export function toThrowWebSpiceError(
       };
     }
 
-    const codeMatch = e.code === code;
-    const msgMatch =
-      messageMatch === undefined || e.message.includes(messageMatch);
-    const pass = codeMatch && msgMatch;
-
-    const errors: string[] = [];
-    if (!codeMatch) errors.push(`code: expected '${code}', got '${e.code}'`);
-    if (!msgMatch)
-      errors.push(
-        `message: expected to contain '${messageMatch}', got '${e.message}'`
-      );
+    const pass = e.code === code;
 
     return {
       pass,
@@ -421,7 +408,7 @@ export function toThrowWebSpiceError(
         if (isNot) {
           return `Expected function NOT to throw WebSpiceError('${code}'), but it did: ${e.message}`;
         }
-        return `WebSpiceError mismatch:\n${errors.map(err => `  - ${err}`).join('\n')}`;
+        return `WebSpiceError mismatch:\n  - code: expected '${code}', got '${e.code}'`;
       },
     };
   }

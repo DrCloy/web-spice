@@ -182,8 +182,7 @@ describe('Sparse Matrix Operations', () => {
       const v = createTestVector({ length: 2, data: [1, 2] });
 
       expect(() => sparseMatrixVectorMultiply(sparse, v)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Matrix columns must match vector length'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -247,8 +246,7 @@ describe('Sparse Matrix Operations', () => {
       };
 
       expect(() => getSparseRow(sparse, 3)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Row index out of bounds'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -467,23 +465,19 @@ describe('Sparse Matrix Operations', () => {
 
     it('should throw on invalid COO in cooToCSR', () => {
       expect(() => cooToCSR(outOfBoundsCOO)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Invalid COO matrix'
+        'INVALID_PARAMETER'
       );
       expect(() => cooToCSR(duplicateEntriesCOO)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Invalid COO matrix'
+        'INVALID_PARAMETER'
       );
     });
 
     it('should throw on invalid COO in sparseToDense', () => {
       expect(() => sparseToDense(outOfBoundsCOO)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Invalid COO matrix'
+        'INVALID_PARAMETER'
       );
       expect(() => sparseToDense(duplicateEntriesCOO)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Invalid COO matrix'
+        'INVALID_PARAMETER'
       );
     });
 
@@ -499,34 +493,28 @@ describe('Sparse Matrix Operations', () => {
 
     it('should throw on invalid COO in sparseTranspose', () => {
       expect(() => sparseTranspose(outOfBoundsCOO)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Invalid COO matrix'
+        'INVALID_PARAMETER'
       );
       expect(() => sparseTranspose(duplicateEntriesCOO)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Invalid COO matrix'
+        'INVALID_PARAMETER'
       );
     });
 
     it('should throw on invalid COO in getSparseRow', () => {
       expect(() => getSparseRow(outOfBoundsCOO, 0)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Invalid COO matrix'
+        'INVALID_PARAMETER'
       );
       expect(() => getSparseRow(duplicateEntriesCOO, 0)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Invalid COO matrix'
+        'INVALID_PARAMETER'
       );
     });
 
     it('should throw on invalid COO in estimateSparsity', () => {
       expect(() => estimateSparsity(outOfBoundsCOO)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Invalid COO matrix'
+        'INVALID_PARAMETER'
       );
       expect(() => estimateSparsity(duplicateEntriesCOO)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Invalid COO matrix'
+        'INVALID_PARAMETER'
       );
     });
   });

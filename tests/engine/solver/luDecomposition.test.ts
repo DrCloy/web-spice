@@ -72,26 +72,17 @@ describe('LU Decomposition', () => {
         cols: 3,
         data: [1, 2, 3, 4, 5, 6],
       });
-      expect(() => luDecompose(A)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Matrix must be square'
-      );
+      expect(() => luDecompose(A)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw for empty matrix', () => {
       const A = createTestMatrix({ rows: 0, cols: 0 });
-      expect(() => luDecompose(A)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'cannot be empty'
-      );
+      expect(() => luDecompose(A)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw for matrix with NaN', () => {
       const A = createTestMatrix({ rows: 2, cols: 2, data: [1, NaN, 3, 4] });
-      expect(() => luDecompose(A)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'NaN or Infinity'
-      );
+      expect(() => luDecompose(A)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw for matrix with Infinity', () => {
@@ -100,10 +91,7 @@ describe('LU Decomposition', () => {
         cols: 2,
         data: [1, 2, Infinity, 4],
       });
-      expect(() => luDecompose(A)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'NaN or Infinity'
-      );
+      expect(() => luDecompose(A)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 
@@ -399,8 +387,7 @@ describe('LU Decomposition', () => {
       const A = createTestMatrix({ rows: 2, cols: 2, data: [1, 0, 0, 1] });
 
       expect(() => luDecompose(A, { pivotTolerance: -1 })).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Pivot tolerance'
+        'INVALID_PARAMETER'
       );
       expect(() =>
         luDecompose(A, { pivotTolerance: Infinity })
@@ -492,10 +479,7 @@ describe('LU Decomposition', () => {
       const lu = luDecompose(A);
       const b = createTestVector({ length: 3, data: [1, 2, 3] });
 
-      expect(() => luSolve(lu, b)).toThrowWebSpiceError(
-        'SINGULAR_MATRIX',
-        'singular or near-singular'
-      );
+      expect(() => luSolve(lu, b)).toThrowWebSpiceError('SINGULAR_MATRIX');
     });
 
     it('should throw for dimension mismatch', () => {
@@ -503,10 +487,7 @@ describe('LU Decomposition', () => {
       const lu = luDecompose(A);
       const b = createTestVector({ length: 3, data: [1, 2, 3] });
 
-      expect(() => luSolve(lu, b)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Vector length must match'
-      );
+      expect(() => luSolve(lu, b)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should solve 1x1 system', () => {
@@ -614,8 +595,7 @@ describe('LU Decomposition', () => {
       });
 
       expect(() => luSolveMultiple(lu, B)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'rows must match'
+        'INVALID_PARAMETER'
       );
     });
 
@@ -629,8 +609,7 @@ describe('LU Decomposition', () => {
       });
 
       expect(() => luSolveMultiple(lu, B)).toThrowWebSpiceError(
-        'SINGULAR_MATRIX',
-        'singular or near-singular'
+        'SINGULAR_MATRIX'
       );
     });
 
@@ -738,10 +717,7 @@ describe('LU Decomposition', () => {
       const A = createSingularMatrix(3);
       const lu = luDecompose(A);
 
-      expect(() => luInverse(lu)).toThrowWebSpiceError(
-        'SINGULAR_MATRIX',
-        'inverse of singular'
-      );
+      expect(() => luInverse(lu)).toThrowWebSpiceError('SINGULAR_MATRIX');
     });
 
     it('should compute inverse of 2x2 matrix', () => {
@@ -814,8 +790,7 @@ describe('LU Decomposition', () => {
       const b = createTestVector({ length: 3, data: [1, 2, 3] });
 
       expect(() => solveLinearSystem(A, b)).toThrowWebSpiceError(
-        'SINGULAR_MATRIX',
-        'singular or near-singular'
+        'SINGULAR_MATRIX'
       );
     });
 

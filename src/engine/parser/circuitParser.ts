@@ -65,7 +65,7 @@ function parseComponent(json: ComponentJSON): Component {
       return parseGround(json);
     default:
       throw new WebSpiceError(
-        'INVALID_COMPONENT',
+        'UNSUPPORTED_ANALYSIS',
         `Component type '${json.type}' is not yet supported`,
         { componentId: json.id }
       );
@@ -113,7 +113,7 @@ function parseVoltageSource(json: ComponentJSON): Component {
   const sourceType = json.parameters.sourceType ?? 'dc';
   if (sourceType !== 'dc') {
     throw new WebSpiceError(
-      'INVALID_COMPONENT',
+      'UNSUPPORTED_ANALYSIS',
       `Voltage source '${json.id}' sourceType '${sourceType}' is not yet supported`,
       { componentId: json.id }
     );
@@ -152,7 +152,7 @@ function parseCurrentSource(json: ComponentJSON): Component {
   const sourceType = json.parameters.sourceType ?? 'dc';
   if (sourceType !== 'dc') {
     throw new WebSpiceError(
-      'INVALID_COMPONENT',
+      'UNSUPPORTED_ANALYSIS',
       `Current source '${json.id}' sourceType '${sourceType}' is not yet supported`,
       { componentId: json.id }
     );

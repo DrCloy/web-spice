@@ -740,8 +740,7 @@ describe('analyzeDC', () => {
       };
 
       expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'not found in circuit'
+        'COMPONENT_NOT_FOUND'
       );
     });
 

@@ -140,7 +140,7 @@ export class CircuitImpl implements Circuit {
   addComponent(component: Component): void {
     if (this._components.has(component.id)) {
       throw new WebSpiceError(
-        'INVALID_COMPONENT',
+        'DUPLICATE_COMPONENT',
         `Component with ID '${component.id}' already exists in circuit`,
         { componentId: component.id }
       );
@@ -158,7 +158,7 @@ export class CircuitImpl implements Circuit {
   removeComponent(id: ComponentId): void {
     if (!this._components.has(id)) {
       throw new WebSpiceError(
-        'INVALID_COMPONENT',
+        'COMPONENT_NOT_FOUND',
         `Component with ID '${id}' not found in circuit`,
         { componentId: id }
       );

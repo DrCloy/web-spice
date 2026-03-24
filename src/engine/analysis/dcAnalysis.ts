@@ -55,7 +55,7 @@ export function analyzeDC(
 
   if (!sweepSource) {
     throw new WebSpiceError(
-      'INVALID_PARAMETER',
+      'COMPONENT_NOT_FOUND',
       `DC sweep source '${sweep.sourceId}' not found in circuit`
     );
   }

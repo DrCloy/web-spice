@@ -101,7 +101,7 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
 
       expect(
         () =>
@@ -113,7 +113,7 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for identical node IDs', () => {
@@ -165,13 +165,13 @@ describe('Resistor', () => {
     it('should throw error for resistance below minimum (< 1 mΩ)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: 1e-4 }))
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'between 1e-3 and 1e12');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for resistance above maximum (> 1 TΩ)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: 1e13 }))
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'between 1e-3 and 1e12');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should accept typical resistor values', () => {

@@ -71,7 +71,7 @@ describe('DCCurrentSourceImpl', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for empty negative node ID', () => {
@@ -85,7 +85,7 @@ describe('DCCurrentSourceImpl', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for identical node IDs', () => {

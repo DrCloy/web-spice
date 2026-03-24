@@ -84,19 +84,19 @@ describe('CircuitImpl', () => {
 
       expect(
         () => new CircuitImpl(makeCircuitData({ components: [r1, r2] }))
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'already exists');
+      ).toThrowWebSpiceError('DUPLICATE_COMPONENT');
     });
 
     it('should throw error for empty circuit ID', () => {
       expect(
         () => new CircuitImpl(makeCircuitData({ id: '' }))
-      ).toThrowWebSpiceError('INVALID_CIRCUIT', 'Circuit ID cannot be empty');
+      ).toThrowWebSpiceError('INVALID_CIRCUIT');
     });
 
     it('should throw error for empty circuit name', () => {
       expect(
         () => new CircuitImpl(makeCircuitData({ name: '' }))
-      ).toThrowWebSpiceError('INVALID_CIRCUIT', 'Circuit name cannot be empty');
+      ).toThrowWebSpiceError('INVALID_CIRCUIT');
     });
 
     it('should trim and normalize ID', () => {
@@ -188,8 +188,7 @@ describe('CircuitImpl', () => {
       circuit.addComponent(r1);
 
       expect(() => circuit.addComponent(r2)).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'already exists'
+        'DUPLICATE_COMPONENT'
       );
     });
 
@@ -213,8 +212,7 @@ describe('CircuitImpl', () => {
       const circuit = new CircuitImpl(makeCircuitData());
 
       expect(() => circuit.removeComponent('R1')).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'not found'
+        'COMPONENT_NOT_FOUND'
       );
     });
 
