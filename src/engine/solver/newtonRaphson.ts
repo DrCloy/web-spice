@@ -105,13 +105,13 @@ export function solveNewtonRaphson(
   if (!Number.isFinite(opts.absoluteTolerance) || opts.absoluteTolerance < 0) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
-      'absoluteTolerance must be a finite, non-negative number'
+      'Absolute tolerance must be a finite, non-negative number'
     );
   }
   if (!Number.isFinite(opts.relativeTolerance) || opts.relativeTolerance < 0) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
-      'relativeTolerance must be a finite, non-negative number'
+      'Relative tolerance must be a finite, non-negative number'
     );
   }
   if (
@@ -121,7 +121,7 @@ export function solveNewtonRaphson(
   ) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
-      'maxIterations must be a finite, positive integer'
+      'Max iterations must be a finite, positive integer'
     );
   }
 

@@ -87,7 +87,7 @@ export class DCCurrentSourceImpl implements DCCurrentSource {
     if (!Number.isFinite(data.current)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
-        'Current must be a valid number',
+        'Current must be a finite number',
         { componentId: data.id }
       );
     }

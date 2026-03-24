@@ -98,7 +98,7 @@ export function subtractVectors(v1: Vector, v2: Vector): Vector {
  * @param v - Vector to scale
  * @param scalar - Scalar multiplier
  * @returns New vector with all elements multiplied by scalar
- * @throws {WebSpiceError} If vector is null or scalar is invalid
+ * @throws {WebSpiceError} If scalar is not a finite number
  */
 export function scaleVector(v: Vector, scalar: number): Vector {
   // Validate inputs

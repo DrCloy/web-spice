@@ -127,7 +127,7 @@ describe('DCVoltageSourceImpl', () => {
         () => new DCVoltageSourceImpl(makeDCVoltageSourceData({ voltage: NaN }))
       ).toThrowWebSpiceError(
         'INVALID_PARAMETER',
-        'Voltage must be a valid number'
+        'Voltage must be a finite number'
       );
     });
 
@@ -139,7 +139,7 @@ describe('DCVoltageSourceImpl', () => {
           )
       ).toThrowWebSpiceError(
         'INVALID_PARAMETER',
-        'Voltage must be a valid number'
+        'Voltage must be a finite number'
       );
     });
   });

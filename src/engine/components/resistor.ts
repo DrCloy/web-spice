@@ -84,7 +84,7 @@ export class ResistorImpl implements Resistor {
     if (!Number.isFinite(data.resistance)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
-        'Resistance must be a valid number',
+        'Resistance must be a finite number',
         { componentId: data.id }
       );
     }

@@ -127,7 +127,7 @@ describe('DCCurrentSourceImpl', () => {
         () => new DCCurrentSourceImpl(makeDCCurrentSourceData({ current: NaN }))
       ).toThrowWebSpiceError(
         'INVALID_PARAMETER',
-        'Current must be a valid number'
+        'Current must be a finite number'
       );
     });
 
@@ -139,7 +139,7 @@ describe('DCCurrentSourceImpl', () => {
           )
       ).toThrowWebSpiceError(
         'INVALID_PARAMETER',
-        'Current must be a valid number'
+        'Current must be a finite number'
       );
     });
   });

@@ -68,7 +68,7 @@ describe('Resistor', () => {
         () => new ResistorImpl(makeResistorData({ resistance: NaN }))
       ).toThrowWebSpiceError(
         'INVALID_PARAMETER',
-        'Resistance must be a valid number'
+        'Resistance must be a finite number'
       );
     });
 
@@ -77,7 +77,7 @@ describe('Resistor', () => {
         () => new ResistorImpl(makeResistorData({ resistance: Infinity }))
       ).toThrowWebSpiceError(
         'INVALID_PARAMETER',
-        'Resistance must be a valid number'
+        'Resistance must be a finite number'
       );
     });
 

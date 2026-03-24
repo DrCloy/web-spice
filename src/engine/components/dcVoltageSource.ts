@@ -87,7 +87,7 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
     if (!Number.isFinite(data.voltage)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
-        'Voltage must be a valid number',
+        'Voltage must be a finite number',
         { componentId: data.id }
       );
     }
