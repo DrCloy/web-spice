@@ -21,6 +21,7 @@ import {
 // ============================================================================
 
 const VOLTAGE_DIVIDER_JSON: CircuitJSON = {
+  id: 'voltage-divider',
   name: 'Voltage Divider',
   ground: '0',
   components: [
@@ -49,6 +50,7 @@ const VOLTAGE_DIVIDER_JSON: CircuitJSON = {
 };
 
 const SIMPLE_RESISTOR_JSON: CircuitJSON = {
+  id: 'simple-resistor',
   name: 'Simple Resistor',
   ground: '0',
   components: [
@@ -70,6 +72,7 @@ const SIMPLE_RESISTOR_JSON: CircuitJSON = {
 };
 
 const CURRENT_SOURCE_JSON: CircuitJSON = {
+  id: 'current-source',
   name: 'Current Source',
   ground: '0',
   components: [
@@ -270,6 +273,7 @@ describe('DC Analysis Pipeline', () => {
 
     it('should throw UNSUPPORTED_ANALYSIS for unsupported component type', () => {
       const json: CircuitJSON = {
+        id: 'bad-circuit',
         name: 'Bad Circuit',
         ground: '0',
         components: [
@@ -289,6 +293,7 @@ describe('DC Analysis Pipeline', () => {
 
     it('should throw FLOATING_NODE for floating node in parsed circuit', () => {
       const json: CircuitJSON = {
+        id: 'floating-node',
         name: 'Floating Node',
         ground: '0',
         components: [
@@ -315,6 +320,7 @@ describe('DC Analysis Pipeline', () => {
     it('should throw WebSpiceError with SINGULAR_MATRIX for parallel voltage sources', () => {
       // Two voltage sources in parallel create a singular matrix
       const json: CircuitJSON = {
+        id: 'parallel-vs',
         name: 'Parallel VS',
         ground: '0',
         components: [

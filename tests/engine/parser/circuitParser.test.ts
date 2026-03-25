@@ -24,6 +24,7 @@ function makeComponentJSON(overrides?: Partial<ComponentJSON>): ComponentJSON {
  */
 function makeCircuitJSON(overrides?: Partial<CircuitJSON>): CircuitJSON {
   return {
+    id: 'test-circuit',
     name: 'Test Circuit',
     ground: '0',
     components: [
@@ -55,6 +56,7 @@ describe('Circuit Parser', () => {
   describe('valid circuit parsing', () => {
     it('should parse a voltage divider circuit', () => {
       const json: CircuitJSON = {
+        id: 'voltage-divider',
         name: 'Voltage Divider',
         description: '12V voltage divider with 1kΩ and 2kΩ resistors',
         ground: '0',
@@ -102,6 +104,7 @@ describe('Circuit Parser', () => {
 
     it('should parse a circuit with multiple source types', () => {
       const json: CircuitJSON = {
+        id: 'multi-source',
         name: 'Multi Source',
         ground: '0',
         components: [

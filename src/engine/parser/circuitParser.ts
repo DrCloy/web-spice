@@ -40,7 +40,7 @@ export function parseCircuit(json: CircuitJSON): CircuitImpl {
 
   // Create CircuitImpl (name validation is delegated to CircuitImpl constructor)
   return new CircuitImpl({
-    id: json.name,
+    id: json.id,
     name: json.name,
     description: json.description,
     groundNodeId: json.ground || '0',

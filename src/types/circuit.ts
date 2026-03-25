@@ -146,6 +146,7 @@ export interface ComponentJSON {
 
 /** JSON representation of a circuit for parsing */
 export interface CircuitJSON {
+  id: string;
   name: string;
   description?: string;
   components: ComponentJSON[];
