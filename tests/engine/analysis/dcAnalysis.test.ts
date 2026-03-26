@@ -814,5 +814,67 @@ describe('analyzeDC', () => {
         'stepValue'
       );
     });
+
+    it('should return single point when startValue equals endValue', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 5, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: { sourceId: 'V1', startValue: 5, endValue: 5, stepValue: 1 },
+      };
+
+      const result = analyzeDC(circuit, config);
+
+      expect(result.sweep!.sweepValues).toHaveLength(1);
+      expect(result.sweep!.sweepValues[0]).toBe(5);
+      expect(result.sweep!.operatingPoints).toHaveLength(1);
+    });
+
+    it('should return single point when stepValue exceeds range', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 5, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: { sourceId: 'V1', startValue: 0, endValue: 3, stepValue: 10 },
+      };
+
+      const result = analyzeDC(circuit, config);
+
+      expect(result.sweep!.sweepValues).toHaveLength(1);
+      expect(result.sweep!.sweepValues[0]).toBe(0);
+    });
+
+    it('should include all points with floating-point step (0.1)', () => {
+      // 0 to 0.3 in 0.1 steps — IEEE 754 cannot represent 0.1 exactly,
+      // so naive accumulation would produce 3 or 4 points depending on rounding
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 5, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: { sourceId: 'V1', startValue: 0, endValue: 0.3, stepValue: 0.1 },
+      };
+
+      const result = analyzeDC(circuit, config);
+
+      expect(result.sweep!.sweepValues).toHaveLength(4); // 0, 0.1, 0.2, 0.3
+    });
   });
 });
