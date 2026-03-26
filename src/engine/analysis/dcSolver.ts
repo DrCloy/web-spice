@@ -23,11 +23,11 @@ export function solveOperatingPoint(
   const map = buildNodeIndexMap(circuit);
 
   if (map.systemSize === 0) {
-    return {
-      nodeVoltages: { [circuit.groundNodeId]: 0 },
-      branchCurrents: {},
-      componentPowers: {},
-    };
+    return extractResults(
+      { length: 0, data: new Float64Array(0) },
+      circuit,
+      map
+    );
   }
 
   const { A, b } = buildMNASystem(circuit, map);

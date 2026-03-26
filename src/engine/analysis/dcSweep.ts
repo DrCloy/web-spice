@@ -34,6 +34,12 @@ export function runDCSweep(
       `DC sweep source '${sweep.sourceId}' must be a voltage or current source, got '${sweepSource.type}'`
     );
   }
+  if ('sourceType' in sweepSource && sweepSource.sourceType !== 'dc') {
+    throw new WebSpiceError(
+      'UNSUPPORTED_ANALYSIS',
+      `DC sweep source '${sweep.sourceId}' must be a DC source, got '${sweepSource.sourceType}'`
+    );
+  }
 
   const sourceType: 'voltage_source' | 'current_source' = sweepSource.type;
   const sweepValues = generateSweepValues(
