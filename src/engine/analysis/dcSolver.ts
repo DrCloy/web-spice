@@ -7,7 +7,7 @@ import {
   buildMNASystem,
   buildNodeIndexMap,
   extractResults,
-} from '@/engine/analysis/mnaAssembler';
+} from '@/engine/solver/mnaAssembler';
 
 /**
  * Solve for a single DC operating point.
