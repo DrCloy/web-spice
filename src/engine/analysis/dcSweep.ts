@@ -77,10 +77,18 @@ function generateSweepValues(
     );
   }
 
+  const MAX_SWEEP_POINTS = 10_000;
   const values: number[] = [];
   const direction = start <= end ? 1 : -1;
   const signedStep = step * direction;
   const count = Math.floor(Math.abs(end - start) / step + 1 + 1e-12);
+
+  if (count > MAX_SWEEP_POINTS) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `Sweep would generate ${count} points, exceeding the maximum of ${MAX_SWEEP_POINTS}. Increase stepValue or reduce the sweep range.`
+    );
+  }
 
   for (let i = 0; i < count; i++) {
     values.push(start + i * signedStep);

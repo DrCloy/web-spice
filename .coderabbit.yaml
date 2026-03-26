@@ -28,15 +28,16 @@ reviews:
   commit_status: true
   fail_commit_status: false
 
-  # Auto title
-  auto_title_instructions: |
-    다음 형식으로 PR 제목을 생성해줘: [TYPE] 한국어 설명 (closes #N)
-    TYPE은 FEAT, FIX, DOCS, REFACTOR, TEST, CHORE 중 하나.
-    예시: [FEAT] 저항 컴포넌트 모델 구현 (closes #1)
-
   # Behavior
   request_changes_workflow: false
   auto_assign_reviewers: false
+
+  # Finishing touches
+  finishing_touches:
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: true
 
   # Label suggestions
   labeling_instructions:
@@ -81,22 +82,22 @@ reviews:
   path_instructions:
     - path: 'src/engine/**'
       instructions: |
-        수치 계산 엔진 코드입니다.
-        순수 함수 및 불변성 원칙을 준수하는지 확인해줘.
-        readonly 필드, 새 인스턴스 반환 패턴을 지키는지 검토해줘.
-        수치 안정성(NaN, Infinity, 엣지 케이스) 처리를 꼼꼼히 검토해줘.
+        SPICE 수치 계산 엔진 코드입니다.
+        순수 함수와 불변 객체 반환 패턴을 유지하는지 확인해줘.
+        수치 안정성(NaN, Infinity, 0 나누기, 특이 행렬 등 엣지 케이스) 처리를 꼼꼼히 검토해줘.
+        WebSpiceError를 사용하는 에러 처리가 ADR-002 원칙(caller가 코드별로 다른 처리를 해야 하는 경우에만 새 코드 추가)을 따르는지 확인해줘.
     - path: 'src/engine/solver/**'
       instructions: |
-        행렬 연산 및 LU 분해 관련 코드입니다.
-        수치 정밀도와 희소 행렬 최적화 관점에서 검토해줘.
-        COO/CSR 포맷 변환 로직의 정확성을 확인해줘.
+        행렬 연산, LU 분해, MNA 어셈블러 관련 코드입니다.
+        수치 정밀도와 피벗팅 전략의 안정성을 검토해줘.
+        COO/CSR 희소 행렬 포맷 변환 로직의 정확성과 인덱스 경계 처리를 확인해줘.
     - path: 'tests/**'
       instructions: |
         Vitest 기반 TDD 테스트 코드입니다. 테스트 환경은 node입니다.
         AAA(Arrange-Act-Assert) 패턴을 따르는지 확인해줘.
         describe/it 블록 네이밍이 명확한지 검토해줘.
         엣지 케이스(NaN, Infinity, 빈 값, 경계값) 커버리지를 확인해줘.
-        make* 헬퍼 함수 패턴으로 테스트 데이터를 생성하는지 확인해줘.
+        create* 팩토리 함수(tests/factories/)와 UPPER_SNAKE_CASE 픽스처(tests/fixtures/)로 테스트 데이터를 생성하는지 확인해줘.
         tests/setup.ts에 정의된 커스텀 매처(toThrowWebSpiceError 등)를 적절히 활용하는지 확인해줘.
     - path: 'src/types/**'
       instructions: |
@@ -109,15 +110,12 @@ reviews:
         babel-plugin-react-compiler와 충돌하는 패턴이 없는지 확인해줘.
         접근성(a11y) 관련 이슈를 검토해줘.
 
-finishing_touches:
-  docstrings:
-    enabled: true
+code_generation:
   unit_tests:
-    enabled: true
     path_instructions:
       - path: 'src/engine/**'
         instructions: |
           Vitest를 사용해 테스트를 작성해줘. 테스트 환경은 node입니다.
-          make* 헬퍼 함수 패턴으로 테스트 데이터를 생성해줘.
+          create* 팩토리 함수(tests/factories/)와 UPPER_SNAKE_CASE 픽스처(tests/fixtures/)로 테스트 데이터를 생성해줘.
           AAA 패턴을 따르고, NaN/Infinity/경계값 엣지 케이스를 포함해줘.
           tests/setup.ts의 커스텀 매처(toThrowWebSpiceError)를 활용해줘.
