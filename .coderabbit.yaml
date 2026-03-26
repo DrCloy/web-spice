@@ -1,0 +1,123 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+language: 'ko-KR'
+early_access: false
+
+reviews:
+  profile: 'assertive'
+
+  # Summary
+  high_level_summary: true
+  high_level_summary_instructions: |
+    변경 사항을 한국어로 bullet point 리스트로 간결하게 요약해줘.
+    변경 이유와 영향받은 모듈을 포함해줘.
+  high_level_summary_in_walkthrough: false
+  # Walkthrough
+  collapse_walkthrough: false
+  changed_files_summary: true
+  sequence_diagrams: true
+  estimate_code_review_effort: true
+  assess_linked_issues: true
+  related_issues: true
+  related_prs: false
+  suggested_labels: true
+  auto_apply_labels: false
+
+  # Statuses
+  review_status: true
+  commit_status: true
+  fail_commit_status: false
+
+  # Auto title
+  auto_title_instructions: |
+    다음 형식으로 PR 제목을 생성해줘: [TYPE] 한국어 설명 (closes #N)
+    TYPE은 FEAT, FIX, DOCS, REFACTOR, TEST, CHORE 중 하나.
+    예시: [FEAT] 저항 컴포넌트 모델 구현 (closes #1)
+
+  # Behavior
+  request_changes_workflow: false
+  auto_assign_reviewers: false
+
+  # Label suggestions
+  labeling_instructions:
+    - label: 'algorithm'
+      instructions: 'SPICE 엔진, 수치해석 알고리즘(solver, analysis, matrix) 관련 변경'
+    - label: 'bug'
+      instructions: '버그나 오류 수정'
+    - label: 'documentation'
+      instructions: 'README, 주석, API 문서 등 문서 관련 변경'
+    - label: 'enhancement'
+      instructions: '기존 기능의 동작 방식이나 품질을 개선하는 변경'
+    - label: 'feature'
+      instructions: '새로운 기능 추가'
+    - label: 'performance'
+      instructions: '성능 최적화, 연산 효율화, GPU 가속 관련 변경'
+    - label: 'phase-1-mvp'
+      instructions: '엔진 코어(회로 소자, solver, analysis) 관련 변경 — 1단계 범위'
+    - label: 'phase-2-ui'
+      instructions: 'Canvas, 그래프, 시각적 인터페이스 관련 변경 — 2단계 범위'
+    - label: 'phase-3-ux'
+      instructions: '드래그앤드롭, 고급 UX 관련 변경 — 3단계 범위'
+    - label: 'priority-high'
+      instructions: '크리티컬 경로(solver, analysis)에 영향을 주거나 블로킹 이슈를 수반하는 변경'
+    - label: 'priority-medium'
+      instructions: '일반적인 중요도의 변경'
+    - label: 'priority-low'
+      instructions: '즉각 처리가 불필요한 소규모 개선이나 정리 작업'
+    - label: 'refactor'
+      instructions: '기능 변경 없이 코드 구조, 가독성, 유지보수성을 개선하는 변경'
+    - label: 'ui'
+      instructions: 'React 컴포넌트, 스타일, 레이아웃 등 UI 관련 변경'
+
+  # Path filters
+  path_filters:
+    - '!dist/**'
+    - '!coverage/**'
+    - '!node_modules/**'
+    - '!**/*.lock'
+    - '!**/*.min.js'
+
+  # Path instructions
+  path_instructions:
+    - path: 'src/engine/**'
+      instructions: |
+        수치 계산 엔진 코드입니다.
+        순수 함수 및 불변성 원칙을 준수하는지 확인해줘.
+        readonly 필드, 새 인스턴스 반환 패턴을 지키는지 검토해줘.
+        수치 안정성(NaN, Infinity, 엣지 케이스) 처리를 꼼꼼히 검토해줘.
+    - path: 'src/engine/solver/**'
+      instructions: |
+        행렬 연산 및 LU 분해 관련 코드입니다.
+        수치 정밀도와 희소 행렬 최적화 관점에서 검토해줘.
+        COO/CSR 포맷 변환 로직의 정확성을 확인해줘.
+    - path: 'tests/**'
+      instructions: |
+        Vitest 기반 TDD 테스트 코드입니다. 테스트 환경은 node입니다.
+        AAA(Arrange-Act-Assert) 패턴을 따르는지 확인해줘.
+        describe/it 블록 네이밍이 명확한지 검토해줘.
+        엣지 케이스(NaN, Infinity, 빈 값, 경계값) 커버리지를 확인해줘.
+        make* 헬퍼 함수 패턴으로 테스트 데이터를 생성하는지 확인해줘.
+        tests/setup.ts에 정의된 커스텀 매처(toThrowWebSpiceError 등)를 적절히 활용하는지 확인해줘.
+    - path: 'src/types/**'
+      instructions: |
+        TypeScript 타입 정의 파일입니다.
+        any 타입 사용 여부를 확인해줘.
+        타입의 재사용성과 명확성을 검토해줘.
+    - path: 'src/components/**'
+      instructions: |
+        React 19 함수형 컴포넌트입니다.
+        babel-plugin-react-compiler와 충돌하는 패턴이 없는지 확인해줘.
+        접근성(a11y) 관련 이슈를 검토해줘.
+
+finishing_touches:
+  docstrings:
+    enabled: true
+  unit_tests:
+    enabled: true
+    path_instructions:
+      - path: 'src/engine/**'
+        instructions: |
+          Vitest를 사용해 테스트를 작성해줘. 테스트 환경은 node입니다.
+          make* 헬퍼 함수 패턴으로 테스트 데이터를 생성해줘.
+          AAA 패턴을 따르고, NaN/Infinity/경계값 엣지 케이스를 포함해줘.
+          tests/setup.ts의 커스텀 매처(toThrowWebSpiceError)를 활용해줘.
