@@ -566,6 +566,51 @@ describe('analyzeDC', () => {
 
       expect(totalPower).toBeCloseTo(0, 10);
     });
+
+    it('should have voltage source supplying power (negative) and resistor consuming (positive)', () => {
+      // V1=10V, R1=1kΩ → I=10mA, P(V1)=-100mW (supply), P(R1)=+100mW (consume)
+      const circuit = SIMPLE_RESISTOR_10V.circuit;
+      const result = analyzeDC(circuit);
+
+      expect(result.operatingPoint.componentPowers['V1']).toBeCloseTo(-0.1);
+      expect(result.operatingPoint.componentPowers['R1']).toBeCloseTo(0.1);
+    });
+
+    it('should have current source supplying power when pumping current uphill', () => {
+      // I1=10mA from node0→node1, R1=1kΩ → V(1)=10V
+      // P(I1) = (V- - V+) * I = (0 - 10) * 0.01 = -0.1W (supply)
+      // P(R1) = V^2/R = 100/1000 = +0.1W (consume)
+      const circuit = createTestCircuit({
+        components: [
+          createDCCurrentSource({ id: 'I1', current: 0.01, nodes: ['0', '1'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const result = analyzeDC(circuit);
+
+      expect(result.operatingPoint.componentPowers['I1']).toBeCloseTo(-0.1);
+      expect(result.operatingPoint.componentPowers['R1']).toBeCloseTo(0.1);
+    });
+
+    it('should flip node voltage sign when current source polarity is reversed', () => {
+      // I1 N+=node1, N-=node0: current drawn from node1 → V(1) = -10V
+      // Power signs are unchanged: source still supplies (-0.1W), resistor still consumes (+0.1W)
+      const circuit = createTestCircuit({
+        components: [
+          createDCCurrentSource({ id: 'I1', current: 0.01, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const result = analyzeDC(circuit);
+
+      expect(result.operatingPoint.nodeVoltages['1']).toBeCloseTo(-10);
+      expect(result.operatingPoint.componentPowers['I1']).toBeCloseTo(-0.1);
+      expect(result.operatingPoint.componentPowers['R1']).toBeCloseTo(0.1);
+    });
   });
 
   // ============================================================================
