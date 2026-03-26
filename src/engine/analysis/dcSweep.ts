@@ -34,7 +34,7 @@ export function runDCSweep(
       `DC sweep source '${sweep.sourceId}' must be a voltage or current source, got '${sweepSource.type}'`
     );
   }
-  if ('sourceType' in sweepSource && sweepSource.sourceType !== 'dc') {
+  if (sweepSource.sourceType !== 'dc') {
     throw new WebSpiceError(
       'UNSUPPORTED_ANALYSIS',
       `DC sweep source '${sweep.sourceId}' must be a DC source, got '${sweepSource.sourceType}'`
@@ -126,7 +126,7 @@ function applySourceValue(
     name: circuit.name,
     description: circuit.description,
     groundNodeId: circuit.groundNodeId,
-    nodes: circuit.nodes,
+    nodes: [...circuit.nodes],
     components: circuit.components.map(comp => {
       if (comp.id !== sourceId) return comp;
       // Explicitly enumerate interface properties instead of spreading, because
@@ -137,7 +137,7 @@ function applySourceValue(
           type: comp.type,
           sourceType: comp.sourceType,
           name: comp.name,
-          terminals: comp.terminals,
+          terminals: [...comp.terminals],
           voltage: value,
         };
       }
@@ -147,7 +147,7 @@ function applySourceValue(
           type: comp.type,
           sourceType: comp.sourceType,
           name: comp.name,
-          terminals: comp.terminals,
+          terminals: [...comp.terminals],
           current: value,
         };
       }
