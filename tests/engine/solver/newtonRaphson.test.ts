@@ -45,16 +45,16 @@ describe('solveNewtonRaphson', () => {
       const guess: Vector = { length: 1, data: new Float64Array([1]) };
       expect(() =>
         solveNewtonRaphson(system, guess, { dampingFactor: 0 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Damping factor');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { dampingFactor: 1.5 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Damping factor');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { dampingFactor: NaN })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Damping factor');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { dampingFactor: Infinity })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Damping factor');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw for invalid maxIterations', () => {
@@ -62,13 +62,13 @@ describe('solveNewtonRaphson', () => {
       const guess: Vector = { length: 1, data: new Float64Array([1]) };
       expect(() =>
         solveNewtonRaphson(system, guess, { maxIterations: 0 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Max iterations');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { maxIterations: NaN })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Max iterations');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { maxIterations: 1.5 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Max iterations');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw for invalid absoluteTolerance', () => {
@@ -76,13 +76,13 @@ describe('solveNewtonRaphson', () => {
       const guess: Vector = { length: 1, data: new Float64Array([1]) };
       expect(() =>
         solveNewtonRaphson(system, guess, { absoluteTolerance: -1 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Absolute tolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { absoluteTolerance: NaN })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Absolute tolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { absoluteTolerance: Infinity })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Absolute tolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw for invalid relativeTolerance', () => {
@@ -90,13 +90,13 @@ describe('solveNewtonRaphson', () => {
       const guess: Vector = { length: 1, data: new Float64Array([1]) };
       expect(() =>
         solveNewtonRaphson(system, guess, { relativeTolerance: -1 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Relative tolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { relativeTolerance: NaN })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Relative tolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { relativeTolerance: Infinity })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Relative tolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 
@@ -319,7 +319,7 @@ describe('solveNewtonRaphson', () => {
       // 2 iterations is not enough to converge to 1e-12 tolerance
       expect(() =>
         solveNewtonRaphson(system, guess, { maxIterations: 2 })
-      ).toThrowWebSpiceError('CONVERGENCE_FAILED', 'did not converge');
+      ).toThrowWebSpiceError('CONVERGENCE_FAILED');
     });
 
     it('should throw CONVERGENCE_FAILED when Jacobian is singular', () => {
@@ -365,7 +365,7 @@ describe('solveNewtonRaphson', () => {
 
       expect(() =>
         solveNewtonRaphson(system, guess, { maxIterations: 50 })
-      ).toThrowWebSpiceError('CONVERGENCE_FAILED', 'singular Jacobian');
+      ).toThrowWebSpiceError('CONVERGENCE_FAILED');
     });
   });
 

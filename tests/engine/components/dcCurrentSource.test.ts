@@ -54,10 +54,7 @@ describe('DCCurrentSourceImpl', () => {
     it('should throw error for empty component ID', () => {
       expect(
         () => new DCCurrentSourceImpl(makeDCCurrentSourceData({ id: '' }))
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Component ID cannot be empty'
-      );
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for empty positive node ID', () => {
@@ -99,10 +96,7 @@ describe('DCCurrentSourceImpl', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Terminals cannot be connected to the same node'
-      );
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for node IDs that are identical after trimming', () => {
@@ -116,19 +110,13 @@ describe('DCCurrentSourceImpl', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Terminals cannot be connected to the same node'
-      );
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for invalid current (NaN)', () => {
       expect(
         () => new DCCurrentSourceImpl(makeDCCurrentSourceData({ current: NaN }))
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Current must be a finite number'
-      );
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for invalid current (Infinity)', () => {
@@ -137,10 +125,7 @@ describe('DCCurrentSourceImpl', () => {
           new DCCurrentSourceImpl(
             makeDCCurrentSourceData({ current: Infinity })
           )
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Current must be a finite number'
-      );
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 

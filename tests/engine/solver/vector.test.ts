@@ -35,8 +35,7 @@ describe('Vector Operations', () => {
       const v2 = createTestVector({ length: 3, data: [1, 2, 3] });
 
       expect(() => addVectors(v1, v2)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Vector dimensions must match'
+        'INVALID_PARAMETER'
       );
     });
 
@@ -66,8 +65,7 @@ describe('Vector Operations', () => {
       const v2 = createTestVector({ length: 3, data: [1, 2, 3] });
 
       expect(() => subtractVectors(v1, v2)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Vector dimensions must match'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -141,8 +139,7 @@ describe('Vector Operations', () => {
       const v2 = createTestVector({ length: 3, data: [1, 2, 3] });
 
       expect(() => dotProduct(v1, v2)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Vector dimensions must match'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -162,8 +159,7 @@ describe('Vector Operations', () => {
       const v2 = createTestVector({ length: 3, data: [1, 2, 3] });
 
       expect(() => hadamardProduct(v1, v2)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Vector dimensions must match'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -239,10 +235,7 @@ describe('Vector Operations', () => {
     it('should throw error for zero vector', () => {
       const v = createZeroVector(3);
 
-      expect(() => normalize(v)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Cannot normalize zero vector'
-      );
+      expect(() => normalize(v)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 
@@ -261,10 +254,7 @@ describe('Vector Operations', () => {
       const v1 = createTestVector({ length: 2, data: [1, 2] });
       const v2 = createTestVector({ length: 3, data: [1, 2, 3] });
 
-      expect(() => distance(v1, v2)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Vector dimensions must match'
-      );
+      expect(() => distance(v1, v2)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 

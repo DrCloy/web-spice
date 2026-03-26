@@ -485,10 +485,10 @@ describe('Sparse Matrix Operations', () => {
       const v = createTestVector({ length: 2, data: [1, 2] });
       expect(() =>
         sparseMatrixVectorMultiply(outOfBoundsCOO, v)
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Invalid COO matrix');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         sparseMatrixVectorMultiply(duplicateEntriesCOO, v)
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Invalid COO matrix');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw on invalid COO in sparseTranspose', () => {

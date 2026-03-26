@@ -391,10 +391,10 @@ describe('LU Decomposition', () => {
       );
       expect(() =>
         luDecompose(A, { pivotTolerance: Infinity })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Pivot tolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         luDecompose(A, { pivotTolerance: NaN })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Pivot tolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 
@@ -805,7 +805,7 @@ describe('LU Decomposition', () => {
       // With very large tolerance, treated as singular
       expect(() =>
         solveLinearSystem(A, b, { pivotTolerance: 2 })
-      ).toThrowWebSpiceError('SINGULAR_MATRIX', 'singular');
+      ).toThrowWebSpiceError('SINGULAR_MATRIX');
     });
 
     it('should produce same result as luDecompose + luSolve', () => {

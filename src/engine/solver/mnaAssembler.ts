@@ -4,7 +4,7 @@
  * Builds and solves the MNA system for DC operating point analysis.
  * Handles node index mapping, matrix stamping, and result extraction.
  *
- * @module engine/analysis/mnaAssembler
+ * @module engine/solver/mnaAssembler
  * @internal
  *
  * All exported symbols are internal helpers consumed exclusively by dcAnalysis.ts.

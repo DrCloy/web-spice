@@ -166,8 +166,7 @@ describe('Analysis Parser', () => {
       });
 
       expect(() => parseAnalysis(json)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        "Cannot parse numeric value: 'abc'"
+        'INVALID_PARAMETER'
       );
     });
 

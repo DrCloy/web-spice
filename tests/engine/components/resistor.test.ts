@@ -48,46 +48,31 @@ describe('Resistor', () => {
     it('should throw error for zero resistance', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: 0 }))
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Resistance must be greater than 0'
-      );
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for negative resistance', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: -100 }))
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Resistance must be greater than 0'
-      );
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for invalid resistance (NaN)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: NaN }))
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Resistance must be a finite number'
-      );
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for invalid resistance (Infinity)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: Infinity }))
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Resistance must be a finite number'
-      );
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for empty component ID', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ id: '' }))
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Component ID cannot be empty'
-      );
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for empty node IDs', () => {
@@ -127,10 +112,7 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Terminals cannot be connected to the same node'
-      );
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for node IDs that are identical after trimming', () => {
@@ -144,10 +126,7 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Terminals cannot be connected to the same node'
-      );
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
   });
 

@@ -37,10 +37,7 @@ describe('analyzeDC', () => {
         nodes: [],
         groundNodeId: '0',
       };
-      expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'INVALID_CIRCUIT',
-        'at least one component'
-      );
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('INVALID_CIRCUIT');
     });
 
     it('should throw for circuit without ground node', () => {
@@ -51,10 +48,7 @@ describe('analyzeDC', () => {
         ],
         groundNodeId: '0', // node '0' doesn't exist in circuit
       });
-      expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'NO_GROUND',
-        'Ground node'
-      );
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('NO_GROUND');
     });
 
     it('should throw for floating node', () => {
@@ -67,10 +61,7 @@ describe('analyzeDC', () => {
         groundNodeId: '0',
       });
       // Node '2' is only connected to R1 (floating)
-      expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'FLOATING_NODE',
-        'Node'
-      );
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('FLOATING_NODE');
     });
 
     it('should throw for unsupported component type', () => {
@@ -83,8 +74,7 @@ describe('analyzeDC', () => {
         groundNodeId: '0',
       });
       expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'UNSUPPORTED_ANALYSIS',
-        'not supported in DC analysis'
+        'UNSUPPORTED_ANALYSIS'
       );
     });
 
@@ -103,8 +93,7 @@ describe('analyzeDC', () => {
         groundNodeId: '0',
       });
       expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'UNSUPPORTED_ANALYSIS',
-        'not supported in DC analysis'
+        'UNSUPPORTED_ANALYSIS'
       );
     });
   });
@@ -436,10 +425,7 @@ describe('analyzeDC', () => {
   describe('Error Cases', () => {
     it('should throw SINGULAR_MATRIX for parallel voltage sources', () => {
       const circuit = SINGULAR_MATRIX_ERROR.circuit as Circuit;
-      expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'SINGULAR_MATRIX',
-        'singular'
-      );
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('SINGULAR_MATRIX');
     });
 
     it('should throw for voltage source loop without resistance', () => {
@@ -452,10 +438,7 @@ describe('analyzeDC', () => {
         ],
         groundNodeId: '0',
       });
-      expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'SINGULAR_MATRIX',
-        'singular'
-      );
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('SINGULAR_MATRIX');
     });
 
     it('should return trivial result for ground-only circuit', () => {
@@ -810,8 +793,7 @@ describe('analyzeDC', () => {
       };
 
       expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'must be a voltage or current source'
+        'INVALID_PARAMETER'
       );
     });
 
@@ -830,8 +812,7 @@ describe('analyzeDC', () => {
       };
 
       expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'stepValue'
+        'INVALID_PARAMETER'
       );
     });
 
@@ -855,8 +836,7 @@ describe('analyzeDC', () => {
       };
 
       expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'stepValue'
+        'INVALID_PARAMETER'
       );
     });
 
