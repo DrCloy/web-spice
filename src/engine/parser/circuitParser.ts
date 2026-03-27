@@ -40,7 +40,7 @@ export function parseCircuit(json: CircuitJSON): CircuitImpl {
 
   // Create CircuitImpl (name validation is delegated to CircuitImpl constructor)
   return new CircuitImpl({
-    id: json.name,
+    id: json.id,
     name: json.name,
     description: json.description,
     groundNodeId: json.ground || '0',
@@ -65,7 +65,7 @@ function parseComponent(json: ComponentJSON): Component {
       return parseGround(json);
     default:
       throw new WebSpiceError(
-        'INVALID_COMPONENT',
+        'UNSUPPORTED_ANALYSIS',
         `Component type '${json.type}' is not yet supported`,
         { componentId: json.id }
       );
@@ -73,21 +73,8 @@ function parseComponent(json: ComponentJSON): Component {
 }
 
 function parseResistor(json: ComponentJSON): Component {
-  if (json.nodes.length !== 2) {
-    throw new WebSpiceError(
-      'INVALID_COMPONENT',
-      `Resistor '${json.id}' must have exactly 2 nodes`,
-      { componentId: json.id }
-    );
-  }
-
-  if (json.parameters.resistance == null) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      `Resistor '${json.id}' requires 'resistance' parameter`,
-      { componentId: json.id }
-    );
-  }
+  assertNodeCount(json, 2);
+  assertRequiredParameter(json, 'resistance');
 
   return new ResistorImpl({
     id: json.id,
@@ -102,30 +89,18 @@ function parseResistor(json: ComponentJSON): Component {
 }
 
 function parseVoltageSource(json: ComponentJSON): Component {
-  if (json.nodes.length !== 2) {
-    throw new WebSpiceError(
-      'INVALID_COMPONENT',
-      `Voltage source '${json.id}' must have exactly 2 nodes`,
-      { componentId: json.id }
-    );
-  }
+  assertNodeCount(json, 2);
 
   const sourceType = json.parameters.sourceType ?? 'dc';
   if (sourceType !== 'dc') {
     throw new WebSpiceError(
-      'INVALID_COMPONENT',
+      'UNSUPPORTED_ANALYSIS',
       `Voltage source '${json.id}' sourceType '${sourceType}' is not yet supported`,
       { componentId: json.id }
     );
   }
 
-  if (json.parameters.voltage == null) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      `Voltage source '${json.id}' requires 'voltage' parameter`,
-      { componentId: json.id }
-    );
-  }
+  assertRequiredParameter(json, 'voltage');
 
   return new DCVoltageSourceImpl({
     id: json.id,
@@ -141,30 +116,18 @@ function parseVoltageSource(json: ComponentJSON): Component {
 }
 
 function parseCurrentSource(json: ComponentJSON): Component {
-  if (json.nodes.length !== 2) {
-    throw new WebSpiceError(
-      'INVALID_COMPONENT',
-      `Current source '${json.id}' must have exactly 2 nodes`,
-      { componentId: json.id }
-    );
-  }
+  assertNodeCount(json, 2);
 
   const sourceType = json.parameters.sourceType ?? 'dc';
   if (sourceType !== 'dc') {
     throw new WebSpiceError(
-      'INVALID_COMPONENT',
+      'UNSUPPORTED_ANALYSIS',
       `Current source '${json.id}' sourceType '${sourceType}' is not yet supported`,
       { componentId: json.id }
     );
   }
 
-  if (json.parameters.current == null) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      `Current source '${json.id}' requires 'current' parameter`,
-      { componentId: json.id }
-    );
-  }
+  assertRequiredParameter(json, 'current');
 
   return new DCCurrentSourceImpl({
     id: json.id,
@@ -180,13 +143,7 @@ function parseCurrentSource(json: ComponentJSON): Component {
 }
 
 function parseGround(json: ComponentJSON): Component {
-  if (json.nodes.length !== 1) {
-    throw new WebSpiceError(
-      'INVALID_COMPONENT',
-      `Ground '${json.id}' must have exactly 1 node`,
-      { componentId: json.id }
-    );
-  }
+  assertNodeCount(json, 1);
 
   return {
     id: json.id,
@@ -194,4 +151,32 @@ function parseGround(json: ComponentJSON): Component {
     name: json.name,
     nodeId: json.nodes[0],
   };
+}
+
+// ============================================================================
+// Validation Helpers
+// ============================================================================
+
+function componentLabel(type: string): string {
+  return type.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
+}
+
+function assertNodeCount(json: ComponentJSON, expected: number): void {
+  if (json.nodes.length !== expected) {
+    throw new WebSpiceError(
+      'INVALID_COMPONENT',
+      `${componentLabel(json.type)} '${json.id}' must have exactly ${expected} node${expected === 1 ? '' : 's'}`,
+      { componentId: json.id }
+    );
+  }
+}
+
+function assertRequiredParameter(json: ComponentJSON, key: string): void {
+  if (json.parameters[key] === undefined) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `${componentLabel(json.type)} '${json.id}' requires '${key}' parameter`,
+      { componentId: json.id }
+    );
+  }
 }

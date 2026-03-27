@@ -55,15 +55,6 @@ export class ResistorImpl implements Resistor {
       );
     }
 
-    // Validate terminals
-    if (!data.terminals || data.terminals.length !== 2) {
-      throw new WebSpiceError(
-        'INVALID_COMPONENT',
-        'Resistor must have exactly 2 terminals',
-        { componentId: data.id }
-      );
-    }
-
     const [term1, term2] = data.terminals;
 
     if (!term1.nodeId || term1.nodeId.trim().length === 0) {
@@ -93,7 +84,7 @@ export class ResistorImpl implements Resistor {
     if (!Number.isFinite(data.resistance)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
-        'Resistance must be a valid number',
+        'Resistance must be a finite number',
         { componentId: data.id }
       );
     }
@@ -160,10 +151,7 @@ export class ResistorImpl implements Resistor {
    * Returns a copy to prevent external modification
    */
   get terminals(): [Terminal, Terminal] {
-    return [{ ...this._terminals[0] }, { ...this._terminals[1] }] as [
-      Terminal,
-      Terminal,
-    ];
+    return [{ ...this._terminals[0] }, { ...this._terminals[1] }];
   }
 
   /**

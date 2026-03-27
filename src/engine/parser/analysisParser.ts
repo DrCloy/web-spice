@@ -49,10 +49,19 @@ function parseDCAnalysis(json: AnalysisJSON): DCAnalysisConfig {
     );
   }
 
-  const sourceId = String(params.sourceId);
-  const startValue = parseSIValue(params.startValue as number | string);
-  const endValue = parseSIValue(params.endValue as number | string);
-  const stepValue = parseSIValue(params.stepValue as number | string);
+  if (
+    typeof params.sourceId !== 'string' ||
+    params.sourceId.trim().length === 0
+  ) {
+    throw new WebSpiceError(
+      'INVALID_PARAMETER',
+      `DC sweep 'sourceId' must be a non-empty string, got ${typeof params.sourceId}`
+    );
+  }
+  const sourceId = params.sourceId;
+  const startValue = parseSIValue(params.startValue);
+  const endValue = parseSIValue(params.endValue);
+  const stepValue = parseSIValue(params.stepValue);
 
   if (stepValue <= 0) {
     throw new WebSpiceError(

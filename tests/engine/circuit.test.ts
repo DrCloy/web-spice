@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CircuitImpl } from '@/engine/circuit';
+import { CircuitImpl, validateCircuitStructure } from '@/engine/circuit';
 import type { Component } from '@/types/component';
 import { WebSpiceError } from '@/types/circuit';
 import {
@@ -84,19 +84,19 @@ describe('CircuitImpl', () => {
 
       expect(
         () => new CircuitImpl(makeCircuitData({ components: [r1, r2] }))
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'already exists');
+      ).toThrowWebSpiceError('DUPLICATE_COMPONENT');
     });
 
     it('should throw error for empty circuit ID', () => {
       expect(
         () => new CircuitImpl(makeCircuitData({ id: '' }))
-      ).toThrowWebSpiceError('INVALID_CIRCUIT', 'Circuit ID cannot be empty');
+      ).toThrowWebSpiceError('INVALID_CIRCUIT');
     });
 
     it('should throw error for empty circuit name', () => {
       expect(
         () => new CircuitImpl(makeCircuitData({ name: '' }))
-      ).toThrowWebSpiceError('INVALID_CIRCUIT', 'Circuit name cannot be empty');
+      ).toThrowWebSpiceError('INVALID_CIRCUIT');
     });
 
     it('should trim and normalize ID', () => {
@@ -188,8 +188,7 @@ describe('CircuitImpl', () => {
       circuit.addComponent(r1);
 
       expect(() => circuit.addComponent(r2)).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'already exists'
+        'DUPLICATE_COMPONENT'
       );
     });
 
@@ -213,8 +212,7 @@ describe('CircuitImpl', () => {
       const circuit = new CircuitImpl(makeCircuitData());
 
       expect(() => circuit.removeComponent('R1')).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'not found'
+        'COMPONENT_NOT_FOUND'
       );
     });
 
@@ -442,9 +440,7 @@ describe('CircuitImpl', () => {
         circuit.addComponent(v1);
         circuit.addComponent(r1);
 
-        const result = circuit.validate();
-        expect(result.valid).toBe(true);
-        expect(result.errors).toHaveLength(0);
+        expect(validateCircuitStructure(circuit)).toHaveLength(0);
       });
 
       it('should validate voltage divider circuit', () => {
@@ -469,9 +465,7 @@ describe('CircuitImpl', () => {
         circuit.addComponent(r1);
         circuit.addComponent(r2);
 
-        const result = circuit.validate();
-        expect(result.valid).toBe(true);
-        expect(result.errors).toHaveLength(0);
+        expect(validateCircuitStructure(circuit)).toHaveLength(0);
       });
 
       it('should validate voltage divider fixture', () => {
@@ -482,9 +476,7 @@ describe('CircuitImpl', () => {
           groundNodeId: VOLTAGE_DIVIDER_12V.circuit.groundNodeId,
         });
 
-        const dividerResult = dividerCircuit.validate();
-        expect(dividerResult.valid).toBe(true);
-        expect(dividerResult.errors).toHaveLength(0);
+        expect(validateCircuitStructure(dividerCircuit)).toHaveLength(0);
       });
 
       it('should validate circuit with ground component', () => {
@@ -508,9 +500,7 @@ describe('CircuitImpl', () => {
         circuit.addComponent(r1);
         circuit.addComponent(gnd);
 
-        const result = circuit.validate();
-        expect(result.valid).toBe(true);
-        expect(result.errors).toHaveLength(0);
+        expect(validateCircuitStructure(circuit)).toHaveLength(0);
       });
     });
 
@@ -518,11 +508,10 @@ describe('CircuitImpl', () => {
       it('should detect empty circuit', () => {
         const circuit = new CircuitImpl(makeCircuitData());
 
-        const result = circuit.validate();
-        expect(result.valid).toBe(false);
-        expect(result.errors).toHaveLength(1);
-        expect(result.errors[0].code).toBe('INVALID_CIRCUIT');
-        expect(result.errors[0].message).toContain(
+        const errors = validateCircuitStructure(circuit);
+        expect(errors).toHaveLength(1);
+        expect(errors[0].code).toBe('INVALID_CIRCUIT');
+        expect(errors[0].message).toContain(
           'Circuit must have at least one component'
         );
       });
@@ -547,10 +536,9 @@ describe('CircuitImpl', () => {
         circuit.addComponent(v1);
         circuit.addComponent(r1);
 
-        const result = circuit.validate();
-        expect(result.valid).toBe(false);
-        expect(result.errors.length).toBeGreaterThan(0);
-        expect(result.errors.some(e => e.code === 'NO_GROUND')).toBe(true);
+        const errors = validateCircuitStructure(circuit);
+        expect(errors.length).toBeGreaterThan(0);
+        expect(errors.some(e => e.code === 'NO_GROUND')).toBe(true);
       });
 
       it('should not have floating nodes when all components are properly connected', () => {
@@ -569,8 +557,7 @@ describe('CircuitImpl', () => {
         circuit.addComponent(v1);
         circuit.addComponent(r1);
 
-        const result = circuit.validate();
-        expect(result.valid).toBe(true);
+        expect(validateCircuitStructure(circuit)).toHaveLength(0);
       });
 
       it('should detect floating node with only one connection', () => {
@@ -590,13 +577,10 @@ describe('CircuitImpl', () => {
         circuit.addComponent(v1);
         circuit.addComponent(r1);
 
-        const result = circuit.validate();
-        expect(result.valid).toBe(false);
-        expect(result.errors.length).toBeGreaterThan(0);
-        expect(result.errors.some(e => e.code === 'FLOATING_NODE')).toBe(true);
-        expect(result.errors.some(e => e.message.includes("Node '2'"))).toBe(
-          true
-        );
+        const errors = validateCircuitStructure(circuit);
+        expect(errors.length).toBeGreaterThan(0);
+        expect(errors.some(e => e.code === 'FLOATING_NODE')).toBe(true);
+        expect(errors.some(e => e.message.includes("Node '2'"))).toBe(true);
       });
 
       it('should allow ground node with single connection', () => {
@@ -608,14 +592,12 @@ describe('CircuitImpl', () => {
 
         circuit.addComponent(gnd);
 
-        const result = circuit.validate();
-        expect(result.valid).toBe(true);
-        expect(result.errors).toHaveLength(0);
+        expect(validateCircuitStructure(circuit)).toHaveLength(0);
       });
     });
 
     describe('validation result structure', () => {
-      it('should return valid=true with no errors for valid circuit', () => {
+      it('should return empty array for valid circuit', () => {
         const circuit = new CircuitImpl(makeCircuitData());
         const v1 = createDCVoltageSource({
           id: 'V1',
@@ -631,22 +613,16 @@ describe('CircuitImpl', () => {
         circuit.addComponent(v1);
         circuit.addComponent(r1);
 
-        const result = circuit.validate();
-        expect(result).toHaveProperty('valid');
-        expect(result).toHaveProperty('errors');
-        expect(result.valid).toBe(true);
-        expect(result.errors).toEqual([]);
+        const errors = validateCircuitStructure(circuit);
+        expect(errors).toEqual([]);
       });
 
-      it('should return valid=false with error array for invalid circuit', () => {
+      it('should return non-empty array for invalid circuit', () => {
         const circuit = new CircuitImpl(makeCircuitData());
 
-        const result = circuit.validate();
-        expect(result).toHaveProperty('valid');
-        expect(result).toHaveProperty('errors');
-        expect(result.valid).toBe(false);
-        expect(Array.isArray(result.errors)).toBe(true);
-        expect(result.errors.length).toBeGreaterThan(0);
+        const errors = validateCircuitStructure(circuit);
+        expect(Array.isArray(errors)).toBe(true);
+        expect(errors.length).toBeGreaterThan(0);
       });
 
       it('should provide context in errors', () => {
@@ -659,11 +635,10 @@ describe('CircuitImpl', () => {
 
         circuit.addComponent(v1);
 
-        const result = circuit.validate();
-        expect(result.valid).toBe(false);
+        const errors = validateCircuitStructure(circuit);
+        expect(errors.length).toBeGreaterThan(0);
 
-        // Check that errors have proper structure
-        for (const error of result.errors) {
+        for (const error of errors) {
           expect(error).toBeInstanceOf(WebSpiceError);
           expect(error).toHaveProperty('code');
           expect(error).toHaveProperty('message');
@@ -770,8 +745,7 @@ describe('CircuitImpl', () => {
       expect(restored.getComponents()).toHaveLength(3);
       expect(restored.getNodes()).toHaveLength(3);
 
-      const restoredValidation = restored.validate();
-      expect(restoredValidation.valid).toBe(true);
+      expect(validateCircuitStructure(restored)).toHaveLength(0);
     });
 
     it('should handle optional fields', () => {

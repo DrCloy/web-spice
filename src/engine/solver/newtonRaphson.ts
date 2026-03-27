@@ -73,8 +73,7 @@ export const DEFAULT_NR_OPTIONS: NewtonRaphsonOptions = {
  *   fall back to {@link DEFAULT_NR_OPTIONS}.
  * @returns The {@link NewtonRaphsonResult} containing the solution,
  *   convergence status, iteration count, and residual/update norms.
- * @throws {WebSpiceError} `INVALID_PARAMETER` if system or initialGuess is
- *   null/undefined, dimensions mismatch, or options are out of range.
+ * @throws {WebSpiceError} `INVALID_PARAMETER` if dimensions mismatch or options are out of range.
  * @throws {WebSpiceError} `CONVERGENCE_FAILED` if the solver does not converge
  *   within maxIterations or encounters a singular Jacobian.
  */
@@ -84,18 +83,6 @@ export function solveNewtonRaphson(
   options?: Partial<NewtonRaphsonOptions>
 ): NewtonRaphsonResult {
   // --- Input validation ---
-  if (!system) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'System cannot be null or undefined'
-    );
-  }
-  if (!initialGuess) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Initial guess cannot be null or undefined'
-    );
-  }
   if (initialGuess.length !== system.size) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -118,13 +105,13 @@ export function solveNewtonRaphson(
   if (!Number.isFinite(opts.absoluteTolerance) || opts.absoluteTolerance < 0) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
-      'absoluteTolerance must be a finite, non-negative number'
+      'Absolute tolerance must be a finite, non-negative number'
     );
   }
   if (!Number.isFinite(opts.relativeTolerance) || opts.relativeTolerance < 0) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
-      'relativeTolerance must be a finite, non-negative number'
+      'Relative tolerance must be a finite, non-negative number'
     );
   }
   if (
@@ -134,7 +121,7 @@ export function solveNewtonRaphson(
   ) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
-      'maxIterations must be a finite, positive integer'
+      'Max iterations must be a finite, positive integer'
     );
   }
 

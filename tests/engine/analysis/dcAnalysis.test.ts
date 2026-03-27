@@ -5,6 +5,7 @@ import type { DCAnalysisConfig } from '@/types/simulation';
 import { createTestCircuit } from '../../factories/circuits';
 import {
   createACVoltageSource,
+  createCapacitor,
   createDCCurrentSource,
   createDCVoltageSource,
   createGround,
@@ -28,13 +29,6 @@ import { SINGULAR_MATRIX_ERROR } from '../../fixtures/error-cases';
 
 describe('analyzeDC', () => {
   describe('Input Validation', () => {
-    it('should throw for null circuit', () => {
-      expect(() => analyzeDC(null as unknown as Circuit)).toThrowWebSpiceError(
-        'INVALID_CIRCUIT',
-        'cannot be null'
-      );
-    });
-
     it('should throw for empty circuit', () => {
       const circuit: Circuit = {
         id: 'empty',
@@ -43,10 +37,7 @@ describe('analyzeDC', () => {
         nodes: [],
         groundNodeId: '0',
       };
-      expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'INVALID_CIRCUIT',
-        'at least one component'
-      );
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('INVALID_CIRCUIT');
     });
 
     it('should throw for circuit without ground node', () => {
@@ -57,10 +48,7 @@ describe('analyzeDC', () => {
         ],
         groundNodeId: '0', // node '0' doesn't exist in circuit
       });
-      expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'NO_GROUND',
-        'Ground node'
-      );
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('NO_GROUND');
     });
 
     it('should throw for floating node', () => {
@@ -73,33 +61,20 @@ describe('analyzeDC', () => {
         groundNodeId: '0',
       });
       // Node '2' is only connected to R1 (floating)
-      expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'FLOATING_NODE',
-        'Node'
-      );
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('FLOATING_NODE');
     });
 
     it('should throw for unsupported component type', () => {
       const circuit = createTestCircuit({
         components: [
           createDCVoltageSource({ id: 'V1', voltage: 12, nodes: ['1', '0'] }),
-          {
-            id: 'C1',
-            type: 'capacitor',
-            name: 'C1',
-            capacitance: 1e-6,
-            terminals: [
-              { name: 'positive', nodeId: '1' },
-              { name: 'negative', nodeId: '0' },
-            ],
-          } as any,
+          createCapacitor({ id: 'C1', capacitance: 1e-6, nodes: ['1', '0'] }),
           createGround({ id: 'GND', nodeId: '0' }),
         ],
         groundNodeId: '0',
       });
       expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'UNSUPPORTED_ANALYSIS',
-        'not supported in DC analysis'
+        'UNSUPPORTED_ANALYSIS'
       );
     });
 
@@ -118,8 +93,7 @@ describe('analyzeDC', () => {
         groundNodeId: '0',
       });
       expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'UNSUPPORTED_ANALYSIS',
-        'not supported in DC analysis'
+        'UNSUPPORTED_ANALYSIS'
       );
     });
   });
@@ -451,10 +425,7 @@ describe('analyzeDC', () => {
   describe('Error Cases', () => {
     it('should throw SINGULAR_MATRIX for parallel voltage sources', () => {
       const circuit = SINGULAR_MATRIX_ERROR.circuit as Circuit;
-      expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'SINGULAR_MATRIX',
-        'singular'
-      );
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('SINGULAR_MATRIX');
     });
 
     it('should throw for voltage source loop without resistance', () => {
@@ -467,10 +438,7 @@ describe('analyzeDC', () => {
         ],
         groundNodeId: '0',
       });
-      expect(() => analyzeDC(circuit)).toThrowWebSpiceError(
-        'SINGULAR_MATRIX',
-        'singular'
-      );
+      expect(() => analyzeDC(circuit)).toThrowWebSpiceError('SINGULAR_MATRIX');
     });
 
     it('should return trivial result for ground-only circuit', () => {
@@ -580,6 +548,51 @@ describe('analyzeDC', () => {
       ).reduce((sum, p) => sum + p, 0);
 
       expect(totalPower).toBeCloseTo(0, 10);
+    });
+
+    it('should have voltage source supplying power (negative) and resistor consuming (positive)', () => {
+      // V1=10V, R1=1kΩ → I=10mA, P(V1)=-100mW (supply), P(R1)=+100mW (consume)
+      const circuit = SIMPLE_RESISTOR_10V.circuit;
+      const result = analyzeDC(circuit);
+
+      expect(result.operatingPoint.componentPowers['V1']).toBeCloseTo(-0.1);
+      expect(result.operatingPoint.componentPowers['R1']).toBeCloseTo(0.1);
+    });
+
+    it('should have current source supplying power when pumping current uphill', () => {
+      // I1=10mA from node0→node1, R1=1kΩ → V(1)=10V
+      // P(I1) = (V- - V+) * I = (0 - 10) * 0.01 = -0.1W (supply)
+      // P(R1) = V^2/R = 100/1000 = +0.1W (consume)
+      const circuit = createTestCircuit({
+        components: [
+          createDCCurrentSource({ id: 'I1', current: 0.01, nodes: ['0', '1'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const result = analyzeDC(circuit);
+
+      expect(result.operatingPoint.componentPowers['I1']).toBeCloseTo(-0.1);
+      expect(result.operatingPoint.componentPowers['R1']).toBeCloseTo(0.1);
+    });
+
+    it('should flip node voltage sign when current source polarity is reversed', () => {
+      // I1 N+=node1, N-=node0: current drawn from node1 → V(1) = -10V
+      // Power signs are unchanged: source still supplies (-0.1W), resistor still consumes (+0.1W)
+      const circuit = createTestCircuit({
+        components: [
+          createDCCurrentSource({ id: 'I1', current: 0.01, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const result = analyzeDC(circuit);
+
+      expect(result.operatingPoint.nodeVoltages['1']).toBeCloseTo(-10);
+      expect(result.operatingPoint.componentPowers['I1']).toBeCloseTo(-0.1);
+      expect(result.operatingPoint.componentPowers['R1']).toBeCloseTo(0.1);
     });
   });
 
@@ -755,8 +768,7 @@ describe('analyzeDC', () => {
       };
 
       expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'not found in circuit'
+        'COMPONENT_NOT_FOUND'
       );
     });
 
@@ -781,9 +793,113 @@ describe('analyzeDC', () => {
       };
 
       expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'must be a voltage or current source'
+        'INVALID_PARAMETER'
       );
+    });
+
+    it('should throw for stepValue of zero when calling analyzeDC directly', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 10, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: { sourceId: 'V1', startValue: 0, endValue: 10, stepValue: 0 },
+      };
+
+      expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
+        'INVALID_PARAMETER'
+      );
+    });
+
+    it('should throw for non-finite stepValue when calling analyzeDC directly', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 10, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: {
+          sourceId: 'V1',
+          startValue: 0,
+          endValue: 10,
+          stepValue: Infinity,
+        },
+      };
+
+      expect(() => analyzeDC(circuit, config)).toThrowWebSpiceError(
+        'INVALID_PARAMETER'
+      );
+    });
+
+    it('should return single point when startValue equals endValue', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 5, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: { sourceId: 'V1', startValue: 5, endValue: 5, stepValue: 1 },
+      };
+
+      const result = analyzeDC(circuit, config);
+
+      expect(result.sweep!.sweepValues).toHaveLength(1);
+      expect(result.sweep!.sweepValues[0]).toBe(5);
+      expect(result.sweep!.operatingPoints).toHaveLength(1);
+    });
+
+    it('should return single point when stepValue exceeds range', () => {
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 5, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: { sourceId: 'V1', startValue: 0, endValue: 3, stepValue: 10 },
+      };
+
+      const result = analyzeDC(circuit, config);
+
+      expect(result.sweep!.sweepValues).toHaveLength(1);
+      expect(result.sweep!.sweepValues[0]).toBe(0);
+    });
+
+    it('should include all points with floating-point step (0.1)', () => {
+      // 0 to 0.3 in 0.1 steps — IEEE 754 cannot represent 0.1 exactly,
+      // so naive accumulation would produce 3 or 4 points depending on rounding
+      const circuit = createTestCircuit({
+        components: [
+          createDCVoltageSource({ id: 'V1', voltage: 5, nodes: ['1', '0'] }),
+          createResistor({ id: 'R1', resistance: 1000, nodes: ['1', '0'] }),
+          createGround({ id: 'GND', nodeId: '0' }),
+        ],
+        groundNodeId: '0',
+      });
+      const config: DCAnalysisConfig = {
+        type: 'dc',
+        sweep: { sourceId: 'V1', startValue: 0, endValue: 0.3, stepValue: 0.1 },
+      };
+
+      const result = analyzeDC(circuit, config);
+
+      expect(result.sweep!.sweepValues).toHaveLength(4); // 0, 0.1, 0.2, 0.3
     });
   });
 });

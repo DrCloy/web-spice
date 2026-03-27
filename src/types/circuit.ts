@@ -91,8 +91,10 @@ export interface LUResult {
 
 /** WebSpice error codes */
 export type ErrorCode =
-  | 'INVALID_COMPONENT'
   | 'INVALID_CIRCUIT'
+  | 'INVALID_COMPONENT'
+  | 'DUPLICATE_COMPONENT'
+  | 'COMPONENT_NOT_FOUND'
   | 'NO_GROUND'
   | 'FLOATING_NODE'
   | 'SINGULAR_MATRIX'
@@ -144,6 +146,7 @@ export interface ComponentJSON {
 
 /** JSON representation of a circuit for parsing */
 export interface CircuitJSON {
+  id: string;
   name: string;
   description?: string;
   components: ComponentJSON[];

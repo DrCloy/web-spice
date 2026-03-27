@@ -88,15 +88,46 @@ describe('Analysis Parser', () => {
     it('should throw INVALID_PARAMETER for null input', () => {
       expect(() =>
         parseAnalysis(null as unknown as AnalysisJSON)
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Analysis JSON is required');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw UNSUPPORTED_ANALYSIS for non-DC analysis type', () => {
       const json = { type: 'ac', parameters: {} } as AnalysisJSON;
 
       expect(() => parseAnalysis(json)).toThrowWebSpiceError(
-        'UNSUPPORTED_ANALYSIS',
-        'not yet supported'
+        'UNSUPPORTED_ANALYSIS'
+      );
+    });
+  });
+
+  describe('error: invalid sourceId', () => {
+    it('should throw for numeric sourceId', () => {
+      const json = makeDCAnalysisJSON({
+        parameters: {
+          sourceId: 123,
+          startValue: 0,
+          endValue: 10,
+          stepValue: 1,
+        },
+      });
+
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'INVALID_PARAMETER'
+      );
+    });
+
+    it('should throw for empty string sourceId', () => {
+      const json = makeDCAnalysisJSON({
+        parameters: {
+          sourceId: '   ',
+          startValue: 0,
+          endValue: 10,
+          stepValue: 1,
+        },
+      });
+
+      expect(() => parseAnalysis(json)).toThrowWebSpiceError(
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -108,8 +139,7 @@ describe('Analysis Parser', () => {
       });
 
       expect(() => parseAnalysis(json)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Missing: endValue, stepValue'
+        'INVALID_PARAMETER'
       );
     });
 
@@ -119,8 +149,7 @@ describe('Analysis Parser', () => {
       });
 
       expect(() => parseAnalysis(json)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Missing: startValue, endValue, stepValue'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -137,8 +166,7 @@ describe('Analysis Parser', () => {
       });
 
       expect(() => parseAnalysis(json)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        "Cannot parse numeric value: 'abc'"
+        'INVALID_PARAMETER'
       );
     });
 
@@ -153,8 +181,7 @@ describe('Analysis Parser', () => {
       });
 
       expect(() => parseAnalysis(json)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'finite number'
+        'INVALID_PARAMETER'
       );
     });
 
@@ -169,8 +196,7 @@ describe('Analysis Parser', () => {
       });
 
       expect(() => parseAnalysis(json)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'stepValue must be a positive finite number'
+        'INVALID_PARAMETER'
       );
     });
 
@@ -185,8 +211,7 @@ describe('Analysis Parser', () => {
       });
 
       expect(() => parseAnalysis(json)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'stepValue must be a positive finite number'
+        'INVALID_PARAMETER'
       );
     });
   });

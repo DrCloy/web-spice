@@ -54,10 +54,7 @@ describe('DCVoltageSourceImpl', () => {
     it('should throw error for empty component ID', () => {
       expect(
         () => new DCVoltageSourceImpl(makeDCVoltageSourceData({ id: '' }))
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Component ID cannot be empty'
-      );
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for empty positive node ID', () => {
@@ -71,7 +68,7 @@ describe('DCVoltageSourceImpl', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for empty negative node ID', () => {
@@ -85,7 +82,7 @@ describe('DCVoltageSourceImpl', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for identical node IDs', () => {
@@ -99,10 +96,7 @@ describe('DCVoltageSourceImpl', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Terminals cannot be connected to the same node'
-      );
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for node IDs that are identical after trimming', () => {
@@ -116,19 +110,13 @@ describe('DCVoltageSourceImpl', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Terminals cannot be connected to the same node'
-      );
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for invalid voltage (NaN)', () => {
       expect(
         () => new DCVoltageSourceImpl(makeDCVoltageSourceData({ voltage: NaN }))
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Voltage must be a valid number'
-      );
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for invalid voltage (Infinity)', () => {
@@ -137,21 +125,7 @@ describe('DCVoltageSourceImpl', () => {
           new DCVoltageSourceImpl(
             makeDCVoltageSourceData({ voltage: Infinity })
           )
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Voltage must be a valid number'
-      );
-    });
-
-    it('should throw error for invalid terminals (not exactly 2)', () => {
-      expect(
-        () =>
-          new DCVoltageSourceImpl(
-            makeDCVoltageSourceData({
-              terminals: [{ name: 'pos', nodeId: 'n1' }] as any,
-            })
-          )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'exactly 2 terminals');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 

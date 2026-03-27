@@ -58,15 +58,6 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
       );
     }
 
-    // Validate terminals
-    if (!data.terminals || data.terminals.length !== 2) {
-      throw new WebSpiceError(
-        'INVALID_COMPONENT',
-        'DC voltage source must have exactly 2 terminals',
-        { componentId: data.id }
-      );
-    }
-
     const [termPos, termNeg] = data.terminals;
 
     if (!termPos.nodeId || termPos.nodeId.trim().length === 0) {
@@ -96,7 +87,7 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
     if (!Number.isFinite(data.voltage)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
-        'Voltage must be a valid number',
+        'Voltage must be a finite number',
         { componentId: data.id }
       );
     }
@@ -132,10 +123,7 @@ export class DCVoltageSourceImpl implements DCVoltageSource {
   }
 
   get terminals(): [Terminal, Terminal] {
-    return [{ ...this._terminals[0] }, { ...this._terminals[1] }] as [
-      Terminal,
-      Terminal,
-    ];
+    return [{ ...this._terminals[0] }, { ...this._terminals[1] }];
   }
 
   /**

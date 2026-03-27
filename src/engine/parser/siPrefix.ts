@@ -99,7 +99,7 @@ export function parseSIValue(value: number | string): number {
   // Unknown suffix — throw rather than silently ignoring to catch typos early
   throw new WebSpiceError(
     'INVALID_PARAMETER',
-    `Unknown SI prefix '${firstChar}' in value '${value}'`
+    `Unknown unit suffix '${suffix}' in value '${value}'`
   );
 }
 

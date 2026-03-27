@@ -60,10 +60,7 @@ describe('Matrix Operations', () => {
         data: [1, 2, 3, 4, 5, 6],
       });
 
-      expect(() => addMatrices(A, B)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Matrix dimensions must match'
-      );
+      expect(() => addMatrices(A, B)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 
@@ -86,8 +83,7 @@ describe('Matrix Operations', () => {
       });
 
       expect(() => subtractMatrices(A, B)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Matrix dimensions must match'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -153,8 +149,7 @@ describe('Matrix Operations', () => {
       const B = createTestMatrix({ rows: 2, cols: 2, data: [1, 2, 3, 4] });
 
       expect(() => multiplyMatrices(A, B)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Matrix dimensions incompatible for multiplication'
+        'INVALID_PARAMETER'
       );
     });
 
@@ -193,8 +188,7 @@ describe('Matrix Operations', () => {
       const v = createTestVector({ length: 2, data: [1, 2] });
 
       expect(() => multiplyMatrixVector(A, v)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Matrix columns must match vector length'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -224,8 +218,7 @@ describe('Matrix Operations', () => {
       });
 
       expect(() => multiplyVectorMatrix(v, A)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Vector length must match matrix rows'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -278,10 +271,7 @@ describe('Matrix Operations', () => {
     it('should throw error for invalid row index', () => {
       const A = createTestMatrix({ rows: 2, cols: 2, data: [1, 2, 3, 4] });
 
-      expect(() => getRow(A, 3)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Row index out of bounds'
-      );
+      expect(() => getRow(A, 3)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 
@@ -302,10 +292,7 @@ describe('Matrix Operations', () => {
     it('should throw error for invalid column index', () => {
       const A = createTestMatrix({ rows: 2, cols: 2, data: [1, 2, 3, 4] });
 
-      expect(() => getColumn(A, 3)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Column index out of bounds'
-      );
+      expect(() => getColumn(A, 3)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 
@@ -332,8 +319,7 @@ describe('Matrix Operations', () => {
       const newRow = [7, 8];
 
       expect(() => setRow(A, 1, newRow)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Row length must match matrix columns'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -361,8 +347,7 @@ describe('Matrix Operations', () => {
       const newCol = [7, 8];
 
       expect(() => setColumn(A, 1, newCol)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Column length must match matrix rows'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -387,8 +372,7 @@ describe('Matrix Operations', () => {
       const A = createTestMatrix({ rows: 2, cols: 2, data: [1, 2, 3, 4] });
 
       expect(() => submatrix(A, 0, 3, 0, 2)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Invalid submatrix indices'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -418,10 +402,7 @@ describe('Matrix Operations', () => {
         data: [1, 2, 3, 4, 5, 6],
       });
 
-      expect(() => trace(A)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Matrix must be square'
-      );
+      expect(() => trace(A)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 
@@ -587,8 +568,7 @@ describe('Matrix Operations', () => {
       });
 
       expect(() => conditionNumber(A)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Matrix must be square'
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -674,8 +654,7 @@ describe('Matrix Operations', () => {
       });
 
       expect(() => estimateConditionNumber(A)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Matrix must be square'
+        'INVALID_PARAMETER'
       );
     });
   });

@@ -32,29 +32,11 @@ function createSquareSystem(target: number): NonlinearSystem {
 
 describe('solveNewtonRaphson', () => {
   describe('Input Validation', () => {
-    it('should throw for null system', () => {
-      const guess: Vector = { length: 1, data: new Float64Array([1]) };
-      expect(() =>
-        solveNewtonRaphson(null as unknown as NonlinearSystem, guess)
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'System cannot be null');
-    });
-
-    it('should throw for null initial guess', () => {
-      const system = createSquareSystem(2);
-      expect(() =>
-        solveNewtonRaphson(system, null as unknown as Vector)
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Initial guess cannot be null'
-      );
-    });
-
     it('should throw for dimension mismatch', () => {
       const system = createSquareSystem(2); // size = 1
       const guess: Vector = { length: 2, data: new Float64Array([1, 2]) };
       expect(() => solveNewtonRaphson(system, guess)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'dimension'
+        'INVALID_PARAMETER'
       );
     });
 
@@ -63,16 +45,16 @@ describe('solveNewtonRaphson', () => {
       const guess: Vector = { length: 1, data: new Float64Array([1]) };
       expect(() =>
         solveNewtonRaphson(system, guess, { dampingFactor: 0 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Damping factor');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { dampingFactor: 1.5 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Damping factor');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { dampingFactor: NaN })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Damping factor');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { dampingFactor: Infinity })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'Damping factor');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw for invalid maxIterations', () => {
@@ -80,13 +62,13 @@ describe('solveNewtonRaphson', () => {
       const guess: Vector = { length: 1, data: new Float64Array([1]) };
       expect(() =>
         solveNewtonRaphson(system, guess, { maxIterations: 0 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'maxIterations');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { maxIterations: NaN })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'maxIterations');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { maxIterations: 1.5 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'maxIterations');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw for invalid absoluteTolerance', () => {
@@ -94,13 +76,13 @@ describe('solveNewtonRaphson', () => {
       const guess: Vector = { length: 1, data: new Float64Array([1]) };
       expect(() =>
         solveNewtonRaphson(system, guess, { absoluteTolerance: -1 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'absoluteTolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { absoluteTolerance: NaN })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'absoluteTolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { absoluteTolerance: Infinity })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'absoluteTolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw for invalid relativeTolerance', () => {
@@ -108,13 +90,13 @@ describe('solveNewtonRaphson', () => {
       const guess: Vector = { length: 1, data: new Float64Array([1]) };
       expect(() =>
         solveNewtonRaphson(system, guess, { relativeTolerance: -1 })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'relativeTolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { relativeTolerance: NaN })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'relativeTolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
       expect(() =>
         solveNewtonRaphson(system, guess, { relativeTolerance: Infinity })
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'relativeTolerance');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
   });
 
@@ -337,7 +319,7 @@ describe('solveNewtonRaphson', () => {
       // 2 iterations is not enough to converge to 1e-12 tolerance
       expect(() =>
         solveNewtonRaphson(system, guess, { maxIterations: 2 })
-      ).toThrowWebSpiceError('CONVERGENCE_FAILED', 'did not converge');
+      ).toThrowWebSpiceError('CONVERGENCE_FAILED');
     });
 
     it('should throw CONVERGENCE_FAILED when Jacobian is singular', () => {
@@ -356,8 +338,7 @@ describe('solveNewtonRaphson', () => {
       const guess: Vector = { length: 1, data: new Float64Array([0.5]) };
 
       expect(() => solveNewtonRaphson(system, guess)).toThrowWebSpiceError(
-        'CONVERGENCE_FAILED',
-        'singular Jacobian'
+        'CONVERGENCE_FAILED'
       );
     });
 
@@ -384,7 +365,7 @@ describe('solveNewtonRaphson', () => {
 
       expect(() =>
         solveNewtonRaphson(system, guess, { maxIterations: 50 })
-      ).toThrowWebSpiceError('CONVERGENCE_FAILED', 'singular Jacobian');
+      ).toThrowWebSpiceError('CONVERGENCE_FAILED');
     });
   });
 

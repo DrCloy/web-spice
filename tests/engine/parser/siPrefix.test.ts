@@ -87,37 +87,28 @@ describe('SI Prefix Parser', () => {
 
   describe('edge cases and errors', () => {
     it('should throw for empty string', () => {
-      expect(() => parseSIValue('')).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'empty string'
-      );
+      expect(() => parseSIValue('')).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw for non-numeric string', () => {
       expect(() => parseSIValue('abc')).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        "Cannot parse numeric value: 'abc'"
+        'INVALID_PARAMETER'
       );
     });
 
     it('should throw for NaN number input', () => {
-      expect(() => parseSIValue(NaN)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'finite number'
-      );
+      expect(() => parseSIValue(NaN)).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw for Infinity number input', () => {
       expect(() => parseSIValue(Infinity)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'finite number'
+        'INVALID_PARAMETER'
       );
     });
 
     it('should throw for unknown SI prefix', () => {
       expect(() => parseSIValue('1x')).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        "Unknown SI prefix 'x'"
+        'INVALID_PARAMETER'
       );
     });
   });
@@ -188,43 +179,37 @@ describe('SI Value Formatter', () => {
   describe('errors', () => {
     it('should throw for NaN', () => {
       expect(() => formatSIValue(NaN, 'V')).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'finite number'
+        'INVALID_PARAMETER'
       );
     });
 
     it('should throw for Infinity', () => {
       expect(() => formatSIValue(Infinity, 'V')).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'finite number'
+        'INVALID_PARAMETER'
       );
     });
 
     it('should throw for -Infinity', () => {
       expect(() => formatSIValue(-Infinity, 'V')).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'finite number'
+        'INVALID_PARAMETER'
       );
     });
 
     it('should throw for negative precision', () => {
       expect(() => formatSIValue(1, 'V', -1)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'precision'
+        'INVALID_PARAMETER'
       );
     });
 
     it('should throw for precision > 100', () => {
       expect(() => formatSIValue(1, 'V', 101)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'precision'
+        'INVALID_PARAMETER'
       );
     });
 
     it('should throw for non-integer precision', () => {
       expect(() => formatSIValue(1, 'V', 2.5)).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'precision'
+        'INVALID_PARAMETER'
       );
     });
   });

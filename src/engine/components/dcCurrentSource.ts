@@ -58,15 +58,6 @@ export class DCCurrentSourceImpl implements DCCurrentSource {
       );
     }
 
-    // Validate terminals
-    if (!data.terminals || data.terminals.length !== 2) {
-      throw new WebSpiceError(
-        'INVALID_COMPONENT',
-        'DC current source must have exactly 2 terminals',
-        { componentId: data.id }
-      );
-    }
-
     const [termPos, termNeg] = data.terminals;
 
     if (!termPos.nodeId || termPos.nodeId.trim().length === 0) {
@@ -96,7 +87,7 @@ export class DCCurrentSourceImpl implements DCCurrentSource {
     if (!Number.isFinite(data.current)) {
       throw new WebSpiceError(
         'INVALID_PARAMETER',
-        'Current must be a valid number',
+        'Current must be a finite number',
         { componentId: data.id }
       );
     }
@@ -132,10 +123,7 @@ export class DCCurrentSourceImpl implements DCCurrentSource {
   }
 
   get terminals(): [Terminal, Terminal] {
-    return [{ ...this._terminals[0] }, { ...this._terminals[1] }] as [
-      Terminal,
-      Terminal,
-    ];
+    return [{ ...this._terminals[0] }, { ...this._terminals[1] }];
   }
 
   /**

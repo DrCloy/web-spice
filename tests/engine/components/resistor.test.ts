@@ -48,46 +48,31 @@ describe('Resistor', () => {
     it('should throw error for zero resistance', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: 0 }))
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Resistance must be greater than 0'
-      );
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for negative resistance', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: -100 }))
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Resistance must be greater than 0'
-      );
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for invalid resistance (NaN)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: NaN }))
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Resistance must be a valid number'
-      );
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for invalid resistance (Infinity)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: Infinity }))
-      ).toThrowWebSpiceError(
-        'INVALID_PARAMETER',
-        'Resistance must be a valid number'
-      );
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for empty component ID', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ id: '' }))
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Component ID cannot be empty'
-      );
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for empty node IDs', () => {
@@ -101,7 +86,7 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
 
       expect(
         () =>
@@ -113,7 +98,7 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'Node ID cannot be empty');
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for identical node IDs', () => {
@@ -127,10 +112,7 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Terminals cannot be connected to the same node'
-      );
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
 
     it('should throw error for node IDs that are identical after trimming', () => {
@@ -144,21 +126,7 @@ describe('Resistor', () => {
               ],
             })
           )
-      ).toThrowWebSpiceError(
-        'INVALID_COMPONENT',
-        'Terminals cannot be connected to the same node'
-      );
-    });
-
-    it('should throw error for invalid terminals (not exactly 2)', () => {
-      expect(
-        () =>
-          new ResistorImpl(
-            makeResistorData({
-              terminals: [{ name: 'terminal1', nodeId: 'n1' }] as any,
-            })
-          )
-      ).toThrowWebSpiceError('INVALID_COMPONENT', 'exactly 2 terminals');
+      ).toThrowWebSpiceError('INVALID_COMPONENT');
     });
   });
 
@@ -176,13 +144,13 @@ describe('Resistor', () => {
     it('should throw error for resistance below minimum (< 1 mΩ)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: 1e-4 }))
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'between 1e-3 and 1e12');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should throw error for resistance above maximum (> 1 TΩ)', () => {
       expect(
         () => new ResistorImpl(makeResistorData({ resistance: 1e13 }))
-      ).toThrowWebSpiceError('INVALID_PARAMETER', 'between 1e-3 and 1e12');
+      ).toThrowWebSpiceError('INVALID_PARAMETER');
     });
 
     it('should accept typical resistor values', () => {

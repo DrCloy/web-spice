@@ -33,19 +33,12 @@ import { hasNaNOrInfinity } from '@/engine/solver/matrix';
  * @param A - Square matrix to decompose
  * @param options - Solver options (pivotTolerance for singularity detection)
  * @returns LU decomposition result (does not throw on singularity, sets singular flag)
- * @throws {WebSpiceError} If matrix is null, not square, or contains NaN/Infinity
+ * @throws {WebSpiceError} If matrix is not square, empty, or contains NaN/Infinity
  */
 export function luDecompose(
   A: Matrix,
   options?: Partial<SolverOptions>
 ): LUResult {
-  if (!A) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'Matrix cannot be null or undefined'
-    );
-  }
-
   if (A.rows !== A.cols) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -160,13 +153,6 @@ export function luDecompose(
  * @returns Lower triangular matrix with unit diagonal
  */
 export function extractL(lu: LUResult): Matrix {
-  if (!lu) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'LU result cannot be null or undefined'
-    );
-  }
-
   const n = lu.size;
   const data = new Float64Array(n * n);
 
@@ -188,13 +174,6 @@ export function extractL(lu: LUResult): Matrix {
  * @returns Upper triangular matrix
  */
 export function extractU(lu: LUResult): Matrix {
-  if (!lu) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'LU result cannot be null or undefined'
-    );
-  }
-
   const n = lu.size;
   const data = new Float64Array(n * n);
 
@@ -223,13 +202,6 @@ export function extractU(lu: LUResult): Matrix {
  * @throws {WebSpiceError} If system is singular or dimensions mismatch
  */
 export function luSolve(lu: LUResult, b: Vector): Vector {
-  if (!lu || !b) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'LU result and vector cannot be null or undefined'
-    );
-  }
-
   if (lu.singular) {
     throw new WebSpiceError(
       'SINGULAR_MATRIX',
@@ -289,13 +261,6 @@ export function luSolve(lu: LUResult, b: Vector): Vector {
  * @throws {WebSpiceError} If system is singular or dimensions mismatch
  */
 export function luSolveMultiple(lu: LUResult, B: Matrix): Matrix {
-  if (!lu || !B) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'LU result and matrix cannot be null or undefined'
-    );
-  }
-
   if (B.rows !== lu.size) {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
@@ -339,13 +304,6 @@ export function luSolveMultiple(lu: LUResult, B: Matrix): Matrix {
  * @returns Determinant value (0 if singular)
  */
 export function determinant(lu: LUResult): number {
-  if (!lu) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'LU result cannot be null or undefined'
-    );
-  }
-
   if (lu.singular) {
     return 0;
   }
@@ -371,13 +329,6 @@ export function determinant(lu: LUResult): number {
  * @throws {WebSpiceError} If matrix is singular
  */
 export function luInverse(lu: LUResult): Matrix {
-  if (!lu) {
-    throw new WebSpiceError(
-      'INVALID_PARAMETER',
-      'LU result cannot be null or undefined'
-    );
-  }
-
   if (lu.singular) {
     throw new WebSpiceError(
       'SINGULAR_MATRIX',

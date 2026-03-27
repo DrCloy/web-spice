@@ -805,6 +805,15 @@ npm run test:coverage    # 테스트 커버리지
 npm run build -- --analyze # 번들 분석
 ```
 
+## 🏛 설계 결정 (Architecture Decision Records)
+
+프로젝트의 주요 설계 결정은 `docs/adr/`에 ADR 문서로 관리한다.
+
+| ADR                                                 | 제목                             | 상태 |
+| --------------------------------------------------- | -------------------------------- | ---- |
+| [ADR-001](adr/ADR-001-runtime-type-guard-policy.md) | 런타임 타입 가드 최소화 정책     | 확정 |
+| [ADR-002](adr/ADR-002-error-code-design.md)         | 에러 코드 설계 원칙 및 코드 체계 | 확정 |
+
 ## 📚 추가 자료
 
 - [React 19 공식 문서](https://react.dev/)
