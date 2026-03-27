@@ -81,7 +81,13 @@ function generateSweepValues(
   const values: number[] = [];
   const direction = start <= end ? 1 : -1;
   const signedStep = step * direction;
-  const count = Math.floor(Math.abs(end - start) / step + 1 + 1e-12);
+  const rawSteps = Math.abs(end - start) / step;
+  const roundedSteps = Math.round(rawSteps);
+  const stepTolerance = Number.EPSILON * Math.max(1, rawSteps);
+  const count =
+    (Math.abs(rawSteps - roundedSteps) <= stepTolerance
+      ? roundedSteps
+      : Math.floor(rawSteps)) + 1;
 
   if (count > MAX_SWEEP_POINTS) {
     throw new WebSpiceError(
@@ -99,7 +105,8 @@ function generateSweepValues(
 /**
  * Create a shallow copy of the circuit with one source's value changed.
  *
- * @throws {WebSpiceError} INVALID_PARAMETER if sourceId does not match a voltage or current source
+ * @throws {WebSpiceError} COMPONENT_NOT_FOUND if sourceId is not found in the circuit
+ * @throws {WebSpiceError} INVALID_PARAMETER if sourceId does not refer to a voltage or current source
  */
 function applySourceValue(
   circuit: Circuit,
@@ -108,19 +115,25 @@ function applySourceValue(
 ): Circuit {
   const target = circuit.components.find(c => c.id === sourceId);
 
-  if (
-    !target ||
-    (target.type !== 'voltage_source' && target.type !== 'current_source')
-  ) {
+  if (!target) {
+    throw new WebSpiceError(
+      'COMPONENT_NOT_FOUND',
+      `DC sweep source '${sourceId}' not found in circuit`
+    );
+  }
+  if (target.type !== 'voltage_source' && target.type !== 'current_source') {
     throw new WebSpiceError(
       'INVALID_PARAMETER',
-      `Sweep sourceId '${sourceId}' does not match any voltage or current source in the circuit`
+      `DC sweep source '${sourceId}' must be a voltage or current source, got '${target.type}'`
     );
   }
 
   // Explicitly enumerate Circuit interface properties instead of using spread,
   // because circuit may be a CircuitImpl class instance whose prototype getters
   // (id, name, groundNodeId, etc.) are not copied by object spread.
+  // Node and Terminal arrays are shallow-copied to break array-level aliasing.
+  // Individual Node/Terminal objects remain shared references — this is safe
+  // because solveOperatingPoint and downstream code treat the circuit as immutable.
   return {
     id: circuit.id,
     name: circuit.name,
