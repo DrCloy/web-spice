@@ -164,37 +164,23 @@ describe('run — analyze command', () => {
   // Verbose output
   // ------------------------------------------------------------------
 
-  it('includes debug section with --verbose', () => {
-    run({
-      command: 'analyze',
-      filePath: VOLTAGE_DIVIDER,
-      outputFormat: 'text',
-      verbose: true,
+  describe('--verbose flag', () => {
+    beforeEach(() => {
+      run({
+        command: 'analyze',
+        filePath: VOLTAGE_DIVIDER,
+        outputFormat: 'text',
+        verbose: true,
+      });
     });
-    const output = getOutput();
-    expect(output).toContain('Debug Info');
-  });
 
-  it('includes iteration count in verbose output', () => {
-    run({
-      command: 'analyze',
-      filePath: VOLTAGE_DIVIDER,
-      outputFormat: 'text',
-      verbose: true,
+    it.each([
+      ['debug section header', 'Debug Info'],
+      ['iteration count', /[Ii]teration/],
+      ['analysis time', /[Tt]ime/],
+    ] as const)('includes %s', (_label, matcher) => {
+      expect(getOutput()).toMatch(matcher);
     });
-    const output = getOutput();
-    expect(output).toMatch(/[Ii]teration/);
-  });
-
-  it('includes analysis time in verbose output', () => {
-    run({
-      command: 'analyze',
-      filePath: VOLTAGE_DIVIDER,
-      outputFormat: 'text',
-      verbose: true,
-    });
-    const output = getOutput();
-    expect(output).toMatch(/[Tt]ime/);
   });
 
   // ------------------------------------------------------------------
