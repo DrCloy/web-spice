@@ -5,8 +5,8 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![React](https://img.shields.io/badge/React-19.2-61dafb.svg)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)
-![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.6-38b2ac.svg)
-![Headless UI](https://img.shields.io/badge/Headless_UI-1.9-4f46e5.svg)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.x-38b2ac.svg)
+![Headless UI](https://img.shields.io/badge/Headless_UI-2.x-4f46e5.svg)
 
 ## 🚀 Quick Start
 
@@ -49,10 +49,11 @@ npm run ci           # 전체 CI 파이프라인 실행
 
 ## 🎯 Features
 
-### Phase 1: MVP Engine (현재 개발 중)
+### Phase 1: MVP Engine (진행중)
 
 - ✅ 기본 회로 소자 (저항, 전압원, 전류원)
 - ✅ DC 분석 엔진
+- ✅ DC Sweep 분석
 - ✅ JSON 기반 회로 입력
 - ⏳ 콘솔 기반 결과 출력
 
@@ -106,9 +107,12 @@ web-spice/
 │   │   ├── circuit/       # 회로 관련 컴포넌트
 │   │   └── charts/        # 그래프 컴포넌트
 │   ├── engine/            # SPICE 시뮬레이션 엔진
-│   │   ├── analysis/      # DC, AC, Transient 분석기
-│   │   ├── components/    # 컴포넌트 모델 (R, C, L 등)
-│   │   └── solver/        # 행렬 해법 엔진
+│   │   ├── analysis/      # DC 분석기 (Phase 1), AC/Transient (Phase 2+)
+│   │   ├── circuit/       # CircuitImpl
+│   │   ├── components/    # 컴포넌트 모델 (R, VoltageSource, CurrentSource)
+│   │   ├── formatter/     # 시뮬레이션 결과 포매터
+│   │   ├── parser/        # 회로 파서 (JSON, SI prefix)
+│   │   └── solver/        # MNA, LU 분해, Newton-Raphson
 │   ├── store/             # Redux 상태 관리
 │   ├── utils/             # 유틸리티 함수
 │   ├── types/             # TypeScript 타입 정의
