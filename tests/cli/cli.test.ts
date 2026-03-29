@@ -55,6 +55,16 @@ describe('parseArgs', () => {
   it('throws on unknown command', () => {
     expect(() => parseArgs(['simulate', 'file.json'])).toThrow();
   });
+
+  it('throws on invalid --output value', () => {
+    expect(() =>
+      parseArgs(['analyze', 'file.json', '--output', 'xml'])
+    ).toThrow();
+  });
+
+  it('throws on unknown flag', () => {
+    expect(() => parseArgs(['analyze', 'file.json', '--unknown'])).toThrow();
+  });
 });
 
 // ============================================================================
@@ -213,7 +223,7 @@ describe('run — analyze command', () => {
     ).toThrow(/Invalid JSON/);
   });
 
-  it('throws WebSpiceError message for invalid circuit structure', () => {
+  it('throws INVALID_CIRCUIT WebSpiceError for empty circuit', () => {
     const tempFile = join(tmpdir(), 'empty-circuit.json');
     writeFileSync(
       tempFile,
@@ -226,6 +236,6 @@ describe('run — analyze command', () => {
         outputFormat: 'text',
         verbose: false,
       })
-    ).toThrow();
+    ).toThrowWebSpiceError('INVALID_CIRCUIT');
   });
 });

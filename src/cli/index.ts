@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import { analyzeDC } from '@/engine/analysis/dcAnalysis';
 import { parseCircuit } from '@/engine/parser/circuitParser';
@@ -83,8 +84,15 @@ export function run(options: CliOptions): void {
   let raw: string;
   try {
     raw = readFileSync(filePath, 'utf-8');
-  } catch {
-    throw new Error(`File not found: ${filePath}`);
+  } catch (err) {
+    const code =
+      err instanceof Error && 'code' in err
+        ? (err as NodeJS.ErrnoException).code
+        : undefined;
+    if (code === 'ENOENT') {
+      throw new Error(`File not found: ${filePath}`);
+    }
+    throw err;
   }
 
   // Parse JSON
