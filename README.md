@@ -41,6 +41,36 @@ npm run format       # 코드 포매팅
 npm run ci           # 전체 CI 파이프라인 실행
 ```
 
+### CLI — Phase 1 회로 분석기
+
+```bash
+# DC 분석 실행
+npm run web-spice -- analyze ./examples/voltage_divider.json
+
+# 디버그 정보 포함 (소요시간, iterations, 오차)
+npm run web-spice -- analyze ./examples/voltage_divider.json --verbose
+
+# JSON 형식 출력
+npm run web-spice -- analyze ./examples/voltage_divider.json --output json
+```
+
+예제 출력:
+
+```
+=== DC Analysis Result ===
+
+Node Voltages:
+  0: 0.000 V
+  1: 12.000 V
+  2: 8.000 V
+
+Branch Currents:
+  V1: 4.000 mA
+  ...
+
+Convergence: converged in 1 iteration(s)
+```
+
 ## 📋 Documentation
 
 - **[PRD (Product Requirements Document)](docs/PRD.md)** - 프로젝트 요구사항 및 로드맵
@@ -49,13 +79,13 @@ npm run ci           # 전체 CI 파이프라인 실행
 
 ## 🎯 Features
 
-### Phase 1: MVP Engine (진행중)
+### Phase 1: Foundation Engine (✅ 완료)
 
 - ✅ 기본 회로 소자 (저항, 전압원, 전류원)
-- ✅ DC 분석 엔진
+- ✅ DC 분석 엔진 (MNA + LU 분해 + Newton-Raphson)
 - ✅ DC Sweep 분석
 - ✅ JSON 기반 회로 입력
-- ⏳ 콘솔 기반 결과 출력
+- ✅ 콘솔 기반 결과 출력 (CLI)
 
 ### Phase 2: Basic UI (계획됨)
 
@@ -100,9 +130,11 @@ npm run ci           # 전체 CI 파이프라인 실행
 
 ```
 web-spice/
-├── public/                 # 정적 파일
+├── examples/              # 예제 회로 JSON 파일
+├── public/                # 정적 파일
 ├── src/
-│   ├── components/         # 재사용 컴포넌트
+│   ├── cli/               # CLI 진입점 (Phase 1 분석기)
+│   ├── components/        # 재사용 컴포넌트
 │   │   ├── ui/            # 기본 UI 컴포넌트
 │   │   ├── circuit/       # 회로 관련 컴포넌트
 │   │   └── charts/        # 그래프 컴포넌트
