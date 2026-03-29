@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import { randomUUID } from 'node:crypto';
 import { parseArgs, run } from '@/cli/index';
 
 const EXAMPLES_DIR = join(process.cwd(), 'examples');
@@ -60,6 +61,10 @@ describe('parseArgs', () => {
     expect(() =>
       parseArgs(['analyze', 'file.json', '--output', 'xml'])
     ).toThrow();
+  });
+
+  it('throws on --output with no following value', () => {
+    expect(() => parseArgs(['analyze', 'file.json', '--output'])).toThrow();
   });
 
   it('throws on unknown flag', () => {
@@ -199,7 +204,7 @@ describe('run — analyze command', () => {
   });
 
   it('throws with "Invalid JSON" for malformed JSON file', () => {
-    const tempFile = join(tmpdir(), 'bad-circuit.json');
+    const tempFile = join(tmpdir(), `bad-circuit-${randomUUID()}.json`);
     writeFileSync(tempFile, '{ invalid json !!!');
     try {
       expect(() =>
@@ -216,7 +221,7 @@ describe('run — analyze command', () => {
   });
 
   it('throws INVALID_CIRCUIT WebSpiceError for empty circuit', () => {
-    const tempFile = join(tmpdir(), 'empty-circuit.json');
+    const tempFile = join(tmpdir(), `empty-circuit-${randomUUID()}.json`);
     writeFileSync(
       tempFile,
       JSON.stringify({ id: 'empty', name: 'Empty', components: [] })
