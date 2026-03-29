@@ -1,0 +1,22 @@
+{
+  "id": "simple-resistor",
+  "name": "Simple Resistor",
+  "description": "5V source with a single 1kΩ resistor. Expected: I=5mA, P=25mW.",
+  "ground": "0",
+  "components": [
+    {
+      "id": "V1",
+      "type": "voltage_source",
+      "name": "V1",
+      "nodes": ["1", "0"],
+      "parameters": { "voltage": 5 }
+    },
+    {
+      "id": "R1",
+      "type": "resistor",
+      "name": "R1",
+      "nodes": ["1", "0"],
+      "parameters": { "resistance": "1k" }
+    }
+  ]
+}

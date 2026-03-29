@@ -1,0 +1,29 @@
+{
+  "id": "voltage-divider",
+  "name": "Voltage Divider",
+  "description": "12V source with 1kΩ/2kΩ resistor divider. Expected: V(2)=8V, I=4mA.",
+  "ground": "0",
+  "components": [
+    {
+      "id": "V1",
+      "type": "voltage_source",
+      "name": "V1",
+      "nodes": ["1", "0"],
+      "parameters": { "voltage": 12 }
+    },
+    {
+      "id": "R1",
+      "type": "resistor",
+      "name": "R1",
+      "nodes": ["1", "2"],
+      "parameters": { "resistance": "1k" }
+    },
+    {
+      "id": "R2",
+      "type": "resistor",
+      "name": "R2",
+      "nodes": ["2", "0"],
+      "parameters": { "resistance": "2k" }
+    }
+  ]
+}
