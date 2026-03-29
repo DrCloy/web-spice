@@ -46,29 +46,35 @@ describe('parseArgs', () => {
   });
 
   it('throws on missing command', () => {
-    expect(() => parseArgs([])).toThrow();
+    expect(() => parseArgs([])).toThrowError(/Missing command/);
   });
 
   it('throws on missing file path', () => {
-    expect(() => parseArgs(['analyze'])).toThrow();
+    expect(() => parseArgs(['analyze'])).toThrowError(/Missing file path/);
   });
 
   it('throws on unknown command', () => {
-    expect(() => parseArgs(['simulate', 'file.json'])).toThrow();
+    expect(() => parseArgs(['simulate', 'file.json'])).toThrowError(
+      /Unknown command: "simulate"/
+    );
   });
 
   it('throws on invalid --output value', () => {
     expect(() =>
       parseArgs(['analyze', 'file.json', '--output', 'xml'])
-    ).toThrow();
+    ).toThrowError(/Invalid --output value: "xml"/);
   });
 
   it('throws on --output with no following value', () => {
-    expect(() => parseArgs(['analyze', 'file.json', '--output'])).toThrow();
+    expect(() => parseArgs(['analyze', 'file.json', '--output'])).toThrowError(
+      /Invalid --output value/
+    );
   });
 
   it('throws on unknown flag', () => {
-    expect(() => parseArgs(['analyze', 'file.json', '--unknown'])).toThrow();
+    expect(() => parseArgs(['analyze', 'file.json', '--unknown'])).toThrowError(
+      /Unknown flag: "--unknown"/
+    );
   });
 });
 
@@ -88,7 +94,9 @@ describe('run — analyze command', () => {
   });
 
   const getOutput = () =>
-    consoleSpy.mock.calls.map((c: unknown[]) => String(c[0])).join('\n');
+    consoleSpy.mock.calls
+      .map((c: Parameters<typeof console.log>) => String(c[0]))
+      .join('\n');
 
   // ------------------------------------------------------------------
   // Text output (voltage_divider.json)
