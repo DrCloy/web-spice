@@ -49,7 +49,7 @@ npm run ci           # 전체 CI 파이프라인 실행
 
 ## 🎯 Features
 
-### Phase 1: MVP Engine (완료)
+### Phase 1: MVP Engine (진행중)
 
 - ✅ 기본 회로 소자 (저항, 전압원, 전류원)
 - ✅ DC 분석 엔진
