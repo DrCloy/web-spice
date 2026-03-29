@@ -150,10 +150,12 @@ describe('run — analyze command', () => {
       verbose: false,
     });
     const output = getOutput();
-    const parsed = JSON.parse(output) as {
-      type: string;
-      operatingPoint: unknown;
-    };
+    let parsed: { type: string; operatingPoint: unknown };
+    try {
+      parsed = JSON.parse(output) as { type: string; operatingPoint: unknown };
+    } catch {
+      throw new Error(`Failed to parse JSON output. Raw output:\n${output}`);
+    }
     expect(parsed.type).toBe('dc');
     expect(parsed.operatingPoint).toBeDefined();
   });
