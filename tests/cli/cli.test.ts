@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { writeFileSync } from 'node:fs';
+import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { parseArgs, run } from '@/cli/index';
@@ -213,14 +213,18 @@ describe('run — analyze command', () => {
   it('throws with "Invalid JSON" for malformed JSON file', () => {
     const tempFile = join(tmpdir(), 'bad-circuit.json');
     writeFileSync(tempFile, '{ invalid json !!!');
-    expect(() =>
-      run({
-        command: 'analyze',
-        filePath: tempFile,
-        outputFormat: 'text',
-        verbose: false,
-      })
-    ).toThrow(/Invalid JSON/);
+    try {
+      expect(() =>
+        run({
+          command: 'analyze',
+          filePath: tempFile,
+          outputFormat: 'text',
+          verbose: false,
+        })
+      ).toThrow(/Invalid JSON/);
+    } finally {
+      rmSync(tempFile, { force: true });
+    }
   });
 
   it('throws INVALID_CIRCUIT WebSpiceError for empty circuit', () => {
@@ -229,13 +233,17 @@ describe('run — analyze command', () => {
       tempFile,
       JSON.stringify({ id: 'empty', name: 'Empty', components: [] })
     );
-    expect(() =>
-      run({
-        command: 'analyze',
-        filePath: tempFile,
-        outputFormat: 'text',
-        verbose: false,
-      })
-    ).toThrowWebSpiceError('INVALID_CIRCUIT');
+    try {
+      expect(() =>
+        run({
+          command: 'analyze',
+          filePath: tempFile,
+          outputFormat: 'text',
+          verbose: false,
+        })
+      ).toThrowWebSpiceError('INVALID_CIRCUIT');
+    } finally {
+      rmSync(tempFile, { force: true });
+    }
   });
 });

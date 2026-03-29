@@ -56,7 +56,7 @@ npm run web-spice -- analyze ./examples/voltage_divider.json --output json
 
 예제 출력:
 
-```
+```text
 === DC Analysis Result ===
 
 Node Voltages:
