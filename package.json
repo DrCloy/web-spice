@@ -21,6 +21,7 @@
     "ci": "npm run type-check && npm run lint && npm run format:check && npm run test && npm run build",
     "ci:quick": "npm run type-check && npm run lint && npm run test",
     "clean": "rimraf dist coverage .eslintcache",
+    "web-spice": "tsx --tsconfig tsconfig.node.json src/cli/index.ts",
     "clean:install": "npm run clean && rm -rf node_modules package-lock.json && npm install",
     "prepare": "husky install"
   },
@@ -65,6 +66,7 @@
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
     "rimraf": "^6.1.2",
+    "tsx": "^4.19.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
     "vite": "^7.2.4",

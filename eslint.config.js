@@ -47,6 +47,12 @@ export default tseslint.config([
     },
   },
   {
+    files: ['src/cli/**/*.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  {
     files: ['**/*.test.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}'],
     rules: {
       // 테스트 파일에서는 any 허용
