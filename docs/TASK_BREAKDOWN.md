@@ -65,9 +65,9 @@ npm run web-spice -- analyze ./examples/voltage_divider.json
 
 ### State Management (엔진 완성 후)
 
-| ID  | 타입 | 제목                        | 설명                                   | 우선순위 | 의존성  |
-| --- | ---- | --------------------------- | -------------------------------------- | -------- | ------- |
-| #16 | TASK | Redux 스토어 기본 구조 설정 | Circuit, Simulation 상태 슬라이스 구현 | MED      | #7, #13 |
+| ID     | 타입 | 제목                        | 설명                                   | 우선순위 | 의존성  |
+| ------ | ---- | --------------------------- | -------------------------------------- | -------- | ------- |
+| ✅ #16 | TASK | Redux 스토어 기본 구조 설정 | Circuit, Simulation 상태 슬라이스 구현 | MED      | #7, #13 |
 
 ### Visual Components
 
@@ -265,5 +265,5 @@ webspice-cli voltage_divider.json  # → 콘솔 결과 출력
 
 **이 문서는 개발 진행에 따라 지속적으로 업데이트됩니다.**
 
-Last Updated: 2026-03-29 (Phase 1 완료 — Task #15 CLI 콘솔 출력 시스템 구현)
+Last Updated: 2026-03-31 (Task #16 Redux 스토어 기본 구조 설정 완료)
 Next Review: Phase 2 착수시
