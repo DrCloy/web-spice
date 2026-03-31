@@ -156,7 +156,7 @@ describe('circuitSlice', () => {
 
     it('should support null in future (redo of clearCircuit)', () => {
       const state = circuitReducer(
-        { past: [circuitA], current: null, future: [circuitB] },
+        { past: [circuitA], current: null, future: [circuitB], isDirty: false },
         redo()
       );
       expect(state.current).toBe(circuitB);
