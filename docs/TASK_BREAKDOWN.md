@@ -265,5 +265,5 @@ webspice-cli voltage_divider.json  # → 콘솔 결과 출력
 
 **이 문서는 개발 진행에 따라 지속적으로 업데이트됩니다.**
 
-Last Updated: 2026-03-29 (Phase 1 완료 — Task #15 CLI 콘솔 출력 시스템 구현)
+Last Updated: 2026-03-31 (Task #16 Redux 스토어 기본 구조 설정 완료)
 Next Review: Phase 2 착수시

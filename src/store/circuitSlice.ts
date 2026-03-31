@@ -11,11 +11,11 @@ const initialState: CircuitState = {
   isDirty: false,
 };
 
-function pushToPast(
-  past: (Circuit | null)[],
+function pushBounded(
+  arr: (Circuit | null)[],
   entry: Circuit | null
 ): (Circuit | null)[] {
-  const next = [...past, entry];
+  const next = [...arr, entry];
   return next.length > MAX_HISTORY ? next.slice(1) : next;
 }
 
@@ -39,7 +39,7 @@ const circuitSlice = createSlice({
 
     clearCircuit(state) {
       if (state.current === null) return;
-      state.past = pushToPast(state.past, state.current);
+      state.past = pushBounded(state.past, state.current);
       state.current = null;
       state.future = [];
       state.isDirty = true;
@@ -48,7 +48,7 @@ const circuitSlice = createSlice({
     undo(state) {
       if (state.past.length === 0) return;
       const previous = state.past[state.past.length - 1];
-      state.future = [state.current, ...state.future];
+      state.future = pushBounded(state.future, state.current);
       state.past = state.past.slice(0, -1);
       state.current = previous;
     },
@@ -56,7 +56,7 @@ const circuitSlice = createSlice({
     redo(state) {
       if (state.future.length === 0) return;
       const next = state.future[0];
-      state.past = pushToPast(state.past, state.current);
+      state.past = pushBounded(state.past, state.current);
       state.future = state.future.slice(1);
       state.current = next;
     },
