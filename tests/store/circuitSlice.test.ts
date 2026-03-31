@@ -156,11 +156,11 @@ describe('circuitSlice', () => {
 
     it('should support null in future (redo of clearCircuit)', () => {
       const state = circuitReducer(
-        { past: [circuitA], current: null, future: [circuitB], isDirty: false },
+        { past: [circuitA], current: circuitB, future: [null], isDirty: false },
         redo()
       );
-      expect(state.current).toBe(circuitB);
-      expect(state.past).toEqual([circuitA, null]);
+      expect(state.current).toBeNull();
+      expect(state.past).toEqual([circuitA, circuitB]);
     });
   });
 
@@ -213,6 +213,23 @@ describe('circuitSlice', () => {
       );
       expect(state.past).toHaveLength(MAX_HISTORY);
       expect(state.past[MAX_HISTORY - 1]).toBe(circuitA);
+    });
+
+    it('should remove oldest future entry when MAX_HISTORY is exceeded via undo', () => {
+      const manyFuture = Array.from({ length: MAX_HISTORY }, (_, i) =>
+        i % 2 === 0 ? circuitA : circuitB
+      );
+      const state = circuitReducer(
+        {
+          past: [circuitA],
+          current: circuitB,
+          future: manyFuture,
+          isDirty: false,
+        },
+        undo()
+      );
+      expect(state.future).toHaveLength(MAX_HISTORY);
+      expect(state.future[MAX_HISTORY - 1]).toBe(circuitB);
     });
   });
 });
