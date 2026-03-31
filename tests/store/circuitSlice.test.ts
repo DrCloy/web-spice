@@ -165,8 +165,7 @@ describe('circuitSlice', () => {
   });
 
   describe('undo/redo LIFO 순서', () => {
-    it('should restore states in reverse undo order', () => {
-      // undo twice: A→B→C becomes past=[], current=A, future=[C, B]
+    it('should build future in LIFO order after multiple undos', () => {
       let state = circuitReducer(
         {
           past: [circuitA, circuitB],
@@ -179,9 +178,18 @@ describe('circuitSlice', () => {
       state = circuitReducer(state, undo());
       expect(state.current).toBe(circuitA);
       expect(state.future).toEqual([null, circuitB]);
+    });
 
-      // redo should restore B first (most recent undo), then null
-      state = circuitReducer(state, redo());
+    it('should restore states in LIFO order after multiple redos', () => {
+      let state = circuitReducer(
+        {
+          past: [],
+          current: circuitA,
+          future: [null, circuitB],
+          isDirty: false,
+        },
+        redo()
+      );
       expect(state.current).toBe(circuitB);
 
       state = circuitReducer(state, redo());
