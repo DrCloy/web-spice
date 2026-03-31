@@ -164,6 +164,31 @@ describe('circuitSlice', () => {
     });
   });
 
+  describe('undo/redo LIFO 순서', () => {
+    it('should restore states in reverse undo order', () => {
+      // undo twice: A→B→C becomes past=[], current=A, future=[C, B]
+      let state = circuitReducer(
+        {
+          past: [circuitA, circuitB],
+          current: null,
+          future: [],
+          isDirty: false,
+        },
+        undo()
+      );
+      state = circuitReducer(state, undo());
+      expect(state.current).toBe(circuitA);
+      expect(state.future).toEqual([null, circuitB]);
+
+      // redo should restore B first (most recent undo), then null
+      state = circuitReducer(state, redo());
+      expect(state.current).toBe(circuitB);
+
+      state = circuitReducer(state, redo());
+      expect(state.current).toBeNull();
+    });
+  });
+
   describe('future 초기화 — 새 편집 후 redo 불가', () => {
     it('loadCircuit after undo should clear future', () => {
       const afterUndo = circuitReducer(

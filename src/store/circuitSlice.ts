@@ -55,9 +55,9 @@ const circuitSlice = createSlice({
 
     redo(state) {
       if (state.future.length === 0) return;
-      const next = state.future[0];
+      const next = state.future[state.future.length - 1];
       state.past = pushBounded(state.past, state.current);
-      state.future = state.future.slice(1);
+      state.future = state.future.slice(0, -1);
       state.current = next;
     },
 
