@@ -101,7 +101,7 @@ reviews:
         tests/setup.ts에 정의된 커스텀 매처(toThrowWebSpiceError 등)를 적절히 활용하는지 확인해줘.
     - path: 'tests/store/**'
       instructions: |
-        Redux 슬라이스 테스트입니다.
+        Redux 슬라이스 테스트입니다. 아래 규칙은 tests/** 일반 규칙보다 우선 적용합니다.
         CircuitState, SimulationState 등 Redux 상태 객체는 인라인 리터럴로 직접 작성하는 것이 정상입니다.
         이 파일들에는 tests/factories/의 create* 팩토리 패턴 적용을 강제하지 마세요 — CircuitState/SimulationState용 factory는 존재하지 않으며 의도적으로 만들지 않습니다.
         Circuit/Component 객체는 tests/fixtures/의 UPPER_SNAKE_CASE 상수(VOLTAGE_DIVIDER_12V 등)를 사용하는 것이 올바른 패턴입니다.
