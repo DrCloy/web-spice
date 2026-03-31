@@ -145,6 +145,12 @@ describe('simulationSlice', () => {
         );
         expect(fulfilled).toBeDefined();
 
+        expect(mockDeps.analyzeDC).toHaveBeenCalledWith(
+          VOLTAGE_DIVIDER_12V.circuit,
+          undefined,
+          DEFAULT_SOLVER_OPTIONS
+        );
+
         const state = simulationReducer(initialState, fulfilled);
         expect(state.status).toBe('success');
         expect(state.result).toEqual(mockDCResult);

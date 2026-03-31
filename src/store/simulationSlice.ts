@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type {
   AnalysisConfig,
+  DCAnalysisConfig,
   DCAnalysisResult,
   SolverOptions,
 } from '@/types/simulation';
@@ -24,7 +25,7 @@ const initialState: SimulationState = {
 
 export const runDCAnalysis = createAsyncThunk<
   DCAnalysisResult,
-  { config?: AnalysisConfig },
+  { config?: DCAnalysisConfig },
   { state: AppState; extra: AppExtraArgument; rejectValue: SimulationError }
 >(
   'simulation/runDCAnalysis',
@@ -38,8 +39,7 @@ export const runDCAnalysis = createAsyncThunk<
     }
     try {
       const { solverOptions } = getState().simulation;
-      const dcConfig = config?.type === 'dc' ? config : undefined;
-      return extra.analyzeDC(circuit, dcConfig, solverOptions);
+      return extra.analyzeDC(circuit, config, solverOptions);
     } catch (err) {
       if (err instanceof WebSpiceError) {
         return rejectWithValue({ code: err.code, message: err.message });
