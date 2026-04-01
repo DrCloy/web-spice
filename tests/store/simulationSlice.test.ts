@@ -50,10 +50,10 @@ function makeMockThunkArgs(overrides?: Partial<AppState['circuit']>) {
     isDirty: false,
     ...overrides,
   };
-  const mockState: AppState = {
+  const mockState = {
     circuit: circuitState,
     simulation: { ...initialState },
-  };
+  } as AppState;
   const dispatch = vi.fn();
   const getState = vi.fn().mockReturnValue(mockState);
   return { dispatch, getState };
