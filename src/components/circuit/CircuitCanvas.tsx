@@ -94,12 +94,42 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
 
   const isPanningRef = useRef(false);
   const lastPanPosRef = useRef<{ x: number; y: number } | null>(null);
+  const isSpaceHeldRef = useRef(false);
   const [isPanning, setIsPanning] = useState(false);
+  const [isSpaceHeld, setIsSpaceHeld] = useState(false);
+
+  // Space key tracking for space+drag pan
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'Space' && !e.repeat) {
+        e.preventDefault();
+        isSpaceHeldRef.current = true;
+        setIsSpaceHeld(true);
+      }
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.code === 'Space') {
+        isSpaceHeldRef.current = false;
+        setIsSpaceHeld(false);
+        if (isPanningRef.current) {
+          isPanningRef.current = false;
+          lastPanPosRef.current = null;
+          setIsPanning(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
-      if (e.button === 1) {
-        // Middle mouse — start panning
+      if (e.button === 1 || (e.button === 0 && isSpaceHeldRef.current)) {
+        // Middle mouse or space+left drag — start panning
         isPanningRef.current = true;
         lastPanPosRef.current = { x: e.clientX, y: e.clientY };
         setIsPanning(true);
@@ -138,10 +168,12 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
 
   const handleMouseUp = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
-      if (e.button === 1) {
-        isPanningRef.current = false;
-        lastPanPosRef.current = null;
-        setIsPanning(false);
+      if (e.button === 1 || e.button === 0) {
+        if (isPanningRef.current) {
+          isPanningRef.current = false;
+          lastPanPosRef.current = null;
+          setIsPanning(false);
+        }
       }
     },
     []
@@ -169,7 +201,10 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
         ref={canvasRef}
         width={size.width}
         height={size.height}
-        style={{ display: 'block', cursor: isPanning ? 'grabbing' : 'default' }}
+        style={{
+          display: 'block',
+          cursor: isPanning ? 'grabbing' : isSpaceHeld ? 'grab' : 'default',
+        }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
