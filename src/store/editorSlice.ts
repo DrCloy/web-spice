@@ -143,6 +143,10 @@ const editorSlice = createSlice({
         state.selectedComponentIds = state.selectedComponentIds.filter(
           id => id !== action.payload
         );
+        for (const wire of state.wires) {
+          wire.isSelected = false;
+        }
+        state.selectedWireIds = [];
       }
     },
 

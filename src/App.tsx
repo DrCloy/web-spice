@@ -20,8 +20,9 @@ export default function App() {
           wires: [],
         })
       );
-    } catch {
-      // bundled example — parse errors are developer errors caught at build time
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to load example circuit:', err);
     }
   }, [dispatch]);
 
