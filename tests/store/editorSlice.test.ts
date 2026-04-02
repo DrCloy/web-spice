@@ -337,6 +337,38 @@ describe('editorSlice', () => {
       );
       expect(state.viewport.scale).toBeGreaterThan(1.0);
     });
+
+    it('should keep the zoom center fixed on screen when zooming in', () => {
+      const center = { x: 200, y: 150 };
+      const prev = {
+        ...initialState,
+        viewport: { offsetX: 50, offsetY: 30, scale: 1.0 },
+      };
+      const state = editorReducer(prev, zoomViewport({ delta: 1, center }));
+      const ratio = state.viewport.scale / 1.0;
+      expect(state.viewport.offsetX).toBeCloseTo(
+        center.x - (center.x - 50) * ratio
+      );
+      expect(state.viewport.offsetY).toBeCloseTo(
+        center.y - (center.y - 30) * ratio
+      );
+    });
+
+    it('should keep the zoom center fixed on screen when zooming out', () => {
+      const center = { x: 100, y: 80 };
+      const prev = {
+        ...initialState,
+        viewport: { offsetX: 20, offsetY: 10, scale: 2.0 },
+      };
+      const state = editorReducer(prev, zoomViewport({ delta: -1, center }));
+      const ratio = state.viewport.scale / 2.0;
+      expect(state.viewport.offsetX).toBeCloseTo(
+        center.x - (center.x - 20) * ratio
+      );
+      expect(state.viewport.offsetY).toBeCloseTo(
+        center.y - (center.y - 10) * ratio
+      );
+    });
   });
 
   describe('resetViewport', () => {

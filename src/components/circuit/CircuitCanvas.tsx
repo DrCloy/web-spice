@@ -11,7 +11,6 @@ import {
   zoomViewport,
 } from '@/store/editorSlice';
 import { resolveComponentColors } from '@/utils/componentColors';
-import type { ComponentColors } from '@/utils/componentColors';
 import { findHitComponent, screenToLogical } from '@/utils/canvas';
 import { renderScene } from './renderScene';
 
@@ -37,10 +36,8 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
   const [size, setSize] = useState({ width: 800, height: 600 });
 
   // Resolve colors once on mount (DOM must be ready)
-  const colorsRef = useRef<ComponentColors | null>(null);
-  useEffect(() => {
-    colorsRef.current = resolveComponentColors();
-  }, []);
+  // Lazy initializer runs once on first render in the browser — DOM is ready.
+  const [colors] = useState(() => resolveComponentColors());
 
   // Track canvas size via ResizeObserver
   useEffect(() => {
@@ -59,7 +56,6 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
   // Render scene whenever state changes
   useEffect(() => {
     const canvas = canvasRef.current;
-    const colors = colorsRef.current;
     if (!canvas || !colors) return;
 
     const ctx = canvas.getContext('2d');
@@ -75,7 +71,7 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
       height: size.height,
       colors,
     });
-  }, [circuit, canvasComponents, viewport, gridSize, showGrid, size]);
+  }, [circuit, canvasComponents, viewport, gridSize, showGrid, size, colors]);
 
   // -------------------------------------------------------------------------
   // Pan state (middle mouse / space+drag)

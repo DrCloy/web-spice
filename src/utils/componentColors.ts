@@ -19,7 +19,15 @@ export interface ComponentColors {
 
 let _cache: ComponentColors | null = null;
 
-/** Read component colors from CSS custom properties defined in style.css @theme. */
+/**
+ * Read component colors from CSS custom properties defined in style.css @theme.
+ *
+ * Result is cached after the first call. The cache persists for the lifetime of
+ * the page unless explicitly cleared via `clearColorCache()`.
+ *
+ * Must be called after the DOM is mounted (CSS variables are not available in
+ * Node/test environments without a DOM).
+ */
 export function resolveComponentColors(): ComponentColors {
   if (_cache) return _cache;
 
@@ -40,7 +48,14 @@ export function resolveComponentColors(): ComponentColors {
   return _cache;
 }
 
-/** Clear the color cache (useful when CSS variables are changed at runtime). */
+/**
+ * Clear the cached colors so the next `resolveComponentColors()` call re-reads
+ * CSS custom properties from the DOM.
+ *
+ * Call this when CSS variables change at runtime (e.g. theme switch, dark mode
+ * toggle). `clearColorCache` is not called internally — callers are responsible
+ * for invoking it when the theme changes.
+ */
 export function clearColorCache(): void {
   _cache = null;
 }

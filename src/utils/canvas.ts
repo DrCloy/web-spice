@@ -24,7 +24,7 @@ import {
 export const SYMBOL_WIDTH = 60;
 export const SYMBOL_HEIGHT = 30;
 
-const ZOOM_FACTOR = 1.15;
+export const ZOOM_FACTOR = 1.15;
 
 // ---------------------------------------------------------------------------
 // Coordinate conversion
@@ -171,8 +171,10 @@ export function fitViewportToCircuit(
   const bounds = getCircuitBounds(components);
   if (!bounds) return DEFAULT_VIEWPORT;
 
-  const scaleX = (canvasWidth - padding * 2) / bounds.width;
-  const scaleY = (canvasHeight - padding * 2) / bounds.height;
+  const safeWidth = bounds.width || 1;
+  const safeHeight = bounds.height || 1;
+  const scaleX = (canvasWidth - padding * 2) / safeWidth;
+  const scaleY = (canvasHeight - padding * 2) / safeHeight;
   const scale = Math.min(
     VIEWPORT_SCALE_MAX,
     Math.max(VIEWPORT_SCALE_MIN, Math.min(scaleX, scaleY))

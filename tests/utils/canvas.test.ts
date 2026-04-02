@@ -92,6 +92,13 @@ describe('screenToLogical', () => {
     // logical = (0 - (-100)) / 0.5 = 200
     expect(screenToLogical(screen, vp)).toEqual({ x: 200, y: 100 });
   });
+
+  it('should return Infinity when scale=0', () => {
+    const vp: Viewport = { offsetX: 0, offsetY: 0, scale: 0 };
+    const result = screenToLogical({ x: 100, y: 100 }, vp);
+    expect(result.x).toBe(Infinity);
+    expect(result.y).toBe(Infinity);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -115,6 +122,12 @@ describe('snapToGrid', () => {
 
   it('should handle gridSize=1 (no effective snapping)', () => {
     expect(snapToGrid({ x: 17, y: 23 }, 1)).toEqual({ x: 17, y: 23 });
+  });
+
+  it('should return NaN when gridSize=0', () => {
+    const result = snapToGrid({ x: 23, y: 37 }, 0);
+    expect(Number.isNaN(result.x)).toBe(true);
+    expect(Number.isNaN(result.y)).toBe(true);
   });
 });
 

@@ -19,8 +19,8 @@ export const store = configureStore({
       // CircuitImpl is a class instance (with Map internals) stored until #18
       // migrates circuit state to a plain serializable object.
       serializableCheck: {
-        ignoredPaths: ['circuit.current'],
-        ignoredActions: ['circuit/loadCircuit'],
+        ignoredPaths: ['circuit.current', 'circuit.past', 'circuit.future'],
+        ignoredActions: ['circuit/loadCircuit', 'circuit/undo', 'circuit/redo'],
       },
     }),
 });

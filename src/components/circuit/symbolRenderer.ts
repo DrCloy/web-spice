@@ -377,8 +377,12 @@ export function drawComponent(
     case 'ground':
       drawGround(ctx, position, rotation, viewport, isSelected, colors);
       break;
+    case 'inductor':
+      // TODO: dedicated inductor symbol pending (#22). Render resistor box as placeholder.
+      drawResistor(ctx, position, rotation, viewport, isSelected, colors);
+      break;
     default:
-      // Unsupported type: draw placeholder box
+      // Unsupported type (e.g. diode — #29): render resistor box as placeholder.
       drawResistor(ctx, position, rotation, viewport, isSelected, colors);
   }
 }

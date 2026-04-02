@@ -9,13 +9,10 @@ import type {
   Rotation,
   Viewport,
 } from '@/types/editor';
-import {
-  DEFAULT_VIEWPORT,
-  VIEWPORT_SCALE_MAX,
-  VIEWPORT_SCALE_MIN,
-} from '@/types/editor';
+import { DEFAULT_VIEWPORT } from '@/types/editor';
 import type { ComponentId } from '@/types/component';
 import type { AppState } from '@/store/types';
+import { calculateZoom } from '@/utils/canvas';
 
 // ---------------------------------------------------------------------------
 // Initial state
@@ -31,12 +28,6 @@ const initialState: EditorState = {
   gridSize: 20,
   showGrid: true,
 };
-
-// ---------------------------------------------------------------------------
-// Zoom step factor: each delta unit multiplies/divides scale by this amount
-// ---------------------------------------------------------------------------
-
-const ZOOM_FACTOR = 1.15;
 
 // ---------------------------------------------------------------------------
 // Slice
@@ -159,17 +150,10 @@ const editorSlice = createSlice({
       action: PayloadAction<{ delta: number; center: Point }>
     ) {
       const { delta, center } = action.payload;
-      const oldScale = state.viewport.scale;
-      const newScale = Math.min(
-        VIEWPORT_SCALE_MAX,
-        Math.max(VIEWPORT_SCALE_MIN, oldScale * Math.pow(ZOOM_FACTOR, delta))
-      );
-      // Adjust offset so the zoom center stays fixed on screen
-      state.viewport.offsetX =
-        center.x - (center.x - state.viewport.offsetX) * (newScale / oldScale);
-      state.viewport.offsetY =
-        center.y - (center.y - state.viewport.offsetY) * (newScale / oldScale);
-      state.viewport.scale = newScale;
+      const next = calculateZoom(state.viewport, delta, center);
+      state.viewport.offsetX = next.offsetX;
+      state.viewport.offsetY = next.offsetY;
+      state.viewport.scale = next.scale;
     },
 
     resetViewport(state) {
