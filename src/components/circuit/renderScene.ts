@@ -5,7 +5,6 @@
 
 import type { Circuit } from '@/types/circuit';
 import type { CanvasComponent, Viewport } from '@/types/editor';
-import type { ComponentId } from '@/types/component';
 import type { ComponentColors } from '@/utils/componentColors';
 import { drawComponent, drawGrid } from './symbolRenderer';
 
@@ -13,7 +12,6 @@ export interface SceneParams {
   circuit: Circuit | null;
   canvasComponents: CanvasComponent[];
   viewport: Viewport;
-  selectedIds: ComponentId[];
   gridSize: number;
   showGrid: boolean;
   width: number;

@@ -101,6 +101,10 @@ const editorSlice = createSlice({
         comp.isSelected = comp.componentId === action.payload;
       }
       state.selectedComponentIds = [action.payload];
+      for (const wire of state.wires) {
+        wire.isSelected = false;
+      }
+      state.selectedWireIds = [];
     },
 
     selectComponents(state, action: PayloadAction<ComponentId[]>) {
@@ -109,6 +113,10 @@ const editorSlice = createSlice({
         comp.isSelected = ids.has(comp.componentId);
       }
       state.selectedComponentIds = action.payload;
+      for (const wire of state.wires) {
+        wire.isSelected = false;
+      }
+      state.selectedWireIds = [];
     },
 
     deselectAll(state) {
@@ -191,8 +199,14 @@ const editorSlice = createSlice({
         wires: CanvasWire[];
       }>
     ) {
-      state.components = action.payload.components;
-      state.wires = action.payload.wires;
+      state.components = action.payload.components.map(c => ({
+        ...c,
+        isSelected: false,
+      }));
+      state.wires = action.payload.wires.map(w => ({
+        ...w,
+        isSelected: false,
+      }));
       state.selectedComponentIds = [];
       state.selectedWireIds = [];
       state.viewport = DEFAULT_VIEWPORT;

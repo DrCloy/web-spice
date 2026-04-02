@@ -33,7 +33,7 @@ export function resolveComponentColors(): ComponentColors {
     voltage: get('--color-component-voltage'),
     current: get('--color-component-current'),
     ground: get('--color-component-ground'),
-    wire: get('--color-component-ground'),
+    wire: get('--color-wire'),
     selected: get('--color-primary-500'),
   };
 

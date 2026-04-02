@@ -207,6 +207,18 @@ describe('editorSlice', () => {
       expect(state.components[1].isSelected).toBe(true);
       expect(state.selectedComponentIds).toEqual(['V1']);
     });
+
+    it('should clear wire selection when a component is selected', () => {
+      const prev = {
+        ...initialState,
+        components: [COMP_A],
+        wires: [{ ...WIRE_A, isSelected: true }],
+        selectedWireIds: ['w1'],
+      };
+      const state = editorReducer(prev, selectComponent('R1'));
+      expect(state.wires[0].isSelected).toBe(false);
+      expect(state.selectedWireIds).toEqual([]);
+    });
   });
 
   describe('selectComponents', () => {
@@ -215,6 +227,18 @@ describe('editorSlice', () => {
       const state = editorReducer(prev, selectComponents(['R1', 'V1']));
       expect(state.selectedComponentIds).toEqual(['R1', 'V1']);
       expect(state.components.every(c => c.isSelected)).toBe(true);
+    });
+
+    it('should clear wire selection when components are selected', () => {
+      const prev = {
+        ...initialState,
+        components: [COMP_A, COMP_B],
+        wires: [{ ...WIRE_A, isSelected: true }],
+        selectedWireIds: ['w1'],
+      };
+      const state = editorReducer(prev, selectComponents(['R1']));
+      expect(state.wires[0].isSelected).toBe(false);
+      expect(state.selectedWireIds).toEqual([]);
     });
   });
 

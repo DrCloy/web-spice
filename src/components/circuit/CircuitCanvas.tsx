@@ -6,7 +6,6 @@ import {
   selectAllCanvasComponents,
   selectComponent,
   selectGridSize,
-  selectSelectedComponentIds,
   selectShowGrid,
   selectViewport,
   zoomViewport,
@@ -32,7 +31,6 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
   const circuit = useAppSelector(s => s.circuit.current);
   const canvasComponents = useAppSelector(selectAllCanvasComponents);
   const viewport = useAppSelector(selectViewport);
-  const selectedIds = useAppSelector(selectSelectedComponentIds);
   const gridSize = useAppSelector(selectGridSize);
   const showGrid = useAppSelector(selectShowGrid);
 
@@ -71,22 +69,13 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
       circuit,
       canvasComponents,
       viewport,
-      selectedIds,
       gridSize,
       showGrid,
       width: size.width,
       height: size.height,
       colors,
     });
-  }, [
-    circuit,
-    canvasComponents,
-    viewport,
-    selectedIds,
-    gridSize,
-    showGrid,
-    size,
-  ]);
+  }, [circuit, canvasComponents, viewport, gridSize, showGrid, size]);
 
   // -------------------------------------------------------------------------
   // Pan state (middle mouse / space+drag)
@@ -124,6 +113,19 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
+  }, []);
+
+  // Terminate panning if pointer is released outside the canvas
+  useEffect(() => {
+    const handleWindowMouseUp = () => {
+      if (isPanningRef.current) {
+        isPanningRef.current = false;
+        lastPanPosRef.current = null;
+        setIsPanning(false);
+      }
+    };
+    window.addEventListener('mouseup', handleWindowMouseUp);
+    return () => window.removeEventListener('mouseup', handleWindowMouseUp);
   }, []);
 
   const handleMouseDown = useCallback(
