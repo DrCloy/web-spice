@@ -18,7 +18,10 @@ export const store = configureStore({
       thunk: { extraArgument: engineDeps },
       // CircuitImpl is a class instance (with Map internals) stored until #18
       // migrates circuit state to a plain serializable object.
-      serializableCheck: { ignoredPaths: ['circuit.current'] },
+      serializableCheck: {
+        ignoredPaths: ['circuit.current'],
+        ignoredActions: ['circuit/loadCircuit'],
+      },
     }),
 });
 
