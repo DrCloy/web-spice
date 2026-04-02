@@ -179,18 +179,21 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
     []
   );
 
-  const handleWheel = useCallback(
-    (e: React.WheelEvent<HTMLCanvasElement>) => {
+  // React registers onWheel as passive, so preventDefault() fails.
+  // Attach a non-passive native listener instead.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
-      const canvas = canvasRef.current;
-      if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
       const center = { x: e.clientX - rect.left, y: e.clientY - rect.top };
       const delta = e.deltaY < 0 ? 1 : -1;
       dispatch(zoomViewport({ delta, center }));
-    },
-    [dispatch]
-  );
+    };
+    canvas.addEventListener('wheel', handleWheel, { passive: false });
+    return () => canvas.removeEventListener('wheel', handleWheel);
+  }, [dispatch]);
 
   return (
     <div
@@ -208,7 +211,6 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
-        onWheel={handleWheel}
       />
     </div>
   );

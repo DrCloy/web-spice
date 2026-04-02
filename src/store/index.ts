@@ -14,7 +14,12 @@ export const store = configureStore({
     editor: editorReducer,
   },
   middleware: getDefaultMiddleware =>
-    getDefaultMiddleware({ thunk: { extraArgument: engineDeps } }),
+    getDefaultMiddleware({
+      thunk: { extraArgument: engineDeps },
+      // CircuitImpl is a class instance (with Map internals) stored until #18
+      // migrates circuit state to a plain serializable object.
+      serializableCheck: { ignoredPaths: ['circuit.current'] },
+    }),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
