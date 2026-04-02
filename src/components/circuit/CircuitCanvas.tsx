@@ -20,9 +20,13 @@ import { renderScene } from './renderScene';
 
 interface CircuitCanvasProps {
   className?: string;
+  'aria-label'?: string;
 }
 
-export function CircuitCanvas({ className }: CircuitCanvasProps) {
+export function CircuitCanvas({
+  className,
+  'aria-label': ariaLabel,
+}: CircuitCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
@@ -35,9 +39,18 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
 
   const [size, setSize] = useState({ width: 800, height: 600 });
 
-  // Resolve colors once on mount (DOM must be ready)
-  // Lazy initializer runs once on first render in the browser — DOM is ready.
-  const [colors] = useState(() => resolveComponentColors());
+  // Colors are resolved after mount so DOM is ready. useRef avoids re-render;
+  // the render effect re-runs because size/circuit/etc. change after mount anyway.
+  const colorsRef = useRef<ReturnType<typeof resolveComponentColors> | null>(
+    null
+  );
+  useEffect(() => {
+    colorsRef.current = resolveComponentColors();
+  }, []);
+
+  // Canvas focus state — Space key panning is scoped to canvas focus only
+  const canvasFocusedRef = useRef(false);
+  const [isSpaceHeld, setIsSpaceHeld] = useState(false);
 
   // Track canvas size via ResizeObserver
   useEffect(() => {
@@ -56,6 +69,7 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
   // Render scene whenever state changes
   useEffect(() => {
     const canvas = canvasRef.current;
+    const colors = colorsRef.current;
     if (!canvas || !colors) return;
 
     const ctx = canvas.getContext('2d');
@@ -71,7 +85,7 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
       height: size.height,
       colors,
     });
-  }, [circuit, canvasComponents, viewport, gridSize, showGrid, size, colors]);
+  }, [circuit, canvasComponents, viewport, gridSize, showGrid, size]);
 
   // -------------------------------------------------------------------------
   // Pan state (middle mouse / space+drag)
@@ -81,12 +95,11 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
   const lastPanPosRef = useRef<{ x: number; y: number } | null>(null);
   const isSpaceHeldRef = useRef(false);
   const [isPanning, setIsPanning] = useState(false);
-  const [isSpaceHeld, setIsSpaceHeld] = useState(false);
 
-  // Space key tracking for space+drag pan
+  // Space key panning — scoped to canvas focus to avoid intercepting other UI
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !e.repeat) {
+      if (e.code === 'Space' && !e.repeat && canvasFocusedRef.current) {
         e.preventDefault();
         isSpaceHeldRef.current = true;
         setIsSpaceHeld(true);
@@ -111,8 +124,15 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
     };
   }, []);
 
-  // Terminate panning if pointer is released outside the canvas
+  // Terminate/continue panning when pointer leaves canvas
   useEffect(() => {
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      if (!isPanningRef.current || !lastPanPosRef.current) return;
+      const dx = e.clientX - lastPanPosRef.current.x;
+      const dy = e.clientY - lastPanPosRef.current.y;
+      lastPanPosRef.current = { x: e.clientX, y: e.clientY };
+      dispatch(panViewport({ dx, dy }));
+    };
     const handleWindowMouseUp = () => {
       if (isPanningRef.current) {
         isPanningRef.current = false;
@@ -120,9 +140,13 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
         setIsPanning(false);
       }
     };
+    window.addEventListener('mousemove', handleWindowMouseMove);
     window.addEventListener('mouseup', handleWindowMouseUp);
-    return () => window.removeEventListener('mouseup', handleWindowMouseUp);
-  }, []);
+    return () => {
+      window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('mouseup', handleWindowMouseUp);
+    };
+  }, [dispatch]);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -151,17 +175,6 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
       }
     },
     [viewport, canvasComponents, dispatch]
-  );
-
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLCanvasElement>) => {
-      if (!isPanningRef.current || !lastPanPosRef.current) return;
-      const dx = e.clientX - lastPanPosRef.current.x;
-      const dy = e.clientY - lastPanPosRef.current.y;
-      lastPanPosRef.current = { x: e.clientX, y: e.clientY };
-      dispatch(panViewport({ dx, dy }));
-    },
-    [dispatch]
   );
 
   const handleMouseUp = useCallback(
@@ -202,13 +215,22 @@ export function CircuitCanvas({ className }: CircuitCanvasProps) {
         ref={canvasRef}
         width={size.width}
         height={size.height}
+        tabIndex={0}
+        aria-label={ariaLabel ?? 'Circuit editor canvas'}
         style={{
           display: 'block',
           cursor: isPanning ? 'grabbing' : isSpaceHeld ? 'grab' : 'default',
         }}
         onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
+        onFocus={() => {
+          canvasFocusedRef.current = true;
+        }}
+        onBlur={() => {
+          canvasFocusedRef.current = false;
+          isSpaceHeldRef.current = false;
+          setIsSpaceHeld(false);
+        }}
       />
     </div>
   );

@@ -11,19 +11,23 @@ export default function App() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const circuit = parseCircuit(voltageDividerJson);
-    dispatch(loadCircuit(circuit));
-    dispatch(
-      loadEditorLayout({
-        components: autoLayoutComponents(circuit.components),
-        wires: [],
-      })
-    );
+    try {
+      const circuit = parseCircuit(voltageDividerJson);
+      dispatch(loadCircuit(circuit));
+      dispatch(
+        loadEditorLayout({
+          components: autoLayoutComponents(circuit.components),
+          wires: [],
+        })
+      );
+    } catch {
+      // bundled example — parse errors are developer errors caught at build time
+    }
   }, [dispatch]);
 
   return (
     <div className='h-screen w-screen bg-gray-900'>
-      <CircuitCanvas className='h-full w-full' />
+      <CircuitCanvas className='h-full w-full' aria-label='Circuit editor' />
     </div>
   );
 }

@@ -88,6 +88,10 @@ const editorSlice = createSlice({
     // -- Selection --
 
     selectComponent(state, action: PayloadAction<ComponentId>) {
+      const exists = state.components.some(
+        c => c.componentId === action.payload
+      );
+      if (!exists) return;
       for (const comp of state.components) {
         comp.isSelected = comp.componentId === action.payload;
       }
@@ -99,11 +103,15 @@ const editorSlice = createSlice({
     },
 
     selectComponents(state, action: PayloadAction<ComponentId[]>) {
-      const ids = new Set(action.payload);
+      const existingIds = new Set(state.components.map(c => c.componentId));
+      const validIds = [...new Set(action.payload)].filter(id =>
+        existingIds.has(id)
+      );
+      const validSet = new Set(validIds);
       for (const comp of state.components) {
-        comp.isSelected = ids.has(comp.componentId);
+        comp.isSelected = validSet.has(comp.componentId);
       }
-      state.selectedComponentIds = action.payload;
+      state.selectedComponentIds = validIds;
       for (const wire of state.wires) {
         wire.isSelected = false;
       }
@@ -127,6 +135,10 @@ const editorSlice = createSlice({
       comp.isSelected = !comp.isSelected;
       if (comp.isSelected) {
         state.selectedComponentIds.push(action.payload);
+        for (const wire of state.wires) {
+          wire.isSelected = false;
+        }
+        state.selectedWireIds = [];
       } else {
         state.selectedComponentIds = state.selectedComponentIds.filter(
           id => id !== action.payload
