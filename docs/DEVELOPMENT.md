@@ -378,8 +378,11 @@ describe('Circuit Canvas Component', () => {
 
 **범위**: 완전한 사용자 워크플로
 
+> **Playwright 도입 예정**: Phase 2 중반부(#20 와이어 연결 시스템 완료 후) 도입 예정.
+> 핵심 사용자 플로우(회로 그리기 → 시뮬레이션 → 결과 확인)가 완성된 시점에 추가한다.
+
 ```typescript
-// Playwright 또는 Cypress 사용
+// Playwright 사용
 describe('End-to-End User Flows', () => {
   it('should create and simulate complete circuit', async ({ page }) => {
     await page.goto('/');

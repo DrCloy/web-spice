@@ -21,11 +21,13 @@ import { parseSIValue } from '@/engine/parser/siPrefix';
  * @throws {WebSpiceError} INVALID_COMPONENT for unsupported or malformed components
  * @throws {WebSpiceError} INVALID_PARAMETER for missing or invalid parameter values
  */
-export function parseCircuit(json: CircuitJSON): CircuitImpl {
-  // Validate input exists
-  if (!json) {
+export function parseCircuit(raw: unknown): CircuitImpl {
+  // Validate input exists and is an object
+  if (!raw || typeof raw !== 'object') {
     throw new WebSpiceError('INVALID_CIRCUIT', 'Circuit JSON is required');
   }
+
+  const json = raw as CircuitJSON;
 
   // Validate components array is non-empty
   if (!json.components || json.components.length === 0) {

@@ -20,6 +20,7 @@
   --color-component-voltage: #dc2626;
   --color-component-current: #0ea5e9;
   --color-component-ground: #374151;
+  --color-wire: #9ca3af;
 
   /* 신호 표시 컬러 (그래프용) */
   --color-signal-1: #ef4444;

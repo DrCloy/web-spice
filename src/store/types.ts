@@ -5,6 +5,7 @@ import type {
   SolverOptions,
 } from '@/types/simulation';
 import type { analyzeDC } from '@/engine/analysis/dcAnalysis';
+import type { EditorState } from '@/types/editor';
 
 export const MAX_HISTORY = 50;
 
@@ -33,7 +34,10 @@ export interface SimulationState {
 export interface AppState {
   circuit: CircuitState;
   simulation: SimulationState;
+  editor: EditorState;
 }
+
+export type { EditorState };
 
 export interface AppExtraArgument {
   analyzeDC: typeof analyzeDC;

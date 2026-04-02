@@ -5,8 +5,13 @@ import simulationReducer, {
   setConfig,
   setSolverOptions,
 } from '@/store/simulationSlice';
-import type { SimulationState } from '@/store/types';
-import type { AppExtraArgument, AppState } from '@/store/types';
+import type {
+  AppExtraArgument,
+  AppState,
+  SimulationState,
+} from '@/store/types';
+import type { EditorState } from '@/types/editor';
+import { DEFAULT_VIEWPORT } from '@/types/editor';
 import type { DCAnalysisResult } from '@/types/simulation';
 import { DEFAULT_SOLVER_OPTIONS } from '@/types/simulation';
 import { WebSpiceError } from '@/types/circuit';
@@ -50,9 +55,20 @@ function makeMockThunkArgs(overrides?: Partial<AppState['circuit']>) {
     isDirty: false,
     ...overrides,
   };
+  const editorState: EditorState = {
+    components: [],
+    wires: [],
+    viewport: DEFAULT_VIEWPORT,
+    selectedComponentIds: [],
+    selectedWireIds: [],
+    activeTool: 'select',
+    gridSize: 20,
+    showGrid: true,
+  };
   const mockState: AppState = {
     circuit: circuitState,
     simulation: { ...initialState },
+    editor: editorState,
   };
   const dispatch = vi.fn();
   const getState = vi.fn().mockReturnValue(mockState);
