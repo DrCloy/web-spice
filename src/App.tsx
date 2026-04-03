@@ -5,6 +5,7 @@ import { loadEditorLayout } from '@/store/editorSlice';
 import { parseCircuit } from '@/engine/parser/circuitParser';
 import { autoLayoutComponents } from '@/utils/canvas';
 import { CircuitCanvas } from '@/components/circuit/CircuitCanvas';
+import ComponentPalette from '@/components/ui/ComponentPalette';
 import voltageDividerJson from '../examples/voltage_divider.json';
 
 export default function App() {
@@ -27,8 +28,9 @@ export default function App() {
   }, [dispatch]);
 
   return (
-    <div className='h-screen w-screen bg-gray-900'>
-      <CircuitCanvas className='h-full w-full' aria-label='Circuit editor' />
+    <div className='flex h-screen w-screen bg-gray-900'>
+      <ComponentPalette />
+      <CircuitCanvas className='h-full flex-1' aria-label='Circuit editor' />
     </div>
   );
 }

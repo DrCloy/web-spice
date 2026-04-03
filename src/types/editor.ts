@@ -5,7 +5,7 @@
  * 분리되어 있으며, componentId로 circuitSlice의 Component를 참조한다.
  */
 
-import type { ComponentId, NodeId } from './component';
+import type { ComponentId, ComponentType, NodeId } from './component';
 
 // =============================================================================
 // Geometry Types
@@ -95,3 +95,17 @@ export interface EditorState {
   gridSize: number;
   showGrid: boolean;
 }
+
+// =============================================================================
+// Palette Drag-and-Drop Types
+// =============================================================================
+
+/** dragstart 시 dataTransfer에 실리는 JSON 구조 */
+export interface PaletteDragPayload {
+  type: ComponentType;
+  /** DC/AC 소스 구분 — sourceType이 있는 컴포넌트에만 사용 */
+  sourceType?: 'dc' | 'ac';
+}
+
+/** MIME type 상수 — Task #19 drop 핸들러에서 동일 키 사용 */
+export const PALETTE_DRAG_MIME = 'application/x-webspice-component';
