@@ -8,10 +8,10 @@ import type { PaletteDragPayload } from '@/types/editor';
 import {
   drawCapacitor,
   drawCurrentSource,
-  drawGround,
   drawResistor,
   drawVoltageSource,
 } from '@/components/circuit/symbolRenderer';
+import { logicalToScreen } from '@/utils/canvas';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -52,6 +52,62 @@ function drawInductor(
     ...colors,
     resistor: colors.inductor,
   });
+}
+
+// ---------------------------------------------------------------------------
+// Ground palette — 팔레트 전용 수직 심볼
+// 메인 캔버스의 drawGround는 terminal이 왼쪽(수평)이지만,
+// 팔레트 미리보기에서는 terminal 위쪽, 바가 아래로 가는 수직 표준 기호로 렌더
+// ---------------------------------------------------------------------------
+
+function drawGroundPalette(
+  ctx: CanvasRenderingContext2D,
+  center: Point,
+  _rotation: Rotation,
+  viewport: Viewport,
+  _isSelected: boolean,
+  colors: ComponentColors
+): void {
+  ctx.save();
+
+  const screen = logicalToScreen(center, viewport);
+  ctx.translate(screen.x, screen.y);
+  ctx.rotate(-Math.PI / 2);
+  ctx.scale(viewport.scale, viewport.scale);
+
+  ctx.strokeStyle = colors.ground;
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  const leadLen = 12;
+  const bars = [
+    { y: 0, half: 14 },
+    { y: 6, half: 9 },
+    { y: 12, half: 5 },
+  ];
+
+  // 위쪽 terminal에서 아래로 내려오는 수직 lead
+  ctx.beginPath();
+  ctx.moveTo(0, -leadLen);
+  ctx.lineTo(0, 0);
+  ctx.stroke();
+
+  // 수평 바 (아래로 쌓임, 폭 감소)
+  for (const bar of bars) {
+    ctx.beginPath();
+    ctx.moveTo(-bar.half, bar.y);
+    ctx.lineTo(bar.half, bar.y);
+    ctx.stroke();
+  }
+
+  // terminal 점
+  ctx.fillStyle = colors.ground;
+  ctx.beginPath();
+  ctx.arc(0, -leadLen, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
 }
 
 // ---------------------------------------------------------------------------
@@ -105,7 +161,7 @@ const PALETTE_ITEMS: readonly PaletteItemConfig[] = [
     type: 'ground',
     label: 'Ground',
     colorKey: 'ground',
-    drawFn: drawGround,
+    drawFn: drawGroundPalette,
     dragPayload: { type: 'ground' },
   },
 ];
@@ -180,11 +236,14 @@ function PaletteItem({
         draggable
         aria-label={`Add ${config.label}`}
         aria-pressed={isSelected}
-        onClick={() => onSelect(config.id)}
+        onClick={e => {
+          e.stopPropagation();
+          onSelect(config.id);
+        }}
         onDragStart={handleDragStart}
         className={[
-          'flex w-full cursor-grab items-center gap-2 rounded px-2 py-1.5 text-left transition-colors hover:bg-gray-100 dark:hover:bg-gray-700',
-          isSelected ? 'bg-gray-100 dark:bg-gray-700' : '',
+          'flex w-full cursor-grab items-center gap-2 rounded px-2 py-1.5 text-left transition-colors hover:bg-gray-700 hover:text-white',
+          isSelected ? 'bg-gray-700 text-white' : 'text-gray-900',
         ].join(' ')}
       >
         {/* inline CSS var — Tailwind 동적 클래스는 purge로 제거되므로 사용 불가 */}
@@ -195,9 +254,7 @@ function PaletteItem({
           }}
         />
         <PaletteItemCanvas config={config} colors={colors} />
-        <span className='truncate text-sm text-gray-700 dark:text-gray-300'>
-          {config.label}
-        </span>
+        <span className='truncate text-sm'>{config.label}</span>
       </button>
     </li>
   );
@@ -212,14 +269,28 @@ export default function ComponentPalette() {
   // 첫 render 시점에 CSS 변수가 이미 적용돼 있음
   const [colors] = useState<ComponentColors>(resolveComponentColors);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const asideRef = useRef<HTMLElement>(null);
+
+  // 팔레트 바깥 클릭 시 선택 해제 (캔버스 등 다른 영역 클릭 포함)
+  useEffect(() => {
+    const handleDocumentClick = (e: MouseEvent) => {
+      if (asideRef.current && !asideRef.current.contains(e.target as Node)) {
+        setSelectedId(null);
+      }
+    };
+    document.addEventListener('click', handleDocumentClick);
+    return () => document.removeEventListener('click', handleDocumentClick);
+  }, []);
 
   return (
     <aside
+      ref={asideRef}
       className='component-palette flex flex-col'
       aria-label='Component palette'
+      onClick={() => setSelectedId(null)}
     >
       <div className='border-b border-gray-200 px-3 py-2 dark:border-gray-700'>
-        <h2 className='text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400'>
+        <h2 className='text-xs font-semibold tracking-wider text-gray-700 uppercase'>
           Components
         </h2>
       </div>

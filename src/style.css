@@ -1,5 +1,8 @@
 @import 'tailwindcss';
 
+/* dark: variant를 미디어쿼리 대신 .dark 클래스 기반으로 설정 */
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* WebSpice 브랜드 컬러 */
   --color-primary-50: #eff6ff;
@@ -19,7 +22,7 @@
   --color-component-inductor: #7c3aed;
   --color-component-voltage: #dc2626;
   --color-component-current: #0ea5e9;
-  --color-component-ground: #374151;
+  --color-component-ground: #111827;
   --color-wire: #9ca3af;
 
   /* 신호 표시 컬러 (그래프용) */
