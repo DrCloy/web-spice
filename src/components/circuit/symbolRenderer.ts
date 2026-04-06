@@ -297,11 +297,18 @@ export function drawInductor(
 
   if (isSelected) drawSelectionHighlight(ctx, colors);
 
+  const coilCount = 4;
+  const coilRadius = (SYMBOL_WIDTH - 12) / (coilCount * 2); // 12 = 6px lead each side
+  const coilStart = -halfW + coilRadius * 2; // end of left lead
+
   setLineStyle(ctx, colors.stroke);
   ctx.beginPath();
   ctx.moveTo(-halfW, 0);
-  ctx.lineTo(-20, 0); // left lead
-  for (const cx of [-15, -5, 5, 15]) ctx.arc(cx, 0, 5, Math.PI, 0, false); // 4 upward semicircles, no overlap
+  ctx.lineTo(coilStart, 0); // left lead
+  for (let i = 0; i < coilCount; i++) {
+    const cx = coilStart + coilRadius * (2 * i + 1);
+    ctx.arc(cx, 0, coilRadius, Math.PI, 0, false); // upward semicircles
+  }
   ctx.lineTo(halfW, 0); // right lead
   ctx.stroke();
 
