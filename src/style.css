@@ -16,15 +16,6 @@
   --color-primary-800: #1e40af;
   --color-primary-900: #1e3a8a;
 
-  /* 회로 컴포넌트 컬러 */
-  --color-component-resistor: #d97706;
-  --color-component-capacitor: #059669;
-  --color-component-inductor: #7c3aed;
-  --color-component-voltage: #dc2626;
-  --color-component-current: #0ea5e9;
-  --color-component-ground: #111827;
-  --color-wire: #9ca3af;
-
   /* 신호 표시 컬러 (그래프용) */
   --color-signal-1: #ef4444;
   --color-signal-2: #3b82f6;
@@ -137,11 +128,6 @@
     color: rgb(17 24 39);
   }
 
-  body.dark {
-    background-color: rgb(17 24 39);
-    color: rgb(243 244 246);
-  }
-
   /* 스크롤바 스타일링 */
   ::-webkit-scrollbar {
     width: 0.5rem;
@@ -193,11 +179,6 @@
     border-right-width: 1px;
     border-color: rgb(229 231 235);
     width: var(--spacing-panel);
-  }
-
-  .dark .component-palette {
-    background-color: rgb(31 41 55);
-    border-color: rgb(75 85 99);
   }
 
   .properties-panel {
@@ -281,45 +262,6 @@
   }
   .z-tooltip {
     z-index: var(--z-tooltip);
-  }
-
-  /* 컴포넌트 컬러 유틸리티 */
-  .text-resistor {
-    color: var(--color-component-resistor);
-  }
-  .text-capacitor {
-    color: var(--color-component-capacitor);
-  }
-  .text-inductor {
-    color: var(--color-component-inductor);
-  }
-  .text-voltage {
-    color: var(--color-component-voltage);
-  }
-  .text-current {
-    color: var(--color-component-current);
-  }
-  .text-ground {
-    color: var(--color-component-ground);
-  }
-
-  .bg-resistor {
-    background-color: var(--color-component-resistor);
-  }
-  .bg-capacitor {
-    background-color: var(--color-component-capacitor);
-  }
-  .bg-inductor {
-    background-color: var(--color-component-inductor);
-  }
-  .bg-voltage {
-    background-color: var(--color-component-voltage);
-  }
-  .bg-current {
-    background-color: var(--color-component-current);
-  }
-  .bg-ground {
-    background-color: var(--color-component-ground);
   }
 
   /* 신호 컬러 유틸리티 */

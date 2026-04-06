@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ComponentColors } from '@/utils/componentColors';
-import { resolveComponentColors } from '@/utils/componentColors';
+import { useCanvasColors } from '@/contexts/ThemeContext';
+import type { CanvasColors } from '@/theme/canvasColors';
 import type { ComponentType } from '@/types/component';
 import type { Point, Rotation, Viewport } from '@/types/editor';
 import { PALETTE_DRAG_MIME } from '@/types/editor';
@@ -8,6 +8,7 @@ import type { PaletteDragPayload } from '@/types/editor';
 import {
   drawCapacitor,
   drawCurrentSource,
+  drawInductor,
   drawResistor,
   drawVoltageSource,
 } from '@/components/circuit/symbolRenderer';
@@ -23,41 +24,21 @@ type SymbolDrawFn = (
   rotation: Rotation,
   viewport: Viewport,
   isSelected: boolean,
-  colors: ComponentColors
+  colors: CanvasColors
 ) => void;
 
 interface PaletteItemConfig {
   id: string;
   type: ComponentType;
   label: string;
-  /** ComponentColors의 키 — CSS var `--color-component-{colorKey}` 에 대응 */
-  colorKey: keyof Omit<ComponentColors, 'wire' | 'selected'>;
   drawFn: SymbolDrawFn;
   dragPayload: PaletteDragPayload;
 }
 
 // ---------------------------------------------------------------------------
-// Inductor draw helper — symbolRenderer.ts의 기존 패턴과 동일
-// ---------------------------------------------------------------------------
-
-function drawInductor(
-  ctx: CanvasRenderingContext2D,
-  center: Point,
-  rotation: Rotation,
-  viewport: Viewport,
-  isSelected: boolean,
-  colors: ComponentColors
-): void {
-  drawResistor(ctx, center, rotation, viewport, isSelected, {
-    ...colors,
-    resistor: colors.inductor,
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Ground palette — 팔레트 전용 수직 심볼
-// 메인 캔버스의 drawGround는 terminal이 왼쪽(수평)이지만,
-// 팔레트 미리보기에서는 terminal 위쪽, 바가 아래로 가는 수직 표준 기호로 렌더
+// Ground palette — palette-only vertical symbol
+// The main canvas drawGround has halfW=30 which clips outside the 40px-tall
+// palette canvas when rotated. This dedicated function uses leadLen=12 to fit.
 // ---------------------------------------------------------------------------
 
 function drawGroundPalette(
@@ -66,7 +47,7 @@ function drawGroundPalette(
   _rotation: Rotation,
   viewport: Viewport,
   _isSelected: boolean,
-  colors: ComponentColors
+  colors: CanvasColors
 ): void {
   ctx.save();
 
@@ -75,7 +56,7 @@ function drawGroundPalette(
   ctx.rotate(-Math.PI / 2);
   ctx.scale(viewport.scale, viewport.scale);
 
-  ctx.strokeStyle = colors.ground;
+  ctx.strokeStyle = colors.stroke;
   ctx.lineWidth = 2;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -87,13 +68,13 @@ function drawGroundPalette(
     { y: 12, half: 5 },
   ];
 
-  // 위쪽 terminal에서 아래로 내려오는 수직 lead
+  // Vertical lead from top terminal down
   ctx.beginPath();
   ctx.moveTo(0, -leadLen);
   ctx.lineTo(0, 0);
   ctx.stroke();
 
-  // 수평 바 (아래로 쌓임, 폭 감소)
+  // Horizontal bars (decreasing width)
   for (const bar of bars) {
     ctx.beginPath();
     ctx.moveTo(-bar.half, bar.y);
@@ -101,8 +82,8 @@ function drawGroundPalette(
     ctx.stroke();
   }
 
-  // terminal 점
-  ctx.fillStyle = colors.ground;
+  // Terminal dot
+  ctx.fillStyle = colors.stroke;
   ctx.beginPath();
   ctx.arc(0, -leadLen, 3, 0, Math.PI * 2);
   ctx.fill();
@@ -112,7 +93,7 @@ function drawGroundPalette(
 
 // ---------------------------------------------------------------------------
 // Palette items
-// AC Voltage/Current는 Task #23 (AC 분석 엔진) 완료 후 추가
+// AC Voltage/Current to be added after Task #23 (AC analysis engine)
 // ---------------------------------------------------------------------------
 
 const PALETTE_ITEMS: readonly PaletteItemConfig[] = [
@@ -120,7 +101,6 @@ const PALETTE_ITEMS: readonly PaletteItemConfig[] = [
     id: 'dc-voltage',
     type: 'voltage_source',
     label: 'DC Voltage',
-    colorKey: 'voltage',
     drawFn: drawVoltageSource,
     dragPayload: { type: 'voltage_source', sourceType: 'dc' },
   },
@@ -128,7 +108,6 @@ const PALETTE_ITEMS: readonly PaletteItemConfig[] = [
     id: 'dc-current',
     type: 'current_source',
     label: 'DC Current',
-    colorKey: 'current',
     drawFn: drawCurrentSource,
     dragPayload: { type: 'current_source', sourceType: 'dc' },
   },
@@ -136,7 +115,6 @@ const PALETTE_ITEMS: readonly PaletteItemConfig[] = [
     id: 'resistor',
     type: 'resistor',
     label: 'Resistor',
-    colorKey: 'resistor',
     drawFn: drawResistor,
     dragPayload: { type: 'resistor' },
   },
@@ -144,7 +122,6 @@ const PALETTE_ITEMS: readonly PaletteItemConfig[] = [
     id: 'capacitor',
     type: 'capacitor',
     label: 'Capacitor',
-    colorKey: 'capacitor',
     drawFn: drawCapacitor,
     dragPayload: { type: 'capacitor' },
   },
@@ -152,7 +129,6 @@ const PALETTE_ITEMS: readonly PaletteItemConfig[] = [
     id: 'inductor',
     type: 'inductor',
     label: 'Inductor',
-    colorKey: 'inductor',
     drawFn: drawInductor,
     dragPayload: { type: 'inductor' },
   },
@@ -160,7 +136,6 @@ const PALETTE_ITEMS: readonly PaletteItemConfig[] = [
     id: 'ground',
     type: 'ground',
     label: 'Ground',
-    colorKey: 'ground',
     drawFn: drawGroundPalette,
     dragPayload: { type: 'ground' },
   },
@@ -175,7 +150,7 @@ function PaletteItemCanvas({
   colors,
 }: {
   config: PaletteItemConfig;
-  colors: ComponentColors;
+  colors: CanvasColors;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -193,7 +168,7 @@ function PaletteItemCanvas({
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, 80, 40);
 
-    // SYMBOL_WIDTH=60 → 리드가 ±30, 화면에서 x=10~70. 80px 캔버스에 맞음
+    // SYMBOL_WIDTH=60 → leads at ±30, screen x=10~70. Fits in 80px canvas.
     const viewport: Viewport = { offsetX: 40, offsetY: 20, scale: 1.0 };
     config.drawFn(ctx, { x: 0, y: 0 }, 0, viewport, false, colors);
   }, [config, colors]);
@@ -218,7 +193,7 @@ function PaletteItem({
   onSelect,
 }: {
   config: PaletteItemConfig;
-  colors: ComponentColors;
+  colors: CanvasColors;
   isSelected: boolean;
   onSelect: (id: string) => void;
 }) {
@@ -242,16 +217,16 @@ function PaletteItem({
         }}
         onDragStart={handleDragStart}
         className={[
-          'flex w-full cursor-grab items-center gap-2 rounded px-2 py-1.5 text-left transition-colors hover:bg-gray-700 hover:text-white',
-          isSelected ? 'bg-gray-700 text-white' : 'text-gray-900',
+          'flex w-full cursor-grab items-center gap-2 rounded px-2 py-1.5 text-left transition-colors',
+          'hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-700 dark:hover:text-white',
+          isSelected
+            ? 'bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white'
+            : 'text-gray-700 dark:text-gray-300',
         ].join(' ')}
       >
-        {/* inline CSS var — Tailwind 동적 클래스는 purge로 제거되므로 사용 불가 */}
         <span
           className='h-8 w-0.5 shrink-0 rounded-full'
-          style={{
-            backgroundColor: `var(--color-component-${config.colorKey})`,
-          }}
+          style={{ backgroundColor: colors.stroke }}
         />
         <PaletteItemCanvas config={config} colors={colors} />
         <span className='truncate text-sm'>{config.label}</span>
@@ -265,13 +240,11 @@ function PaletteItem({
 // ---------------------------------------------------------------------------
 
 export default function ComponentPalette() {
-  // lazy initializer: Vite가 CSS를 모듈 평가 시 <style>로 주입하므로
-  // 첫 render 시점에 CSS 변수가 이미 적용돼 있음
-  const [colors] = useState<ComponentColors>(resolveComponentColors);
+  const colors = useCanvasColors();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const asideRef = useRef<HTMLElement>(null);
 
-  // 팔레트 바깥 클릭 시 선택 해제 (캔버스 등 다른 영역 클릭 포함)
+  // Deselect when clicking outside the palette (e.g. on the canvas)
   useEffect(() => {
     const handleDocumentClick = (e: MouseEvent) => {
       if (asideRef.current && !asideRef.current.contains(e.target as Node)) {
@@ -285,12 +258,12 @@ export default function ComponentPalette() {
   return (
     <aside
       ref={asideRef}
-      className='component-palette flex flex-col'
+      className='component-palette flex flex-col dark:border-gray-700 dark:bg-gray-800'
       aria-label='Component palette'
       onClick={() => setSelectedId(null)}
     >
       <div className='border-b border-gray-200 px-3 py-2 dark:border-gray-700'>
-        <h2 className='text-xs font-semibold tracking-wider text-gray-700 uppercase'>
+        <h2 className='text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-400'>
           Components
         </h2>
       </div>
