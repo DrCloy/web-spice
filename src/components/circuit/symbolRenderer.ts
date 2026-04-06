@@ -176,8 +176,8 @@ export function drawVoltageSource(
   ctx.font = 'bold 10px monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('+', 6, 0);
-  ctx.fillText('−', -6, 0);
+  ctx.fillText('+', -6, 0); // terminals[0] = N+ = left lead
+  ctx.fillText('−', 6, 0); // terminals[1] = N− = right lead
 
   ctx.restore();
 }
