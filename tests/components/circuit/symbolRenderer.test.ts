@@ -2,11 +2,13 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   drawCapacitor,
   drawCurrentSource,
+  drawGrid,
   drawGround,
   drawInductor,
   drawResistor,
   drawVoltageSource,
 } from '@/components/circuit/symbolRenderer';
+
 import { LIGHT_CANVAS_COLORS } from '@/theme/canvasColors';
 import type { Point, Rotation, Viewport } from '@/types/editor';
 
@@ -114,10 +116,35 @@ describe('symbolRenderer', () => {
       ).not.toThrow();
     });
 
-    it('should draw semicircle arcs', () => {
+    it('should draw upward semicircle arcs', () => {
       const ctx = makeCtx();
       drawInductor(ctx, CENTER, ROTATION, VIEWPORT, false, COLORS);
       expect(ctx.arc).toHaveBeenCalled();
+      // All arcs must be upward semicircles: startAngle=π, endAngle=0, anticlockwise=false
+      for (const [, , , startAngle, endAngle, anticlockwise] of vi.mocked(
+        ctx.arc
+      ).mock.calls) {
+        expect(startAngle).toBe(Math.PI);
+        expect(endAngle).toBe(0);
+        expect(anticlockwise).toBe(false);
+      }
+    });
+  });
+
+  describe('drawGrid', () => {
+    it('should draw dots when scaledGrid >= 4', () => {
+      const ctx = makeCtx();
+      const viewport: Viewport = { offsetX: 0, offsetY: 0, scale: 1.0 };
+      drawGrid(ctx, viewport, 20, 100, 100, 'rgba(0,0,0,0.4)');
+      expect(ctx.arc).toHaveBeenCalled();
+    });
+
+    it('should skip drawing when scaledGrid < 4 (too dense)', () => {
+      const ctx = makeCtx();
+      // scale=0.1, gridSize=20 → scaledGrid=2 < 4
+      const viewport: Viewport = { offsetX: 0, offsetY: 0, scale: 0.1 };
+      drawGrid(ctx, viewport, 20, 100, 100, 'rgba(0,0,0,0.4)');
+      expect(ctx.arc).not.toHaveBeenCalled();
     });
   });
 
