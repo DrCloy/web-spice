@@ -10,7 +10,7 @@ import {
   selectViewport,
   zoomViewport,
 } from '@/store/editorSlice';
-import { resolveComponentColors } from '@/utils/componentColors';
+import { useCanvasColors } from '@/contexts/ThemeContext';
 import { findHitComponent, screenToLogical } from '@/utils/canvas';
 import { renderScene } from './renderScene';
 
@@ -39,14 +39,7 @@ export function CircuitCanvas({
 
   const [size, setSize] = useState({ width: 800, height: 600 });
 
-  // Colors are resolved after mount so DOM is ready. useRef avoids re-render;
-  // the render effect re-runs because size/circuit/etc. change after mount anyway.
-  const colorsRef = useRef<ReturnType<typeof resolveComponentColors> | null>(
-    null
-  );
-  useEffect(() => {
-    colorsRef.current = resolveComponentColors();
-  }, []);
+  const colors = useCanvasColors();
 
   // Canvas focus state — Space key panning is scoped to canvas focus only
   const canvasFocusedRef = useRef(false);
@@ -69,8 +62,7 @@ export function CircuitCanvas({
   // Render scene whenever state changes
   useEffect(() => {
     const canvas = canvasRef.current;
-    const colors = colorsRef.current;
-    if (!canvas || !colors) return;
+    if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -85,7 +77,7 @@ export function CircuitCanvas({
       height: size.height,
       colors,
     });
-  }, [circuit, canvasComponents, viewport, gridSize, showGrid, size]);
+  }, [circuit, canvasComponents, viewport, gridSize, showGrid, size, colors]);
 
   // -------------------------------------------------------------------------
   // Pan state (middle mouse / space+drag)

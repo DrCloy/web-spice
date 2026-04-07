@@ -2,7 +2,7 @@
  * Circuit component symbol renderer.
  *
  * Pure functions — each draw function:
- *   - Accepts a resolved ComponentColors object (no DOM access)
+ *   - Accepts a CanvasColors object (no DOM access)
  *   - Works in logical coordinates, converts via logicalToScreen internally
  *   - Wraps all drawing in ctx.save() / ctx.restore()
  */
@@ -14,7 +14,7 @@ import type {
   Rotation,
   Viewport,
 } from '@/types/editor';
-import type { ComponentColors } from '@/utils/componentColors';
+import type { CanvasColors } from '@/theme/canvasColors';
 import { SYMBOL_HEIGHT, SYMBOL_WIDTH, logicalToScreen } from '@/utils/canvas';
 
 // ---------------------------------------------------------------------------
@@ -44,38 +44,9 @@ function setLineStyle(
   ctx.lineJoin = 'round';
 }
 
-/** Draw lead wires from component edge to terminal points. */
-function drawLeads(
-  ctx: CanvasRenderingContext2D,
-  halfW: number,
-  color: string
-): void {
-  setLineStyle(ctx, color);
-  ctx.beginPath();
-  ctx.moveTo(-halfW, 0);
-  ctx.lineTo(-halfW + 10, 0);
-  ctx.moveTo(halfW - 10, 0);
-  ctx.lineTo(halfW, 0);
-  ctx.stroke();
-}
-
-/** Draw a small circle at each terminal. */
-function drawTerminals(
-  ctx: CanvasRenderingContext2D,
-  halfW: number,
-  color: string
-): void {
-  ctx.fillStyle = color;
-  for (const x of [-halfW, halfW]) {
-    ctx.beginPath();
-    ctx.arc(x, 0, 3, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
 function drawSelectionHighlight(
   ctx: CanvasRenderingContext2D,
-  colors: ComponentColors
+  colors: CanvasColors
 ): void {
   ctx.strokeStyle = colors.selected;
   ctx.lineWidth = 1;
@@ -98,7 +69,8 @@ export function drawGrid(
   viewport: Viewport,
   gridSize: number,
   canvasWidth: number,
-  canvasHeight: number
+  canvasHeight: number,
+  gridColor: string
 ): void {
   ctx.save();
 
@@ -111,7 +83,7 @@ export function drawGrid(
   const startX = ((viewport.offsetX % scaledGrid) + scaledGrid) % scaledGrid;
   const startY = ((viewport.offsetY % scaledGrid) + scaledGrid) % scaledGrid;
 
-  ctx.fillStyle = 'rgba(156, 163, 175, 0.4)'; // gray-400 at 40%
+  ctx.fillStyle = gridColor;
   const dotSize = Math.min(1.5, scaledGrid * 0.08);
 
   for (let x = startX; x < canvasWidth; x += scaledGrid) {
@@ -126,7 +98,7 @@ export function drawGrid(
 }
 
 // ---------------------------------------------------------------------------
-// Resistor — IEC style rectangle
+// Resistor — IEEE zigzag
 // ---------------------------------------------------------------------------
 
 export function drawResistor(
@@ -135,23 +107,30 @@ export function drawResistor(
   rotation: Rotation,
   viewport: Viewport,
   isSelected: boolean,
-  colors: ComponentColors
+  colors: CanvasColors
 ): void {
   ctx.save();
   applyTransform(ctx, center, rotation, viewport);
 
   const halfW = SYMBOL_WIDTH / 2;
-  const boxW = 30;
-  const boxH = 12;
 
   if (isSelected) drawSelectionHighlight(ctx, colors);
 
-  drawLeads(ctx, halfW, colors.resistor);
-
-  setLineStyle(ctx, colors.resistor);
-  ctx.strokeRect(-boxW / 2, -boxH / 2, boxW, boxH);
-
-  drawTerminals(ctx, halfW, colors.resistor);
+  setLineStyle(ctx, colors.stroke);
+  ctx.beginPath();
+  ctx.moveTo(-halfW, 0);
+  ctx.lineTo(-15, 0);
+  for (const [x, y] of [
+    [-12, 7],
+    [-6, -7],
+    [0, 7],
+    [6, -7],
+    [12, 7],
+    [15, 0],
+  ])
+    ctx.lineTo(x, y);
+  ctx.lineTo(halfW, 0);
+  ctx.stroke();
 
   ctx.restore();
 }
@@ -166,37 +145,45 @@ export function drawVoltageSource(
   rotation: Rotation,
   viewport: Viewport,
   isSelected: boolean,
-  colors: ComponentColors
+  colors: CanvasColors
 ): void {
   ctx.save();
   applyTransform(ctx, center, rotation, viewport);
 
   const halfW = SYMBOL_WIDTH / 2;
-  const radius = SYMBOL_HEIGHT / 2;
+  const r = SYMBOL_HEIGHT / 2;
 
   if (isSelected) drawSelectionHighlight(ctx, colors);
 
-  drawLeads(ctx, halfW, colors.voltage);
-
-  setLineStyle(ctx, colors.voltage);
+  setLineStyle(ctx, colors.stroke);
+  // Left lead
   ctx.beginPath();
-  ctx.arc(0, 0, radius, 0, Math.PI * 2);
+  ctx.moveTo(-halfW, 0);
+  ctx.lineTo(-r, 0);
+  ctx.stroke();
+  // Circle
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.stroke();
+  // Right lead
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  ctx.lineTo(halfW, 0);
   ctx.stroke();
 
-  ctx.fillStyle = colors.voltage;
-  ctx.font = '9px monospace';
+  // +/- labels — bold for readability
+  ctx.fillStyle = colors.stroke;
+  ctx.font = 'bold 10px monospace';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('+', 5, 0);
-  ctx.fillText('−', -5, 0);
-
-  drawTerminals(ctx, halfW, colors.voltage);
+  ctx.fillText('+', -6, 0); // terminals[0] = N+ = left lead
+  ctx.fillText('−', 6, 0); // terminals[1] = N− = right lead
 
   ctx.restore();
 }
 
 // ---------------------------------------------------------------------------
-// Current source — circle with arrow
+// Current source — circle with filled arrow
 // ---------------------------------------------------------------------------
 
 export function drawCurrentSource(
@@ -205,39 +192,46 @@ export function drawCurrentSource(
   rotation: Rotation,
   viewport: Viewport,
   isSelected: boolean,
-  colors: ComponentColors
+  colors: CanvasColors
 ): void {
   ctx.save();
   applyTransform(ctx, center, rotation, viewport);
 
   const halfW = SYMBOL_WIDTH / 2;
-  const radius = SYMBOL_HEIGHT / 2;
+  const r = SYMBOL_HEIGHT / 2;
 
   if (isSelected) drawSelectionHighlight(ctx, colors);
 
-  drawLeads(ctx, halfW, colors.current);
-
-  setLineStyle(ctx, colors.current);
+  setLineStyle(ctx, colors.stroke);
+  // Left lead
   ctx.beginPath();
-  ctx.arc(0, 0, radius, 0, Math.PI * 2);
+  ctx.moveTo(-halfW, 0);
+  ctx.lineTo(-r, 0);
+  ctx.stroke();
+  // Circle
+  ctx.beginPath();
+  ctx.arc(0, 0, r, 0, Math.PI * 2);
+  ctx.stroke();
+  // Right lead
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  ctx.lineTo(halfW, 0);
   ctx.stroke();
 
-  // Arrow pointing right (conventional current direction)
-  ctx.fillStyle = colors.current;
+  // Filled arrow (IEEE standard — solid triangle pointing right)
   ctx.beginPath();
-  ctx.moveTo(5, 0);
-  ctx.lineTo(-3, -4);
-  ctx.lineTo(-3, 4);
+  ctx.moveTo(-5, -4);
+  ctx.lineTo(6, 0);
+  ctx.lineTo(-5, 4);
   ctx.closePath();
+  ctx.fillStyle = colors.stroke;
   ctx.fill();
-
-  drawTerminals(ctx, halfW, colors.current);
 
   ctx.restore();
 }
 
 // ---------------------------------------------------------------------------
-// Capacitor — two parallel plates
+// Capacitor — two parallel plates with full leads
 // ---------------------------------------------------------------------------
 
 export function drawCapacitor(
@@ -246,7 +240,7 @@ export function drawCapacitor(
   rotation: Rotation,
   viewport: Viewport,
   isSelected: boolean,
-  colors: ComponentColors
+  colors: CanvasColors
 ): void {
   ctx.save();
   applyTransform(ctx, center, rotation, viewport);
@@ -257,10 +251,14 @@ export function drawCapacitor(
 
   if (isSelected) drawSelectionHighlight(ctx, colors);
 
-  drawLeads(ctx, halfW, colors.capacitor);
-
-  setLineStyle(ctx, colors.capacitor, 2.5);
+  setLineStyle(ctx, colors.stroke);
+  // Left lead
+  ctx.beginPath();
+  ctx.moveTo(-halfW, 0);
+  ctx.lineTo(-gap / 2, 0);
+  ctx.stroke();
   // Left plate
+  setLineStyle(ctx, colors.stroke, 2.5);
   ctx.beginPath();
   ctx.moveTo(-gap / 2, -plateH / 2);
   ctx.lineTo(-gap / 2, plateH / 2);
@@ -270,14 +268,55 @@ export function drawCapacitor(
   ctx.moveTo(gap / 2, -plateH / 2);
   ctx.lineTo(gap / 2, plateH / 2);
   ctx.stroke();
-
-  drawTerminals(ctx, halfW, colors.capacitor);
+  // Right lead
+  setLineStyle(ctx, colors.stroke);
+  ctx.beginPath();
+  ctx.moveTo(gap / 2, 0);
+  ctx.lineTo(halfW, 0);
+  ctx.stroke();
 
   ctx.restore();
 }
 
 // ---------------------------------------------------------------------------
-// Ground — three horizontal lines of decreasing width
+// Inductor — IEEE semicircle series
+// ---------------------------------------------------------------------------
+
+export function drawInductor(
+  ctx: CanvasRenderingContext2D,
+  center: Point,
+  rotation: Rotation,
+  viewport: Viewport,
+  isSelected: boolean,
+  colors: CanvasColors
+): void {
+  ctx.save();
+  applyTransform(ctx, center, rotation, viewport);
+
+  const halfW = SYMBOL_WIDTH / 2;
+
+  if (isSelected) drawSelectionHighlight(ctx, colors);
+
+  const coilCount = 4;
+  const coilRadius = (SYMBOL_WIDTH - 12) / (coilCount * 2); // 12 = 6px lead each side
+  const coilStart = -halfW + coilRadius * 2; // end of left lead
+
+  setLineStyle(ctx, colors.stroke);
+  ctx.beginPath();
+  ctx.moveTo(-halfW, 0);
+  ctx.lineTo(coilStart, 0); // left lead
+  for (let i = 0; i < coilCount; i++) {
+    const cx = coilStart + coilRadius * (2 * i + 1);
+    ctx.arc(cx, 0, coilRadius, Math.PI, 0, false); // upward semicircles
+  }
+  ctx.lineTo(halfW, 0); // right lead
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
+// Ground — three horizontal bars of decreasing width
 // ---------------------------------------------------------------------------
 
 export function drawGround(
@@ -286,7 +325,7 @@ export function drawGround(
   rotation: Rotation,
   viewport: Viewport,
   isSelected: boolean,
-  colors: ComponentColors
+  colors: CanvasColors
 ): void {
   ctx.save();
   applyTransform(ctx, center, rotation, viewport);
@@ -296,7 +335,7 @@ export function drawGround(
   if (isSelected) drawSelectionHighlight(ctx, colors);
 
   // Lead from terminal to first bar
-  setLineStyle(ctx, colors.ground);
+  setLineStyle(ctx, colors.stroke);
   ctx.beginPath();
   ctx.moveTo(-halfW, 0);
   ctx.lineTo(0, 0);
@@ -309,7 +348,7 @@ export function drawGround(
     { y: 12, half: 4 },
   ];
   for (const bar of bars) {
-    setLineStyle(ctx, colors.ground, 2);
+    setLineStyle(ctx, colors.stroke, 2);
     ctx.beginPath();
     ctx.moveTo(-bar.half, bar.y);
     ctx.lineTo(bar.half, bar.y);
@@ -317,7 +356,7 @@ export function drawGround(
   }
 
   // Terminal dot
-  ctx.fillStyle = colors.ground;
+  ctx.fillStyle = colors.stroke;
   ctx.beginPath();
   ctx.arc(-halfW, 0, 3, 0, Math.PI * 2);
   ctx.fill();
@@ -334,12 +373,13 @@ export function drawComponentLabel(
   label: string,
   center: Point,
   rotation: Rotation,
-  viewport: Viewport
+  viewport: Viewport,
+  labelColor: string
 ): void {
   ctx.save();
   applyTransform(ctx, center, rotation, viewport);
 
-  ctx.fillStyle = 'rgb(107 114 128)'; // gray-500
+  ctx.fillStyle = labelColor;
   ctx.font = `${Math.max(9, 10 / viewport.scale)}px monospace`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
@@ -357,7 +397,7 @@ export function drawComponent(
   canvasComp: CanvasComponent,
   component: Component,
   viewport: Viewport,
-  colors: ComponentColors
+  colors: CanvasColors
 ): void {
   const { position, rotation, isSelected } = canvasComp;
 
@@ -374,15 +414,11 @@ export function drawComponent(
     case 'capacitor':
       drawCapacitor(ctx, position, rotation, viewport, isSelected, colors);
       break;
+    case 'inductor':
+      drawInductor(ctx, position, rotation, viewport, isSelected, colors);
+      break;
     case 'ground':
       drawGround(ctx, position, rotation, viewport, isSelected, colors);
-      break;
-    case 'inductor':
-      // TODO: dedicated inductor symbol pending (#22). Render resistor box as placeholder.
-      drawResistor(ctx, position, rotation, viewport, isSelected, {
-        ...colors,
-        resistor: colors.inductor,
-      });
       break;
     default:
       // Unsupported type (e.g. diode — #29): render resistor box as placeholder.

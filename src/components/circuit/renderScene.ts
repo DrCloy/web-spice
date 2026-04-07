@@ -5,7 +5,7 @@
 
 import type { Circuit } from '@/types/circuit';
 import type { CanvasComponent, Viewport } from '@/types/editor';
-import type { ComponentColors } from '@/utils/componentColors';
+import type { CanvasColors } from '@/theme/canvasColors';
 import { drawComponent, drawGrid } from './symbolRenderer';
 
 export interface SceneParams {
@@ -16,7 +16,7 @@ export interface SceneParams {
   showGrid: boolean;
   width: number;
   height: number;
-  colors: ComponentColors;
+  colors: CanvasColors;
 }
 
 export function renderScene(
@@ -37,7 +37,7 @@ export function renderScene(
   ctx.clearRect(0, 0, width, height);
 
   if (showGrid) {
-    drawGrid(ctx, viewport, gridSize, width, height);
+    drawGrid(ctx, viewport, gridSize, width, height, colors.grid);
   }
 
   if (!circuit) return;

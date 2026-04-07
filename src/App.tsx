@@ -4,7 +4,9 @@ import { loadCircuit } from '@/store/circuitSlice';
 import { loadEditorLayout } from '@/store/editorSlice';
 import { parseCircuit } from '@/engine/parser/circuitParser';
 import { autoLayoutComponents } from '@/utils/canvas';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { CircuitCanvas } from '@/components/circuit/CircuitCanvas';
+import ComponentPalette from '@/components/ui/ComponentPalette';
 import voltageDividerJson from '../examples/voltage_divider.json';
 
 export default function App() {
@@ -27,8 +29,11 @@ export default function App() {
   }, [dispatch]);
 
   return (
-    <div className='h-screen w-screen bg-gray-900'>
-      <CircuitCanvas className='h-full w-full' aria-label='Circuit editor' />
-    </div>
+    <ThemeProvider>
+      <div className='flex h-screen w-screen bg-gray-50 dark:bg-gray-900'>
+        <ComponentPalette />
+        <CircuitCanvas className='h-full flex-1' aria-label='Circuit editor' />
+      </div>
+    </ThemeProvider>
   );
 }
