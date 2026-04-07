@@ -81,6 +81,7 @@ describe('symbolRenderer', () => {
       const ctx = makeCtx();
       drawVoltageSource(ctx, CENTER, ROTATION, VIEWPORT, false, COLORS);
       const calls = vi.mocked(ctx.fillText).mock.calls;
+      expect(ctx.fillText).toHaveBeenCalledTimes(2);
       // First fillText call must be '+' at negative x (left side = N+)
       expect(calls[0][0]).toBe('+');
       expect(calls[0][1]).toBeLessThan(0);
