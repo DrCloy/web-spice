@@ -1,0 +1,12 @@
+{
+  "enabledPlugins": {
+    "harness@harness-marketplace": true,
+    "code-review@claude-plugins-official": false,
+    "context7@claude-plugins-official": false,
+    "frontend-design@claude-plugins-official": false,
+    "skill-creator@claude-plugins-official": false,
+    "playwright@claude-plugins-official": false,
+    "security-guidance@claude-plugins-official": false,
+    "typescript-lsp@claude-plugins-official": false
+  }
+}
