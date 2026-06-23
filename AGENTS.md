@@ -71,6 +71,20 @@ implements isolated, well-specified tasks delivered as briefs.
 - `src/components/circuit/CircuitCanvas.tsx` — wire and interaction state
 - `src/types/` — shared type contracts (until Claude lands the change)
 
+## Reviewing Claude Code PRs
+
+When asked to review a Claude Code PR:
+
+1. Run `gh pr diff {number}` to read the full diff.
+2. Check against `docs/harness/webspice-codex/team-spec.md` review policy.
+3. Verify the implementation matches the stated goal and does not break
+   existing patterns in the files it touches.
+4. Leave a review comment with one of: `pass`, `fix: {specific issue}`,
+   `redo: {reason}`, or `reject: {reason}`.
+
+Focus on: correctness, numerical stability for engine code, Redux pattern
+consistency for UI code, test coverage for edge cases.
+
 ## Security & Configuration Tips
 
 Do not commit `dist/`, `coverage/`, or local caches. Keep example circuits

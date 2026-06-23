@@ -30,7 +30,7 @@ gh pr list --state open        # 열린 PR (Codex PR 포함)
 
 아래 순서로 결정:
 
-1. **Codex PR 대기 중** → 리뷰 최우선 (`docs/harness/webspice-codex/team-spec.md` 리뷰 정책)
+1. **Codex PR 대기 중** → 리뷰 최우선. `gh pr diff {번호}`로 diff를 읽고 `docs/harness/webspice-codex/team-spec.md` 리뷰 정책에 따라 직접 리뷰한다. 결과: `pass` / `fix: {이슈}` / `redo: {사유}` / `reject: {사유}`
 2. **`_workspace/` 진행 중 작업** → 이어서 할지 새로 시작할지 판단
 3. **다음 태스크 선택** → TASK_BREAKDOWN.md 의존성 체인 기준
 

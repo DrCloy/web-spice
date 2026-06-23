@@ -40,16 +40,30 @@ git commit -m "feat: ..." 또는 "fix: ..." 또는 "test: ..."
 변경 후: | ✅ #21 | FEAT | 캐패시터(Capacitor) 모델 구현 |
 ```
 
-### Step 4: Codex PR 상태 확인
+### Step 4: PR 오픈 + Codex 리뷰 요청
+
+커밋 후 PR을 오픈한다:
+
+```bash
+git push -u origin {branch}
+gh pr create --title "..." --body "..."
+```
+
+PR이 열리면 Codex에게 리뷰를 요청한다. 유저에게 아래 프롬프트를 전달:
+
+```
+Read AGENTS.md section "Reviewing Claude Code PRs".
+Review PR #{번호}: gh pr diff {번호}
+Leave a review comment: pass / fix: {issue} / redo: {reason}
+```
+
+### Step 5: 열린 Codex PR 상태 확인
 
 ```bash
 gh pr list --state open
 ```
 
-Codex PR이 있으면:
-
-- CI 통과 여부 확인
-- 리뷰 필요하면 `webspice-codex-orchestrator` Phase 5 실행 안내
+Codex PR이 있으면 CI 통과 여부를 확인하고 다음 kickoff에서 리뷰 예정임을 안내한다.
 
 ### Step 5: 다음 계획 안내
 
