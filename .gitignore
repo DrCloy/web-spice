@@ -30,12 +30,6 @@ coverage/
 .vscode/
 .idea/
 
-# Claude Code
-.claude/
-.anthropic/
-.claude-chat/
-CLAUDE.md
-
 # OS generated files
 .DS_Store
 Thumbs.db
@@ -44,6 +38,9 @@ Thumbs.db
 .simulation-cache/
 *.tmp.json
 .webspice-config
+
+# Harness working directory
+_workspace/
 
 # Wiki (separate git repository)
 docs/wiki/
