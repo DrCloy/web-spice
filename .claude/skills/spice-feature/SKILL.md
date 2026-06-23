@@ -15,7 +15,7 @@ Codex 트랙: codex-delegate 스킬로 명세서 생성 → 유저에게 전달
 
 - **미존재** → 초기 실행 (Phase 1부터)
 - **존재 + 부분 수정 요청** → 해당 에이전트만 재호출, qa-validator 재실행
-- **존재 + 새 요청** → `_workspace/`를 `_workspace_prev/`로 이동 후 Phase 1 시작
+- **존재 + 새 요청** → 완료 여부 확인 (`_workspace/qa-report.md` 존재 + 열린 Codex PR 없음) 후 이동. 미완료면 유저에게 확인 후 이동
 
 ## Phase 1: 분석 및 라우팅 (feature-architect)
 
@@ -69,8 +69,8 @@ Agent(
 )
 ```
 
-Codex 결과는 Codex가 자체 테스트 실행 후 PR을 생성하므로 별도 QA 불필요.
-단, 머지 전 충돌 여부 확인을 유저에게 안내한다.
+Codex 결과는 Codex가 자체 테스트 실행 후 PR을 생성하므로 Claude Code 트랙과 별도 QA 불필요.
+단, **Codex PR 머지 후** qa-validator를 실행하여 경계면 정합성(타입, API shape) 최종 검증.
 
 ## Phase 4: 결과 보고
 
