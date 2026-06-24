@@ -18,6 +18,30 @@ git diff --stat
 
 커밋되지 않은 변경사항 목록을 확인한다.
 
+### Step 1.5: 브랜치 확인 및 생성
+
+```bash
+git branch --show-current
+```
+
+현재 브랜치를 확인하고 아래 기준으로 판단:
+
+- **`main` 또는 태스크와 무관한 브랜치** (예: `chore/*`, `infra/*`, 다른 feature 브랜치)
+  → 반드시 새 브랜치 생성 후 커밋
+
+  ```bash
+  git checkout main
+  git pull origin main
+  git checkout -b feature/{task-id}-{short-description}
+  ```
+
+  예: `feature/19-drag-drop-placement`
+
+- **이미 올바른 feature 브랜치** (예: `feature/19-*`)
+  → 그대로 커밋 진행
+
+> ⚠️ main 브랜치에 직접 커밋하지 않는다. 반드시 feature 브랜치를 사용한다.
+
 ### Step 2: 커밋
 
 Conventional Commits 형식으로 커밋:

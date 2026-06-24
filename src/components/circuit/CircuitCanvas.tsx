@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from '@/hooks/store';
 import {
   deselectAll,
   panViewport,
+  placeComponent,
   selectAllCanvasComponents,
   selectComponent,
   selectGridSize,
@@ -10,8 +11,15 @@ import {
   selectViewport,
   zoomViewport,
 } from '@/store/editorSlice';
+import { addComponent } from '@/store/circuitSlice';
 import { useCanvasColors } from '@/contexts/ThemeContext';
-import { findHitComponent, screenToLogical } from '@/utils/canvas';
+import { findHitComponent, screenToLogical, snapToGrid } from '@/utils/canvas';
+import {
+  createDefaultComponent,
+  generateComponentId,
+} from '@/utils/componentFactory';
+import type { PaletteDragPayload } from '@/types/editor';
+import { PALETTE_DRAG_MIME } from '@/types/editor';
 import { renderScene } from './renderScene';
 
 // ---------------------------------------------------------------------------
@@ -182,6 +190,58 @@ export function CircuitCanvas({
     []
   );
 
+  // -------------------------------------------------------------------------
+  // Drag-and-drop from ComponentPalette
+  // -------------------------------------------------------------------------
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent<HTMLCanvasElement>) => {
+      if (e.dataTransfer.types.includes(PALETTE_DRAG_MIME)) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+      }
+    },
+    []
+  );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLCanvasElement>) => {
+      e.preventDefault();
+      const raw = e.dataTransfer.getData(PALETTE_DRAG_MIME);
+      if (!raw) return;
+
+      let payload: PaletteDragPayload;
+      try {
+        payload = JSON.parse(raw) as PaletteDragPayload;
+      } catch {
+        return;
+      }
+
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const screenPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      const logicalPos = screenToLogical(screenPos, viewport);
+      const snapped = snapToGrid(logicalPos, gridSize);
+
+      const existingIds = canvasComponents.map(c => c.componentId);
+      const id = generateComponentId(payload.type, existingIds);
+      const component = createDefaultComponent(payload, id);
+
+      dispatch(addComponent(component));
+      dispatch(
+        placeComponent({
+          componentId: id,
+          position: snapped,
+          rotation: 0,
+          isSelected: false,
+        })
+      );
+    },
+    [viewport, gridSize, canvasComponents, dispatch]
+  );
+
   // React registers onWheel as passive, so preventDefault() fails.
   // Attach a non-passive native listener instead.
   useEffect(() => {
@@ -215,6 +275,8 @@ export function CircuitCanvas({
         }}
         onMouseDown={handleMouseDown}
         onMouseUp={handleMouseUp}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
         onFocus={() => {
           canvasFocusedRef.current = true;
         }}
