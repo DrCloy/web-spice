@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import circuitReducer, {
+  addComponent,
   clearCircuit,
   loadCircuit,
   markClean,
@@ -207,6 +208,68 @@ describe('circuitSlice', () => {
 
       const afterLoad = circuitReducer(afterUndo, loadCircuit(circuitB));
       expect(afterLoad.future).toEqual([]);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // addComponent
+  // -------------------------------------------------------------------------
+
+  describe('addComponent', () => {
+    const resistor = {
+      id: 'R1',
+      type: 'resistor' as const,
+      name: 'R1',
+      resistance: 1000,
+      terminals: [
+        { name: 'terminal1' as const, nodeId: 'R1_1' },
+        { name: 'terminal2' as const, nodeId: 'R1_2' },
+      ],
+    };
+
+    it('creates a new circuit and adds the component when current is null', () => {
+      const state = circuitReducer(initialState, addComponent(resistor));
+      expect(state.current).not.toBeNull();
+      expect(state.current?.components).toHaveLength(1);
+      expect(state.current?.components[0]).toEqual(resistor);
+      expect(state.isDirty).toBe(true);
+    });
+
+    it('appends to existing circuit components', () => {
+      const prev = circuitReducer(initialState, addComponent(resistor));
+      const capacitor = {
+        id: 'C1',
+        type: 'capacitor' as const,
+        name: 'C1',
+        capacitance: 1e-6,
+        terminals: [
+          { name: 'pos' as const, nodeId: 'C1_p' },
+          { name: 'neg' as const, nodeId: 'C1_n' },
+        ],
+      };
+      const state = circuitReducer(prev, addComponent(capacitor));
+      expect(state.current?.components).toHaveLength(2);
+    });
+
+    it('pushes previous circuit to past for undo support', () => {
+      const state = circuitReducer(initialState, addComponent(resistor));
+      expect(state.past).toHaveLength(1);
+      expect(state.past[0]).toBeNull();
+    });
+
+    it('clears future on add', () => {
+      const withFuture: typeof initialState = {
+        ...initialState,
+        future: [circuitA],
+      };
+      const state = circuitReducer(withFuture, addComponent(resistor));
+      expect(state.future).toEqual([]);
+    });
+
+    it('can be undone to restore previous circuit', () => {
+      const afterAdd = circuitReducer(initialState, addComponent(resistor));
+      const afterUndo = circuitReducer(afterAdd, undo());
+      expect(afterUndo.current).toBeNull();
     });
   });
 

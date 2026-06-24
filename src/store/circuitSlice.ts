@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { Circuit } from '@/types/circuit';
+import type { Component } from '@/types/component';
 import type { CircuitState } from '@/store/types';
 import { MAX_HISTORY } from '@/store/types';
 
@@ -68,6 +69,24 @@ const circuitSlice = createSlice({
     markClean(state) {
       state.isDirty = false;
     },
+
+    addComponent(state, action: PayloadAction<Component>) {
+      const prev = state.current;
+      state.past = pushBounded(state.past, prev);
+      // Replace current with a new plain Circuit object to stay Redux-serializable.
+      // This works whether `prev` is a plain Circuit or a CircuitImpl instance.
+      const prevComponents = prev ? prev.components : [];
+      state.current = {
+        id: prev?.id ?? 'canvas-circuit-1',
+        name: prev?.name ?? 'New Circuit',
+        description: prev?.description,
+        groundNodeId: prev?.groundNodeId ?? '0',
+        components: [...prevComponents, action.payload],
+        nodes: [],
+      };
+      state.future = [];
+      state.isDirty = true;
+    },
   },
 });
 
@@ -79,6 +98,7 @@ export const {
   redo,
   markDirty,
   markClean,
+  addComponent,
 } = circuitSlice.actions;
 
 export default circuitSlice.reducer;
