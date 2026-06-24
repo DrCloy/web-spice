@@ -9,7 +9,7 @@
  *   logical = (screen - offset) / scale
  */
 
-import type { Component } from '@/types/component';
+import type { Component, ComponentId, NodeId } from '@/types/component';
 import type { CanvasComponent, Point, Rect, Viewport } from '@/types/editor';
 import {
   DEFAULT_VIEWPORT,
@@ -216,4 +216,130 @@ export function autoLayoutComponents(
       isSelected: false,
     };
   });
+}
+
+// ---------------------------------------------------------------------------
+// Terminal anchors & hit testing (Task #20 — wire connection system)
+// ---------------------------------------------------------------------------
+
+/** Default hit radius (logical px) for terminal pick. */
+export const TERMINAL_HIT_RADIUS = 8;
+
+/**
+ * A single connectable terminal of a placed component, resolved to logical
+ * coordinates. `nodeId` references the electrical node the terminal belongs to.
+ */
+export interface TerminalAnchor {
+  componentId: ComponentId;
+  terminalIndex: number; // 0 | 1 (ground exposes index 0 only)
+  nodeId: NodeId;
+  position: Point; // logical coordinates
+}
+
+/** Rotate a local offset by `rotation` degrees (standard 2D rotation). */
+function rotateOffset(offset: Point, rotation: number): Point {
+  const rad = (rotation * Math.PI) / 180;
+  const cos = Math.cos(rad);
+  const sin = Math.sin(rad);
+  return {
+    x: offset.x * cos - offset.y * sin,
+    y: offset.x * sin + offset.y * cos,
+  };
+}
+
+/**
+ * Compute the logical-space position of each terminal of a placed component.
+ *
+ * Local (unrotated) terminal offsets mirror symbolRenderer leads:
+ *   terminals[0] = (-SYMBOL_WIDTH/2, 0)  (left lead)
+ *   terminals[1] = (+SYMBOL_WIDTH/2, 0)  (right lead)
+ * Ground exposes a single terminal at its left lead (-SYMBOL_WIDTH/2, 0).
+ *
+ * logical = position + rotate(localOffset, rotation)
+ */
+export function getTerminalAnchors(
+  canvasComp: CanvasComponent,
+  component: Component
+): TerminalAnchor[] {
+  const { position, rotation, componentId } = canvasComp;
+  const halfW = SYMBOL_WIDTH / 2;
+
+  const toLogical = (offset: Point): Point => {
+    const r = rotateOffset(offset, rotation);
+    return { x: position.x + r.x, y: position.y + r.y };
+  };
+
+  if (component.type === 'ground') {
+    // Ground has a single connection point (its left lead).
+    return [
+      {
+        componentId,
+        terminalIndex: 0,
+        nodeId: component.nodeId,
+        position: toLogical({ x: -halfW, y: 0 }),
+      },
+    ];
+  }
+
+  return component.terminals.map((terminal, index) => ({
+    componentId,
+    terminalIndex: index,
+    nodeId: terminal.nodeId,
+    position: toLogical({ x: index === 0 ? -halfW : halfW, y: 0 }),
+  }));
+}
+
+/**
+ * Find the closest terminal within `hitRadius` of `point` (logical space).
+ * Returns null when no terminal is within range or the component map is empty.
+ * Later components in the array take precedence on equal distance (topmost).
+ */
+export function findTerminalAt(
+  point: Point,
+  canvasComponents: CanvasComponent[],
+  componentMap: Map<ComponentId, Component>,
+  hitRadius = TERMINAL_HIT_RADIUS
+): TerminalAnchor | null {
+  let best: TerminalAnchor | null = null;
+  let bestDist = Infinity;
+  const radiusSq = hitRadius * hitRadius;
+
+  for (const canvasComp of canvasComponents) {
+    const component = componentMap.get(canvasComp.componentId);
+    if (!component) continue;
+
+    for (const anchor of getTerminalAnchors(canvasComp, component)) {
+      const dx = anchor.position.x - point.x;
+      const dy = anchor.position.y - point.y;
+      const distSq = dx * dx + dy * dy;
+      if (distSq <= radiusSq && distSq <= bestDist) {
+        best = anchor;
+        bestDist = distSq;
+      }
+    }
+  }
+
+  return best;
+}
+
+/**
+ * Shortest distance from a point to a line segment (logical space).
+ * Used for wire hit testing.
+ */
+export function distanceToSegment(
+  point: Point,
+  from: Point,
+  to: Point
+): number {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const lenSq = dx * dx + dy * dy;
+  if (lenSq === 0) {
+    return Math.hypot(point.x - from.x, point.y - from.y);
+  }
+  let t = ((point.x - from.x) * dx + (point.y - from.y) * dy) / lenSq;
+  t = Math.max(0, Math.min(1, t));
+  const projX = from.x + t * dx;
+  const projY = from.y + t * dy;
+  return Math.hypot(point.x - projX, point.y - projY);
 }

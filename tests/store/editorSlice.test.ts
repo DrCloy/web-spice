@@ -13,6 +13,7 @@ import editorReducer, {
   rotateComponent,
   selectComponent,
   selectComponents,
+  selectWire,
   setActiveTool,
   setGridSize,
   setViewport,
@@ -181,6 +182,48 @@ describe('editorSlice', () => {
       };
       const state = editorReducer(prev, removeWire('w1'));
       expect(state.selectedWireIds).toEqual([]);
+    });
+  });
+
+  describe('selectWire', () => {
+    it('should set isSelected=true on the wire and update selectedWireIds', () => {
+      const prev = { ...initialState, wires: [WIRE_A] };
+      const state = editorReducer(prev, selectWire('w1'));
+      expect(state.wires[0].isSelected).toBe(true);
+      expect(state.selectedWireIds).toEqual(['w1']);
+    });
+
+    it('should clear component selection when a wire is selected', () => {
+      const prev = {
+        ...initialState,
+        components: [{ ...COMP_A, isSelected: true }],
+        selectedComponentIds: ['R1'],
+        wires: [WIRE_A],
+      };
+      const state = editorReducer(prev, selectWire('w1'));
+      expect(state.components[0].isSelected).toBe(false);
+      expect(state.selectedComponentIds).toEqual([]);
+      expect(state.selectedWireIds).toEqual(['w1']);
+    });
+
+    it('should deselect other wires (mutually exclusive)', () => {
+      const wireB = { ...WIRE_A, wireId: 'w2', isSelected: true };
+      const prev = {
+        ...initialState,
+        wires: [{ ...WIRE_A }, wireB],
+        selectedWireIds: ['w2'],
+      };
+      const state = editorReducer(prev, selectWire('w1'));
+      expect(state.wires[0].isSelected).toBe(true);
+      expect(state.wires[1].isSelected).toBe(false);
+      expect(state.selectedWireIds).toEqual(['w1']);
+    });
+
+    it('should be a no-op when wireId does not exist', () => {
+      const prev = { ...initialState, wires: [WIRE_A] };
+      const state = editorReducer(prev, selectWire('nope'));
+      expect(state.selectedWireIds).toEqual([]);
+      expect(state.wires[0].isSelected).toBe(false);
     });
   });
 

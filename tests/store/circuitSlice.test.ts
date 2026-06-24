@@ -5,14 +5,17 @@ import circuitReducer, {
   loadCircuit,
   markClean,
   markDirty,
+  mergeNodes,
   redo,
   resetCircuit,
   undo,
 } from '@/store/circuitSlice';
 import type { CircuitState } from '@/store/types';
-import type { Terminal } from '@/types/component';
+import type { Component, Terminal } from '@/types/component';
+import type { Circuit } from '@/types/circuit';
 import { MAX_HISTORY } from '@/store/types';
 import { SIMPLE_RESISTOR_10V, VOLTAGE_DIVIDER_12V } from '../fixtures/circuits';
+import { createGround, createResistor } from '../factories/components';
 
 const circuitA = VOLTAGE_DIVIDER_12V.circuit;
 const circuitB = SIMPLE_RESISTOR_10V.circuit;
@@ -281,6 +284,160 @@ describe('circuitSlice', () => {
       expect(circuitA.nodes.length).toBeGreaterThan(0);
       const state = circuitReducer(withCircuit, addComponent(resistor));
       expect(state.current?.nodes).toEqual(circuitA.nodes);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // mergeNodes
+  // -------------------------------------------------------------------------
+
+  describe('mergeNodes', () => {
+    // R1: a-b, R2: b-c, GND on node 'g'
+    const makeCircuit = (): Circuit => ({
+      id: 'merge-test',
+      name: 'Merge Test',
+      groundNodeId: 'g',
+      nodes: [],
+      components: [
+        createResistor({ id: 'R1', resistance: 100, nodes: ['a', 'b'] }),
+        createResistor({ id: 'R2', resistance: 200, nodes: ['b', 'c'] }),
+        createGround({ id: 'GND', nodeId: 'g' }),
+      ] as Component[],
+    });
+
+    const nodeIdsOf = (circuit: Circuit | null): string[] => {
+      if (!circuit) return [];
+      const ids: string[] = [];
+      for (const comp of circuit.components) {
+        if (comp.type === 'ground') ids.push(comp.nodeId);
+        else for (const t of comp.terminals) ids.push(t.nodeId);
+      }
+      return ids;
+    };
+
+    it('replaces every occurrence of fromNodeId with toNodeId', () => {
+      const start: CircuitState = {
+        past: [],
+        current: makeCircuit(),
+        future: [],
+        isDirty: false,
+      };
+      const state = circuitReducer(
+        start,
+        mergeNodes({ fromNodeId: 'c', toNodeId: 'a' })
+      );
+      const ids = nodeIdsOf(state.current);
+      expect(ids).not.toContain('c');
+      // R2's second terminal (was 'c') now 'a'
+      const r2 = state.current?.components.find(
+        c => c.id === 'R2'
+      ) as Component & { terminals: Terminal[] };
+      expect(r2.terminals[1].nodeId).toBe('a');
+    });
+
+    it('pushes history and sets isDirty', () => {
+      const circuit = makeCircuit();
+      const start: CircuitState = {
+        past: [],
+        current: circuit,
+        future: [circuit],
+        isDirty: false,
+      };
+      const state = circuitReducer(
+        start,
+        mergeNodes({ fromNodeId: 'b', toNodeId: 'a' })
+      );
+      expect(state.past).toEqual([circuit]);
+      expect(state.future).toEqual([]);
+      expect(state.isDirty).toBe(true);
+    });
+
+    it('always merges toward ground when one side is ground', () => {
+      const start: CircuitState = {
+        past: [],
+        current: makeCircuit(),
+        future: [],
+        isDirty: false,
+      };
+      // from=ground 'g', to non-ground 'a' -> result must keep 'g' on node 'a'
+      const state = circuitReducer(
+        start,
+        mergeNodes({ fromNodeId: 'g', toNodeId: 'a' })
+      );
+      const ids = nodeIdsOf(state.current);
+      expect(ids).not.toContain('a'); // 'a' absorbed into ground
+      expect(ids).toContain('g');
+      expect(state.current?.groundNodeId).toBe('g');
+    });
+
+    it('preserves groundNodeId when merging a normal node into ground', () => {
+      const start: CircuitState = {
+        past: [],
+        current: makeCircuit(),
+        future: [],
+        isDirty: false,
+      };
+      const state = circuitReducer(
+        start,
+        mergeNodes({ fromNodeId: 'a', toNodeId: 'g' })
+      );
+      expect(state.current?.groundNodeId).toBe('g');
+      const ids = nodeIdsOf(state.current);
+      expect(ids).not.toContain('a');
+    });
+
+    it('is a no-op when current is null', () => {
+      const before: CircuitState = {
+        past: [],
+        current: null,
+        future: [],
+        isDirty: false,
+      };
+      const state = circuitReducer(
+        before,
+        mergeNodes({ fromNodeId: 'a', toNodeId: 'b' })
+      );
+      expect(state).toEqual(before);
+    });
+
+    it('is a no-op when fromNodeId equals toNodeId', () => {
+      const start: CircuitState = {
+        past: [],
+        current: makeCircuit(),
+        future: [],
+        isDirty: false,
+      };
+      const state = circuitReducer(
+        start,
+        mergeNodes({ fromNodeId: 'a', toNodeId: 'a' })
+      );
+      expect(state.past).toEqual([]);
+      expect(state.isDirty).toBe(false);
+    });
+
+    it('merges node metadata when nodes array is populated', () => {
+      const circuit = makeCircuit();
+      circuit.nodes = [
+        { id: 'a', isGround: false, connectedComponents: ['R1'] },
+        { id: 'c', isGround: false, connectedComponents: ['R2'] },
+      ];
+      const start: CircuitState = {
+        past: [],
+        current: circuit,
+        future: [],
+        isDirty: false,
+      };
+      const state = circuitReducer(
+        start,
+        mergeNodes({ fromNodeId: 'c', toNodeId: 'a' })
+      );
+      const nodes = state.current?.nodes ?? [];
+      expect(nodes.find(n => n.id === 'c')).toBeUndefined();
+      const aNode = nodes.find(n => n.id === 'a');
+      expect([...(aNode?.connectedComponents ?? [])].sort()).toEqual([
+        'R1',
+        'R2',
+      ]);
     });
   });
 

@@ -6,11 +6,14 @@ import {
   drawGround,
   drawInductor,
   drawResistor,
+  drawTerminalDot,
   drawVoltageSource,
+  drawWire,
+  drawWirePreview,
 } from '@/components/circuit/symbolRenderer';
 
 import { LIGHT_CANVAS_COLORS } from '@/theme/canvasColors';
-import type { Point, Rotation, Viewport } from '@/types/editor';
+import type { CanvasWire, Point, Rotation, Viewport } from '@/types/editor';
 
 // ---------------------------------------------------------------------------
 // Mock CanvasRenderingContext2D
@@ -155,6 +158,60 @@ describe('symbolRenderer', () => {
       expect(() =>
         drawGround(ctx, CENTER, ROTATION, VIEWPORT, false, COLORS)
       ).not.toThrow();
+    });
+  });
+
+  describe('drawWire', () => {
+    const wire: CanvasWire = {
+      wireId: 'w1',
+      fromNodeId: 'n1',
+      toNodeId: 'n2',
+      segments: [{ from: { x: 0, y: 0 }, to: { x: 50, y: 0 } }],
+      isSelected: false,
+    };
+
+    it('should stroke each segment', () => {
+      const ctx = makeCtx();
+      drawWire(ctx, wire, VIEWPORT, COLORS);
+      expect(ctx.moveTo).toHaveBeenCalledOnce();
+      expect(ctx.lineTo).toHaveBeenCalledOnce();
+      expect(ctx.stroke).toHaveBeenCalledOnce();
+    });
+
+    it('should use the highlight color and heavier stroke when selected', () => {
+      const ctx = makeCtx();
+      drawWire(ctx, { ...wire, isSelected: true }, VIEWPORT, COLORS);
+      expect(ctx.strokeStyle).toBe(COLORS.selected);
+      expect(ctx.lineWidth).toBe(3);
+    });
+
+    it('should be a no-op for an empty segment list', () => {
+      const ctx = makeCtx();
+      drawWire(ctx, { ...wire, segments: [] }, VIEWPORT, COLORS);
+      expect(ctx.stroke).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('drawWirePreview', () => {
+    it('should draw a dashed preview line', () => {
+      const ctx = makeCtx();
+      drawWirePreview(
+        ctx,
+        [{ from: { x: 0, y: 0 }, to: { x: 10, y: 10 } }],
+        VIEWPORT,
+        COLORS
+      );
+      expect(ctx.setLineDash).toHaveBeenCalled();
+      expect(ctx.stroke).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe('drawTerminalDot', () => {
+    it('should fill a small circle at the terminal', () => {
+      const ctx = makeCtx();
+      drawTerminalDot(ctx, { x: 10, y: 20 }, VIEWPORT, COLORS);
+      expect(ctx.arc).toHaveBeenCalledOnce();
+      expect(ctx.fill).toHaveBeenCalledOnce();
     });
   });
 });

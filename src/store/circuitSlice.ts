@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import type { Circuit } from '@/types/circuit';
-import type { Component } from '@/types/component';
+import type { Circuit, Node } from '@/types/circuit';
+import type { Component, NodeId } from '@/types/component';
 import type { CircuitState } from '@/store/types';
 import { MAX_HISTORY } from '@/store/types';
 
@@ -87,6 +87,82 @@ const circuitSlice = createSlice({
       state.future = [];
       state.isDirty = true;
     },
+
+    /**
+     * Merge two electrical nodes into one. Every component terminal (and ground
+     * reference) whose nodeId equals `fromNodeId` is rewritten to `toNodeId`.
+     *
+     * Ground rule: if either side is the circuit's ground node, the result is
+     * always the ground node — i.e. the non-ground node is absorbed into ground.
+     * No-op when current is null, the ids are equal, or no terminal uses
+     * `fromNodeId`.
+     */
+    mergeNodes(
+      state,
+      action: PayloadAction<{ fromNodeId: NodeId; toNodeId: NodeId }>
+    ) {
+      const prev = state.current;
+      if (prev === null) return;
+
+      const groundId = prev.groundNodeId;
+      let { fromNodeId, toNodeId } = action.payload;
+
+      // Ground always wins: absorb the other node into ground.
+      if (toNodeId === groundId && fromNodeId === groundId) return;
+      if (fromNodeId === groundId) {
+        [fromNodeId, toNodeId] = [toNodeId, fromNodeId];
+      }
+
+      if (fromNodeId === toNodeId) return;
+
+      const rewriteId = (id: NodeId): NodeId =>
+        id === fromNodeId ? toNodeId : id;
+
+      const components: Component[] = prev.components.map(comp => {
+        if (comp.type === 'ground') {
+          return comp.nodeId === fromNodeId
+            ? { ...comp, nodeId: toNodeId }
+            : comp;
+        }
+        const touched = comp.terminals.some(t => t.nodeId === fromNodeId);
+        if (!touched) return comp;
+        return {
+          ...comp,
+          terminals: comp.terminals.map(t => ({
+            ...t,
+            nodeId: rewriteId(t.nodeId),
+          })),
+        } as Component;
+      });
+
+      // Merge node metadata when the nodes array is populated.
+      let nodes: Node[] = prev.nodes;
+      if (nodes.length > 0) {
+        const fromNode = nodes.find(n => n.id === fromNodeId);
+        nodes = nodes
+          .filter(n => n.id !== fromNodeId)
+          .map(n => {
+            if (n.id !== toNodeId || !fromNode) return n;
+            const merged = new Set([
+              ...n.connectedComponents,
+              ...fromNode.connectedComponents,
+            ]);
+            return { ...n, connectedComponents: [...merged] };
+          });
+      }
+
+      state.past = pushBounded(state.past, prev);
+      state.current = {
+        id: prev.id,
+        name: prev.name,
+        description: prev.description,
+        groundNodeId: groundId,
+        components,
+        nodes,
+      };
+      state.future = [];
+      state.isDirty = true;
+    },
   },
 });
 
@@ -99,6 +175,7 @@ export const {
   markDirty,
   markClean,
   addComponent,
+  mergeNodes,
 } = circuitSlice.actions;
 
 export default circuitSlice.reducer;
