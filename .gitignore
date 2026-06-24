@@ -30,6 +30,9 @@ coverage/
 .vscode/
 .idea/
 
+# Claude Code local settings (personal, not shared)
+.claude/settings.local.json
+
 # OS generated files
 .DS_Store
 Thumbs.db

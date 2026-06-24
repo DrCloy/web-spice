@@ -10,9 +10,11 @@
 import type { Component } from '@/types/component';
 import type {
   CanvasComponent,
+  CanvasWire,
   Point,
   Rotation,
   Viewport,
+  WireSegment,
 } from '@/types/editor';
 import type { CanvasColors } from '@/theme/canvasColors';
 import { SYMBOL_HEIGHT, SYMBOL_WIDTH, logicalToScreen } from '@/utils/canvas';
@@ -385,6 +387,84 @@ export function drawComponentLabel(
   ctx.textBaseline = 'top';
   ctx.fillText(label, 0, SYMBOL_HEIGHT / 2 + 4);
 
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------------
+// Wires (Task #20)
+// ---------------------------------------------------------------------------
+
+/** Draw the polyline of a wire's segments in logical space. */
+function strokeSegments(
+  ctx: CanvasRenderingContext2D,
+  segments: WireSegment[],
+  viewport: Viewport
+): void {
+  ctx.beginPath();
+  for (const seg of segments) {
+    const from = logicalToScreen(seg.from, viewport);
+    const to = logicalToScreen(seg.to, viewport);
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x, to.y);
+  }
+  ctx.stroke();
+}
+
+/**
+ * Draw a wire as a sequence of straight segments. Segments are stored in
+ * logical coordinates and converted per-vertex (no canvas transform applied).
+ * Selected wires use the highlight color and a heavier stroke.
+ */
+export function drawWire(
+  ctx: CanvasRenderingContext2D,
+  wire: CanvasWire,
+  viewport: Viewport,
+  colors: CanvasColors
+): void {
+  if (wire.segments.length === 0) return;
+  ctx.save();
+  const width = wire.isSelected ? 3 : 2;
+  setLineStyle(ctx, wire.isSelected ? colors.selected : colors.stroke, width);
+  strokeSegments(ctx, wire.segments, viewport);
+  ctx.restore();
+}
+
+/**
+ * Draw a dashed preview wire (used while the user drags a new connection).
+ */
+export function drawWirePreview(
+  ctx: CanvasRenderingContext2D,
+  segments: WireSegment[],
+  viewport: Viewport,
+  colors: CanvasColors
+): void {
+  if (segments.length === 0) return;
+  ctx.save();
+  setLineStyle(ctx, colors.selected, 1.5);
+  ctx.setLineDash([5, 4]);
+  strokeSegments(ctx, segments, viewport);
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+/**
+ * Draw a small filled dot at a terminal position (logical coordinates).
+ * Shown when the wire tool is active so connection points are visible.
+ */
+export function drawTerminalDot(
+  ctx: CanvasRenderingContext2D,
+  position: Point,
+  viewport: Viewport,
+  colors: CanvasColors,
+  highlighted = false
+): void {
+  ctx.save();
+  const screen = logicalToScreen(position, viewport);
+  const radius = (highlighted ? 5 : 3.5) * Math.min(1, viewport.scale) || 3.5;
+  ctx.beginPath();
+  ctx.arc(screen.x, screen.y, radius, 0, Math.PI * 2);
+  ctx.fillStyle = highlighted ? colors.selected : colors.stroke;
+  ctx.fill();
   ctx.restore();
 }
 

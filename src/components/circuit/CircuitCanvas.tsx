@@ -1,19 +1,33 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/hooks/store';
 import {
+  addWire,
   deselectAll,
   panViewport,
   placeComponent,
+  selectActiveTool,
   selectAllCanvasComponents,
+  selectAllWires,
   selectComponent,
   selectGridSize,
   selectShowGrid,
   selectViewport,
+  selectWire,
   zoomViewport,
 } from '@/store/editorSlice';
-import { addComponent } from '@/store/circuitSlice';
+import { addComponent, mergeNodes } from '@/store/circuitSlice';
 import { useCanvasColors } from '@/contexts/ThemeContext';
-import { findHitComponent, screenToLogical, snapToGrid } from '@/utils/canvas';
+import {
+  TERMINAL_HIT_RADIUS,
+  distanceToSegment,
+  findHitComponent,
+  findTerminalAt,
+  screenToLogical,
+  snapToGrid,
+} from '@/utils/canvas';
+import type { Component, ComponentId } from '@/types/component';
+import type { TerminalAnchor } from '@/utils/canvas';
+import type { CanvasWire, WireSegment } from '@/types/editor';
 import {
   createDefaultComponent,
   generateComponentId,
@@ -31,6 +45,18 @@ interface CircuitCanvasProps {
   'aria-label'?: string;
 }
 
+/** Generate a unique wire id not colliding with existing wires. */
+function nextWireId(wires: CanvasWire[]): string {
+  const existing = new Set(wires.map(w => w.wireId));
+  let n = wires.length + 1;
+  let id = `w${n}`;
+  while (existing.has(id)) {
+    n += 1;
+    id = `w${n}`;
+  }
+  return id;
+}
+
 export function CircuitCanvas({
   className,
   'aria-label': ariaLabel,
@@ -41,13 +67,28 @@ export function CircuitCanvas({
 
   const circuit = useAppSelector(s => s.circuit.current);
   const canvasComponents = useAppSelector(selectAllCanvasComponents);
+  const wires = useAppSelector(selectAllWires);
   const viewport = useAppSelector(selectViewport);
   const gridSize = useAppSelector(selectGridSize);
   const showGrid = useAppSelector(selectShowGrid);
+  const activeTool = useAppSelector(selectActiveTool);
 
   const [size, setSize] = useState({ width: 800, height: 600 });
 
   const colors = useCanvasColors();
+
+  // Wire-drag state. Ref drives event handlers; preview state drives re-render.
+  const wireDragRef = useRef<TerminalAnchor | null>(null);
+  const [wirePreview, setWirePreview] = useState<WireSegment[] | null>(null);
+
+  // Map from componentId to its full Component (for terminal lookup).
+  const componentMap = useMemo(
+    () =>
+      new Map<ComponentId, Component>(
+        (circuit?.components ?? []).map(c => [c.id, c])
+      ),
+    [circuit]
+  );
 
   // Canvas focus state — Space key panning is scoped to canvas focus only
   const canvasFocusedRef = useRef(false);
@@ -84,8 +125,22 @@ export function CircuitCanvas({
       width: size.width,
       height: size.height,
       colors,
+      wires,
+      activeTool,
+      wirePreview,
     });
-  }, [circuit, canvasComponents, viewport, gridSize, showGrid, size, colors]);
+  }, [
+    circuit,
+    canvasComponents,
+    wires,
+    viewport,
+    gridSize,
+    showGrid,
+    size,
+    colors,
+    activeTool,
+    wirePreview,
+  ]);
 
   // -------------------------------------------------------------------------
   // Pan state (middle mouse / space+drag)
@@ -148,6 +203,26 @@ export function CircuitCanvas({
     };
   }, [dispatch]);
 
+  // Wire hit test — closest wire within a screen-scaled tolerance.
+  const findWireAt = useCallback(
+    (logicalPos: { x: number; y: number }): CanvasWire | null => {
+      const tolerance = TERMINAL_HIT_RADIUS / viewport.scale;
+      let best: CanvasWire | null = null;
+      let bestDist = Infinity;
+      for (const wire of wires) {
+        for (const seg of wire.segments) {
+          const d = distanceToSegment(logicalPos, seg.from, seg.to);
+          if (d <= tolerance && d < bestDist) {
+            best = wire;
+            bestDist = d;
+          }
+        }
+      }
+      return best;
+    },
+    [wires, viewport.scale]
+  );
+
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
       if (e.button === 1 || (e.button === 0 && isSpaceHeldRef.current)) {
@@ -160,21 +235,54 @@ export function CircuitCanvas({
       }
 
       if (e.button === 0) {
-        // Left click — hit test
         const canvas = canvasRef.current;
         if (!canvas) return;
         const rect = canvas.getBoundingClientRect();
         const screenPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
         const logicalPos = screenToLogical(screenPos, viewport);
+
+        if (activeTool === 'wire') {
+          // Begin a wire drag from the nearest terminal.
+          const start = findTerminalAt(
+            logicalPos,
+            canvasComponents,
+            componentMap
+          );
+          if (start) {
+            wireDragRef.current = start;
+            setWirePreview([{ from: start.position, to: start.position }]);
+          }
+          return;
+        }
+
+        // Select tool — prefer component hit, then wire hit, else clear.
         const hit = findHitComponent(logicalPos, canvasComponents);
         if (hit) {
           dispatch(selectComponent(hit.componentId));
+          return;
+        }
+        const wireHit = findWireAt(logicalPos);
+        if (wireHit) {
+          dispatch(selectWire(wireHit.wireId));
         } else {
           dispatch(deselectAll());
         }
       }
     },
-    [viewport, canvasComponents, dispatch]
+    [viewport, canvasComponents, activeTool, componentMap, findWireAt, dispatch]
+  );
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (activeTool !== 'wire' || !wireDragRef.current) return;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      const screenPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      const logicalPos = screenToLogical(screenPos, viewport);
+      setWirePreview([{ from: wireDragRef.current.position, to: logicalPos }]);
+    },
+    [activeTool, viewport]
   );
 
   const handleMouseUp = useCallback(
@@ -186,8 +294,53 @@ export function CircuitCanvas({
           setIsPanning(false);
         }
       }
+
+      // Complete a wire drag (left button only).
+      if (e.button === 0 && wireDragRef.current) {
+        const start = wireDragRef.current;
+        wireDragRef.current = null;
+        setWirePreview(null);
+
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        const screenPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        const logicalPos = screenToLogical(screenPos, viewport);
+        const end = findTerminalAt(logicalPos, canvasComponents, componentMap);
+
+        // Ignore: no target, same terminal, or same component+terminal.
+        if (
+          !end ||
+          (end.componentId === start.componentId &&
+            end.terminalIndex === start.terminalIndex)
+        ) {
+          return;
+        }
+        // Already on the same electrical node — nothing to merge or draw.
+        if (end.nodeId === start.nodeId) return;
+
+        const wireId = nextWireId(wires);
+        // mergeNodes uses ground-priority: the non-ground node is absorbed into
+        // the ground node. Pre-compute which node survives so the wire stores
+        // stable, post-merge nodeIds on both endpoints.
+        const groundNodeId = circuit?.groundNodeId ?? '0';
+        const survivingNodeId =
+          end.nodeId === groundNodeId ? end.nodeId : start.nodeId;
+        dispatch(
+          addWire({
+            wireId,
+            fromNodeId: survivingNodeId,
+            toNodeId: survivingNodeId,
+            segments: [{ from: start.position, to: end.position }],
+            isSelected: false,
+          })
+        );
+        dispatch(
+          mergeNodes({ fromNodeId: end.nodeId, toNodeId: start.nodeId })
+        );
+      }
     },
-    []
+    [viewport, canvasComponents, wires, componentMap, circuit, dispatch]
   );
 
   // -------------------------------------------------------------------------
@@ -274,6 +427,7 @@ export function CircuitCanvas({
           cursor: isPanning ? 'grabbing' : isSpaceHeld ? 'grab' : 'default',
         }}
         onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onDragOver={handleDragOver}
         onDrop={handleDrop}

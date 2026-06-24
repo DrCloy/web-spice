@@ -76,16 +76,16 @@ npm run web-spice -- analyze ./examples/voltage_divider.json
 | ✅ #17 | FEAT | Canvas 기반 회로 에디터 구현 | HTML5 Canvas를 이용한 회로도 편집기                                                                                                                                       | HIGH     | #8     |
 | ✅ #18 | FEAT | 컴포넌트 팔레트 UI 구현      | 드래그 가능한 컴포넌트 라이브러리 UI. ThemeProvider(세션 기반 다크/라이트 토글) + CanvasColors TS 상수(CSS 브릿지 제거) + IEEE 표준 심볼(지그재그 저항, 반원 인덕터) 포함 | HIGH     | #17    |
 | ✅ #19 | FEAT | 드래그앤드롭 컴포넌트 배치   | 마우스/터치로 컴포넌트 배치 기능 (drop 핸들러, 좌표 변환, addComponent 액션 포함 — #18에서 이관)                                                                          | HIGH     | #18    |
-| #20    | FEAT | 와이어 연결 시스템 구현      | 컴포넌트 간 전기적 연결 관리                                                                                                                                              | HIGH     | #19    |
+| ✅ #20 | FEAT | 와이어 연결 시스템 구현      | 컴포넌트 간 전기적 연결 관리                                                                                                                                              | HIGH     | #19    |
 
 ### Advanced Analysis
 
-| ID  | 타입 | 제목                          | 설명                              | 우선순위 | 의존성        |
-| --- | ---- | ----------------------------- | --------------------------------- | -------- | ------------- |
-| #21 | FEAT | 캐패시터(Capacitor) 모델 구현 | 주파수 의존적 임피던스, AC 해석용 | HIGH     | #1, #3        |
-| #22 | FEAT | 인덕터(Inductor) 모델 구현    | 주파수 의존적 임피던스, AC 해석용 | HIGH     | #1, #3        |
-| #23 | FEAT | AC 분석 엔진 구현             | 주파수 영역 해석, 복소수 연산     | HIGH     | #21, #22, #11 |
-| #24 | FEAT | 주파수 응답 계산기 구현       | Bode plot용 주파수 스위핑         | HIGH     | #23           |
+| ID     | 타입 | 제목                          | 설명                              | 우선순위 | 의존성        |
+| ------ | ---- | ----------------------------- | --------------------------------- | -------- | ------------- |
+| ✅ #21 | FEAT | 캐패시터(Capacitor) 모델 구현 | 주파수 의존적 임피던스, AC 해석용 | HIGH     | #1, #3        |
+| ✅ #22 | FEAT | 인덕터(Inductor) 모델 구현    | 주파수 의존적 임피던스, AC 해석용 | HIGH     | #1, #3        |
+| #23    | FEAT | AC 분석 엔진 구현             | 주파수 영역 해석, 복소수 연산     | HIGH     | #21, #22, #11 |
+| #24    | FEAT | 주파수 응답 계산기 구현       | Bode plot용 주파수 스위핑         | HIGH     | #23           |
 
 ### Visualization
 
@@ -265,5 +265,5 @@ webspice-cli voltage_divider.json  # → 콘솔 결과 출력
 
 **이 문서는 개발 진행에 따라 지속적으로 업데이트됩니다.**
 
-Last Updated: 2026-06-24 (Task #19 드래그앤드롭 컴포넌트 배치 완료 — componentFactory, addComponent, drop 핸들러)
-Next Review: Phase 2 착수시
+Last Updated: 2026-06-24 (Task #20 와이어 연결 시스템 완료 — terminal hit-test, mergeNodes, wire 렌더; #21/#22 완료 표시 반영)
+Next Review: #23 AC 분석 엔진 완료 시

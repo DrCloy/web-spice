@@ -85,6 +85,19 @@ const editorSlice = createSlice({
       );
     },
 
+    selectWire(state, action: PayloadAction<string>) {
+      const exists = state.wires.some(w => w.wireId === action.payload);
+      if (!exists) return;
+      for (const wire of state.wires) {
+        wire.isSelected = wire.wireId === action.payload;
+      }
+      state.selectedWireIds = [action.payload];
+      for (const comp of state.components) {
+        comp.isSelected = false;
+      }
+      state.selectedComponentIds = [];
+    },
+
     // -- Selection --
 
     selectComponent(state, action: PayloadAction<ComponentId>) {
@@ -225,6 +238,7 @@ export const {
   removeCanvasComponent,
   addWire,
   removeWire,
+  selectWire,
   selectComponent,
   selectComponents,
   deselectAll,
@@ -256,6 +270,11 @@ export const selectViewport = (state: AppState) => state.editor.viewport;
 
 export const selectSelectedComponentIds = (state: AppState) =>
   state.editor.selectedComponentIds;
+
+export const selectAllWires = (state: AppState) => state.editor.wires;
+
+export const selectSelectedWireIds = (state: AppState) =>
+  state.editor.selectedWireIds;
 
 export const selectGridSize = (state: AppState) => state.editor.gridSize;
 

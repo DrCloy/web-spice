@@ -1,23 +1,33 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SYMBOL_WIDTH,
+  TERMINAL_HIT_RADIUS,
   autoLayoutComponents,
   calculateZoom,
+  distanceToSegment,
   findHitComponent,
+  findTerminalAt,
   fitViewportToCircuit,
   getCircuitBounds,
   getComponentBounds,
+  getTerminalAnchors,
   hitTestComponent,
   logicalToScreen,
   screenToLogical,
   snapToGrid,
 } from '@/utils/canvas';
+import type { Component, ComponentId } from '@/types/component';
 import type { CanvasComponent, Viewport } from '@/types/editor';
 import {
   DEFAULT_VIEWPORT,
   VIEWPORT_SCALE_MAX,
   VIEWPORT_SCALE_MIN,
 } from '@/types/editor';
-import { createDCVoltageSource, createResistor } from '../factories/components';
+import {
+  createDCVoltageSource,
+  createGround,
+  createResistor,
+} from '../factories/components';
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -338,5 +348,167 @@ describe('autoLayoutComponents', () => {
     const result = autoLayoutComponents([r1]);
     expect(result[0].position.x % 20).toBe(0);
     expect(result[0].position.y % 20).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getTerminalAnchors
+// ---------------------------------------------------------------------------
+
+describe('getTerminalAnchors', () => {
+  const halfW = SYMBOL_WIDTH / 2;
+  const resistor = createResistor({
+    id: 'R1',
+    resistance: 1000,
+    nodes: ['n1', 'n2'],
+  });
+
+  const canvasAt = (rotation: 0 | 90 | 180 | 270): CanvasComponent => ({
+    componentId: 'R1',
+    position: { x: 100, y: 100 },
+    rotation,
+    isSelected: false,
+  });
+
+  it('should place terminals at left/right leads for rotation 0', () => {
+    const anchors = getTerminalAnchors(canvasAt(0), resistor);
+    expect(anchors).toHaveLength(2);
+    expect(anchors[0]).toMatchObject({
+      componentId: 'R1',
+      terminalIndex: 0,
+      nodeId: 'n1',
+    });
+    expect(anchors[0].position.x).toBeCloseTo(100 - halfW);
+    expect(anchors[0].position.y).toBeCloseTo(100);
+    expect(anchors[1]).toMatchObject({ terminalIndex: 1, nodeId: 'n2' });
+    expect(anchors[1].position.x).toBeCloseTo(100 + halfW);
+    expect(anchors[1].position.y).toBeCloseTo(100);
+  });
+
+  it('should rotate terminals 90deg (left lead points down)', () => {
+    const anchors = getTerminalAnchors(canvasAt(90), resistor);
+    // rotate(-halfW,0) by 90 -> (0,-halfW)
+    expect(anchors[0].position.x).toBeCloseTo(100);
+    expect(anchors[0].position.y).toBeCloseTo(100 - halfW);
+    expect(anchors[1].position.x).toBeCloseTo(100);
+    expect(anchors[1].position.y).toBeCloseTo(100 + halfW);
+  });
+
+  it('should rotate terminals 180deg (swap left/right)', () => {
+    const anchors = getTerminalAnchors(canvasAt(180), resistor);
+    expect(anchors[0].position.x).toBeCloseTo(100 + halfW);
+    expect(anchors[0].position.y).toBeCloseTo(100);
+    expect(anchors[1].position.x).toBeCloseTo(100 - halfW);
+    expect(anchors[1].position.y).toBeCloseTo(100);
+  });
+
+  it('should rotate terminals 270deg', () => {
+    const anchors = getTerminalAnchors(canvasAt(270), resistor);
+    // rotate(-halfW,0) by 270 -> (0,+halfW)
+    expect(anchors[0].position.x).toBeCloseTo(100);
+    expect(anchors[0].position.y).toBeCloseTo(100 + halfW);
+    expect(anchors[1].position.x).toBeCloseTo(100);
+    expect(anchors[1].position.y).toBeCloseTo(100 - halfW);
+  });
+
+  it('should expose a single terminal for ground using its nodeId', () => {
+    const ground = createGround({ id: 'GND', nodeId: '0' });
+    const anchors = getTerminalAnchors(
+      {
+        componentId: 'GND',
+        position: { x: 50, y: 50 },
+        rotation: 0,
+        isSelected: false,
+      },
+      ground
+    );
+    expect(anchors).toHaveLength(1);
+    expect(anchors[0]).toMatchObject({
+      componentId: 'GND',
+      terminalIndex: 0,
+      nodeId: '0',
+    });
+    expect(anchors[0].position.x).toBeCloseTo(50 - halfW);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findTerminalAt
+// ---------------------------------------------------------------------------
+
+describe('findTerminalAt', () => {
+  const halfW = SYMBOL_WIDTH / 2;
+  const resistor = createResistor({
+    id: 'R1',
+    resistance: 1000,
+    nodes: ['n1', 'n2'],
+  });
+  const canvasComp: CanvasComponent = {
+    componentId: 'R1',
+    position: { x: 100, y: 100 },
+    rotation: 0,
+    isSelected: false,
+  };
+  const map = new Map<ComponentId, Component>([['R1', resistor]]);
+  const leftTerminal = { x: 100 - halfW, y: 100 };
+
+  it('should find the terminal exactly at its position', () => {
+    const hit = findTerminalAt(leftTerminal, [canvasComp], map);
+    expect(hit?.terminalIndex).toBe(0);
+    expect(hit?.nodeId).toBe('n1');
+  });
+
+  it('should find a terminal just inside the hit radius', () => {
+    const point = { x: leftTerminal.x + (TERMINAL_HIT_RADIUS - 0.1), y: 100 };
+    expect(findTerminalAt(point, [canvasComp], map)).not.toBeNull();
+  });
+
+  it('should return null just outside the hit radius', () => {
+    const point = { x: leftTerminal.x + (TERMINAL_HIT_RADIUS + 0.1), y: 100 };
+    expect(findTerminalAt(point, [canvasComp], map)).toBeNull();
+  });
+
+  it('should pick the closest of two nearby terminals', () => {
+    const hit = findTerminalAt({ x: 100 + halfW, y: 100 }, [canvasComp], map);
+    expect(hit?.terminalIndex).toBe(1);
+  });
+
+  it('should return null with an empty component map', () => {
+    expect(findTerminalAt(leftTerminal, [canvasComp], new Map())).toBeNull();
+  });
+
+  it('should ignore components missing from the map', () => {
+    const other: CanvasComponent = { ...canvasComp, componentId: 'X9' };
+    expect(findTerminalAt(leftTerminal, [other], map)).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// distanceToSegment
+// ---------------------------------------------------------------------------
+
+describe('distanceToSegment', () => {
+  it('should return 0 for a point on the segment', () => {
+    expect(
+      distanceToSegment({ x: 5, y: 0 }, { x: 0, y: 0 }, { x: 10, y: 0 })
+    ).toBeCloseTo(0);
+  });
+
+  it('should return perpendicular distance for a point beside the segment', () => {
+    expect(
+      distanceToSegment({ x: 5, y: 3 }, { x: 0, y: 0 }, { x: 10, y: 0 })
+    ).toBeCloseTo(3);
+  });
+
+  it('should clamp to the nearest endpoint beyond the segment', () => {
+    expect(
+      distanceToSegment({ x: -4, y: 0 }, { x: 0, y: 0 }, { x: 10, y: 0 })
+    ).toBeCloseTo(4);
+  });
+
+  it('should handle a zero-length segment as point distance', () => {
+    expect(
+      distanceToSegment({ x: 3, y: 4 }, { x: 0, y: 0 }, { x: 0, y: 0 })
+    ).toBeCloseTo(5);
   });
 });
