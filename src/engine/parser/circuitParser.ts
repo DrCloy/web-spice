@@ -3,6 +3,8 @@ import type { Component } from '@/types/component';
 import { WebSpiceError } from '@/types/circuit';
 import { CircuitImpl } from '@/engine/circuit';
 import { ResistorImpl } from '@/engine/components/resistor';
+import { CapacitorImpl } from '@/engine/components/capacitor';
+import { InductorImpl } from '@/engine/components/inductor';
 import { DCVoltageSourceImpl } from '@/engine/components/dcVoltageSource';
 import { DCCurrentSourceImpl } from '@/engine/components/dcCurrentSource';
 import { parseSIValue } from '@/engine/parser/siPrefix';
@@ -59,6 +61,10 @@ function parseComponent(json: ComponentJSON): Component {
   switch (json.type) {
     case 'resistor':
       return parseResistor(json);
+    case 'capacitor':
+      return parseCapacitor(json);
+    case 'inductor':
+      return parseInductor(json);
     case 'voltage_source':
       return parseVoltageSource(json);
     case 'current_source':
@@ -83,6 +89,44 @@ function parseResistor(json: ComponentJSON): Component {
     type: 'resistor',
     name: json.name,
     resistance: parseSIValue(json.parameters.resistance),
+    terminals: [
+      { name: 'terminal1', nodeId: json.nodes[0] },
+      { name: 'terminal2', nodeId: json.nodes[1] },
+    ],
+  });
+}
+
+function parseCapacitor(json: ComponentJSON): Component {
+  assertNodeCount(json, 2);
+  assertRequiredParameter(json, 'capacitance');
+
+  return new CapacitorImpl({
+    id: json.id,
+    type: 'capacitor',
+    name: json.name,
+    capacitance: parseSIValue(json.parameters.capacitance),
+    ...(json.parameters.initialVoltage !== undefined
+      ? { initialVoltage: parseSIValue(json.parameters.initialVoltage) }
+      : {}),
+    terminals: [
+      { name: 'pos', nodeId: json.nodes[0] },
+      { name: 'neg', nodeId: json.nodes[1] },
+    ],
+  });
+}
+
+function parseInductor(json: ComponentJSON): Component {
+  assertNodeCount(json, 2);
+  assertRequiredParameter(json, 'inductance');
+
+  return new InductorImpl({
+    id: json.id,
+    type: 'inductor',
+    name: json.name,
+    inductance: parseSIValue(json.parameters.inductance),
+    ...(json.parameters.initialCurrent !== undefined
+      ? { initialCurrent: parseSIValue(json.parameters.initialCurrent) }
+      : {}),
     terminals: [
       { name: 'terminal1', nodeId: json.nodes[0] },
       { name: 'terminal2', nodeId: json.nodes[1] },

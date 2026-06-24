@@ -278,11 +278,11 @@ describe('DC Analysis Pipeline', () => {
         ground: '0',
         components: [
           {
-            id: 'C1',
-            type: 'capacitor',
-            name: 'C1',
+            id: 'D1',
+            type: 'diode',
+            name: 'D1',
             nodes: ['1', '0'],
-            parameters: { capacitance: 1e-6 },
+            parameters: { modelName: 'default' },
           },
         ],
       };
