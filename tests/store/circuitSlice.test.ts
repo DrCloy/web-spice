@@ -272,6 +272,16 @@ describe('circuitSlice', () => {
       const afterUndo = circuitReducer(afterAdd, undo());
       expect(afterUndo.current).toBeNull();
     });
+
+    it('preserves existing circuit nodes when adding a component', () => {
+      const withCircuit: typeof initialState = {
+        ...initialState,
+        current: circuitA,
+      };
+      expect(circuitA.nodes.length).toBeGreaterThan(0);
+      const state = circuitReducer(withCircuit, addComponent(resistor));
+      expect(state.current?.nodes).toEqual(circuitA.nodes);
+    });
   });
 
   describe('MAX_HISTORY', () => {

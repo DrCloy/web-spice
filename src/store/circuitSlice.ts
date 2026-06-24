@@ -82,7 +82,7 @@ const circuitSlice = createSlice({
         description: prev?.description,
         groundNodeId: prev?.groundNodeId ?? '0',
         components: [...prevComponents, action.payload],
-        nodes: [],
+        nodes: prev?.nodes ?? [],
       };
       state.future = [];
       state.isDirty = true;
