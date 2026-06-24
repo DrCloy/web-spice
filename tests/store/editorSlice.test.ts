@@ -165,6 +165,36 @@ describe('editorSlice', () => {
       expect(state.wires).toHaveLength(1);
       expect(state.wires[0]).toEqual(WIRE_A);
     });
+
+    it('wire connecting to ground stores groundNodeId on both endpoints', () => {
+      // After mergeNodes with ground-priority, the non-ground node is absorbed.
+      // CircuitCanvas pre-computes survivingNodeId = groundNodeId when end is ground.
+      const groundWire = {
+        wireId: 'w-gnd',
+        fromNodeId: '0',
+        toNodeId: '0',
+        segments: [{ from: { x: 0, y: 0 }, to: { x: 100, y: 0 } }],
+        isSelected: false,
+      };
+      const state = editorReducer(initialState, addWire(groundWire));
+      expect(state.wires[0].fromNodeId).toBe('0');
+      expect(state.wires[0].toNodeId).toBe('0');
+    });
+
+    it('wire connecting two non-ground nodes stores the surviving nodeId on both endpoints', () => {
+      // mergeNodes absorbs end.nodeId into start.nodeId (start survives).
+      // CircuitCanvas pre-computes survivingNodeId = start.nodeId for non-ground case.
+      const nonGroundWire = {
+        wireId: 'w-ng',
+        fromNodeId: 'n1',
+        toNodeId: 'n1',
+        segments: [{ from: { x: 0, y: 0 }, to: { x: 100, y: 0 } }],
+        isSelected: false,
+      };
+      const state = editorReducer(initialState, addWire(nonGroundWire));
+      expect(state.wires[0].fromNodeId).toBe('n1');
+      expect(state.wires[0].toNodeId).toBe('n1');
+    });
   });
 
   describe('removeWire', () => {

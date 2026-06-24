@@ -320,22 +320,27 @@ export function CircuitCanvas({
         if (end.nodeId === start.nodeId) return;
 
         const wireId = nextWireId(wires);
+        // mergeNodes uses ground-priority: the non-ground node is absorbed into
+        // the ground node. Pre-compute which node survives so the wire stores
+        // stable, post-merge nodeIds on both endpoints.
+        const groundNodeId = circuit?.groundNodeId ?? '0';
+        const survivingNodeId =
+          end.nodeId === groundNodeId ? end.nodeId : start.nodeId;
         dispatch(
           addWire({
             wireId,
-            fromNodeId: start.nodeId,
-            toNodeId: end.nodeId,
+            fromNodeId: survivingNodeId,
+            toNodeId: survivingNodeId,
             segments: [{ from: start.position, to: end.position }],
             isSelected: false,
           })
         );
-        // Ground-priority handled inside the reducer.
         dispatch(
           mergeNodes({ fromNodeId: end.nodeId, toNodeId: start.nodeId })
         );
       }
     },
-    [viewport, canvasComponents, wires, componentMap, dispatch]
+    [viewport, canvasComponents, wires, componentMap, circuit, dispatch]
   );
 
   // -------------------------------------------------------------------------
