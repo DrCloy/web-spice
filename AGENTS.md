@@ -48,6 +48,20 @@ Commits use Conventional Commits enforced by commitlint, such as
 describe the change, link issues with `Closes #123` when applicable, include
 screenshots for UI changes, and note validation commands run.
 
+Every commit you create must include the following co-author trailer:
+
+```
+Co-Authored-By: OpenAI Codex <noreply@openai.com>
+```
+
+Example commit message:
+
+```
+feat: add capacitor component model
+
+Co-Authored-By: OpenAI Codex <noreply@openai.com>
+```
+
 ## Parallel Workflow with Claude Code
 
 This project runs Claude Code (Sonnet 4.6) and Codex (GPT-5.5) in parallel.
