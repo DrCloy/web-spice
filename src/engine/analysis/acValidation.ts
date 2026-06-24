@@ -51,7 +51,7 @@ export function validateCircuitForAC(
       default:
         throw new WebSpiceError(
           'UNSUPPORTED_ANALYSIS',
-          `Component type '${component.type}' is not supported in AC analysis`
+          `Component type '${(component as { type: string }).type}' is not supported in AC analysis`
         );
     }
   }
