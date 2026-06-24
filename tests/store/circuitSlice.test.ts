@@ -10,6 +10,7 @@ import circuitReducer, {
   undo,
 } from '@/store/circuitSlice';
 import type { CircuitState } from '@/store/types';
+import type { Terminal } from '@/types/component';
 import { MAX_HISTORY } from '@/store/types';
 import { SIMPLE_RESISTOR_10V, VOLTAGE_DIVIDER_12V } from '../fixtures/circuits';
 
@@ -224,7 +225,7 @@ describe('circuitSlice', () => {
       terminals: [
         { name: 'terminal1' as const, nodeId: 'R1_1' },
         { name: 'terminal2' as const, nodeId: 'R1_2' },
-      ],
+      ] as [Terminal, Terminal],
     };
 
     it('creates a new circuit and adds the component when current is null', () => {
@@ -245,7 +246,7 @@ describe('circuitSlice', () => {
         terminals: [
           { name: 'pos' as const, nodeId: 'C1_p' },
           { name: 'neg' as const, nodeId: 'C1_n' },
-        ],
+        ] as [Terminal, Terminal],
       };
       const state = circuitReducer(prev, addComponent(capacitor));
       expect(state.current?.components).toHaveLength(2);

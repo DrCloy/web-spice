@@ -117,7 +117,7 @@ describe('createDefaultComponent', () => {
   it('creates a DC current source with 1mA default', () => {
     const comp = createDefaultComponent({ type: 'current_source' }, 'I1');
     expect(comp.type).toBe('current_source');
-    if (comp.type === 'current_source') {
+    if (comp.type === 'current_source' && comp.sourceType === 'dc') {
       expect(comp.current).toBe(0.001);
     }
   });

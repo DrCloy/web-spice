@@ -121,5 +121,9 @@ export function createDefaultComponent(
         name: id,
         nodeId: '0',
       };
+    default:
+      throw new Error(
+        `createDefaultComponent: unsupported type "${(payload as PaletteDragPayload).type}"`
+      );
   }
 }
