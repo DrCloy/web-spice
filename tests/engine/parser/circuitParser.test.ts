@@ -203,6 +203,90 @@ describe('Circuit Parser', () => {
     });
   });
 
+  describe('component parsing - capacitor', () => {
+    it('should parse a capacitor with correct properties', () => {
+      const json = makeCircuitJSON({
+        components: [
+          {
+            id: 'C1',
+            type: 'capacitor',
+            name: 'Filter Capacitor',
+            nodes: ['1', '0'],
+            parameters: { capacitance: '1u', initialVoltage: -5 },
+          },
+          {
+            id: 'GND',
+            type: 'ground',
+            name: 'GND',
+            nodes: ['0'],
+            parameters: {},
+          },
+        ],
+      });
+
+      const circuit = parseCircuit(json);
+      const capacitor = circuit.components.find(c => c.id === 'C1');
+
+      expect(capacitor).toBeDefined();
+      expect(capacitor!.type).toBe('capacitor');
+      if (capacitor!.type === 'capacitor') {
+        expect(capacitor!.capacitance).toBeCloseTo(1e-6, 15);
+        expect(capacitor!.initialVoltage).toBe(-5);
+        expect(capacitor!.name).toBe('Filter Capacitor');
+        expect(capacitor!.terminals[0]).toEqual({
+          name: 'pos',
+          nodeId: '1',
+        });
+        expect(capacitor!.terminals[1]).toEqual({
+          name: 'neg',
+          nodeId: '0',
+        });
+      }
+    });
+  });
+
+  describe('component parsing - inductor', () => {
+    it('should parse an inductor with correct properties', () => {
+      const json = makeCircuitJSON({
+        components: [
+          {
+            id: 'L1',
+            type: 'inductor',
+            name: 'Choke',
+            nodes: ['1', '0'],
+            parameters: { inductance: '10m', initialCurrent: -0.5 },
+          },
+          {
+            id: 'GND',
+            type: 'ground',
+            name: 'GND',
+            nodes: ['0'],
+            parameters: {},
+          },
+        ],
+      });
+
+      const circuit = parseCircuit(json);
+      const inductor = circuit.components.find(c => c.id === 'L1');
+
+      expect(inductor).toBeDefined();
+      expect(inductor!.type).toBe('inductor');
+      if (inductor!.type === 'inductor') {
+        expect(inductor!.inductance).toBeCloseTo(0.01, 15);
+        expect(inductor!.initialCurrent).toBe(-0.5);
+        expect(inductor!.name).toBe('Choke');
+        expect(inductor!.terminals[0]).toEqual({
+          name: 'terminal1',
+          nodeId: '1',
+        });
+        expect(inductor!.terminals[1]).toEqual({
+          name: 'terminal2',
+          nodeId: '0',
+        });
+      }
+    });
+  });
+
   describe('component parsing - voltage source', () => {
     it('should parse a DC voltage source with explicit sourceType', () => {
       const json = makeCircuitJSON();
@@ -409,42 +493,6 @@ describe('Circuit Parser', () => {
   });
 
   describe('error: unsupported component types', () => {
-    it('should throw error for capacitor (not yet supported)', () => {
-      expect(() =>
-        parseCircuit(
-          makeCircuitJSON({
-            components: [
-              {
-                id: 'C1',
-                type: 'capacitor',
-                name: 'C1',
-                nodes: ['1', '0'],
-                parameters: { capacitance: 1e-6 },
-              },
-            ],
-          })
-        )
-      ).toThrowWebSpiceError('UNSUPPORTED_ANALYSIS');
-    });
-
-    it('should throw error for inductor (not yet supported)', () => {
-      expect(() =>
-        parseCircuit(
-          makeCircuitJSON({
-            components: [
-              {
-                id: 'L1',
-                type: 'inductor',
-                name: 'L1',
-                nodes: ['1', '0'],
-                parameters: { inductance: 1e-3 },
-              },
-            ],
-          })
-        )
-      ).toThrowWebSpiceError('UNSUPPORTED_ANALYSIS');
-    });
-
     it('should throw error for AC voltage source (not yet supported)', () => {
       expect(() =>
         parseCircuit(
